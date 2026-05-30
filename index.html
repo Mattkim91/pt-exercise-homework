@@ -5,648 +5,449 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>운동 숙제 리플릿 만들기</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     @media print {
-      body { background: white; }
       .no-print { display: none !important; }
       .print-area { display: block !important; }
-      .page-break { break-inside: avoid; }
+      .page-break { break-inside: avoid; page-break-inside: avoid; }
+      body { background: white; }
       @page { size: A4; margin: 12mm; }
+    }
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
   </style>
 </head>
-<body>
-  <div id="root"></div>
+<body class="bg-slate-50">
+<div id="app"></div>
+<script>
+const ROWS = [[1, "ROM", "Lv1 침상운동", "발목 펌프 운동", "하지 순환 및 발목 움직임 유지", 20, 3, 3, "양측", "🛏️", "누운 자세에서 발끝을 몸쪽으로 당겼다가 아래로 천천히 내립니다.", "종아리 통증이나 심한 붓기가 있으면 치료사에게 알려주세요.", "ankle-pump"], [2, "ROM", "Lv1 침상운동", "무릎 굽혔다 펴기", "무릎 관절가동범위 유지", 10, 3, 5, "양측", "🛏️", "누운 자세에서 발뒤꿈치를 침대 위로 미끄러뜨리며 무릎을 천천히 굽혔다가 다시 폅니다.", "통증이 심하면 무릎을 굽히는 범위를 줄이세요.", "heel-slide"], [3, "Strengthening", "Lv1 침상운동", "다리 들어올리기", "고관절 굴곡근 및 대퇴사두근 강화", 10, 2, 5, "좌측", "🦵", "누운 자세에서 무릎을 편 상태로 한쪽 다리를 천천히 들어 올렸다가 내립니다.", "허리가 과하게 뜨거나 통증이 있으면 중단하세요.", "straight-leg-raise"], [4, "Strengthening", "Lv1 침상운동", "다리 벌리기", "고관절 외전근 강화", 10, 2, 4, "양측", "🦵", "누운 자세에서 한쪽 다리를 옆으로 천천히 벌렸다가 다시 모읍니다.", "골반이 함께 돌아가지 않도록 주의하세요.", "supine-hip-abduction"], [5, "Strengthening", "Lv1 침상운동", "엉덩이 힘주기", "둔근 활성화", 10, 3, 3, "양측", "🛏️", "누운 자세에서 엉덩이에 힘을 주고 3초간 유지한 뒤 천천히 힘을 뺍니다.", "허리나 다리에 통증이 생기면 강도를 줄이세요.", "glute-set"], [6, "Strengthening", "Lv1 침상운동", "무릎 누르기", "대퇴사두근 활성화", 10, 3, 3, "양측", "🦵", "무릎 아래에 수건을 놓고 무릎을 아래로 눌러 허벅지 앞쪽에 힘을 줍니다.", "무릎 통증이 심하면 힘주는 강도를 줄이세요.", "quad-set"], [7, "상지 기능", "Lv1 침상운동", "손 쥐었다 펴기", "손 기능 및 순환 유지", 20, 3, 3, "양측", "✋", "손을 천천히 쥐었다가 손가락을 가능한 범위에서 펴줍니다.", "손가락 통증이나 저림이 심하면 중단하세요.", "hand-open-close"], [8, "상지 기능", "Lv1 침상운동", "손목 굽힘/폄", "손목 관절가동범위 유지", 10, 3, 3, "양측", "🤲", "팔을 편안히 둔 상태에서 손목을 천천히 위아래로 움직입니다.", "반동 없이 천천히 시행하세요.", "wrist-flexion-extension"], [9, "상지 기능", "Lv1 침상운동", "팔꿈치 굽힘/폄", "팔꿈치 관절가동범위 유지", 10, 3, 4, "양측", "💪", "팔꿈치를 천천히 굽혔다가 폅니다. 통증이 없는 범위에서 반복합니다.", "어깨가 과하게 들리지 않도록 주의하세요.", "elbow-flexion-extension"], [10, "상지 기능", "Lv1 침상운동", "누워서 팔 올리기", "어깨 관절가동범위 유지", 10, 2, 4, "양측", "🙆", "누운 자세에서 양손을 잡거나 막대를 이용하여 팔을 천천히 머리 위 방향으로 올립니다.", "어깨 통증이 있으면 범위를 줄이세요.", "supine-shoulder-flexion"], [11, "Functional", "Lv1 침상운동", "브릿지", "둔근 강화 및 침상 이동 준비", 10, 2, 5, "해당 없음", "🌉", "무릎을 세우고 누운 뒤 엉덩이를 천천히 들어 올렸다가 내립니다.", "허리 통증이 심하면 중단하세요.", "bridge"], [12, "ROM", "Lv1 침상운동", "골반 기울이기", "골반 조절 및 요부 긴장 완화", 10, 2, 4, "해당 없음", "🛏️", "무릎을 세우고 누운 자세에서 허리를 바닥 쪽으로 가볍게 누르며 골반을 움직입니다.", "통증이 없는 작은 범위에서 시행하세요.", "pelvic-tilt"], [13, "Functional", "Lv1 침상운동", "옆으로 돌아눕기", "침상 이동 능력 향상", 5, 3, 5, "좌/우 선택", "🔄", "누운 자세에서 무릎을 살짝 굽히고 몸통을 천천히 옆으로 돌립니다.", "어지럽거나 통증이 있으면 천천히 쉬어가며 시행하세요.", "log-rolling"], [14, "Strengthening", "Lv2 앉은자세", "앉아서 무릎 펴기", "대퇴사두근 강화", 10, 3, 4, "양측", "🪑", "의자에 허리를 세우고 앉아 한쪽 무릎을 천천히 펴고 2초간 유지한 뒤 내립니다.", "허리가 뒤로 젖혀지지 않도록 주의하세요.", "seated-knee-extension"], [15, "Gait", "Lv2 앉은자세", "앉아서 제자리 발 들기", "고관절 굴곡 및 보행 준비", 20, 2, 4, "양측", "🪑", "의자에 앉아 무릎을 번갈아 들어 올립니다. 몸통이 뒤로 넘어가지 않게 유지합니다.", "허리가 뒤로 젖혀지면 범위를 줄이세요.", "seated-marching"], [16, "Strengthening", "Lv2 앉은자세", "앉아서 뒤꿈치 들기", "종아리 근력 강화", 15, 3, 3, "양측", "🦶", "의자에 앉아 발끝은 바닥에 두고 뒤꿈치를 천천히 들어 올렸다가 내립니다.", "발목 통증이 있으면 천천히 시행하세요.", "seated-heel-raise"], [17, "Strengthening", "Lv2 앉은자세", "앉아서 발끝 들기", "발목 배측굴곡근 강화", 15, 3, 3, "양측", "🦶", "의자에 앉아 뒤꿈치는 바닥에 두고 발끝을 몸쪽으로 천천히 들어 올립니다.", "무리하게 당기지 마세요.", "seated-toe-raise"], [18, "상지 기능", "Lv2 앉은자세", "테이블 위 팔 밀기", "어깨 움직임 및 상지 조절", 10, 2, 5, "환측", "🪑", "테이블 위에 수건을 놓고 손을 올린 뒤 팔을 앞으로 천천히 밀었다가 돌아옵니다.", "어깨 통증이 심해지면 중단하세요.", "table-slide"], [19, "상지 기능", "Lv2 앉은자세", "막대 잡고 양팔 올리기", "양측 상지 협응 및 어깨 ROM", 10, 2, 5, "양측", "🙆", "양손으로 막대를 잡고 팔을 천천히 앞으로 들어 올렸다가 내립니다.", "아픈 팔은 반대팔로 보조하며 무리하지 마세요.", "cane-shoulder-flexion"], [20, "상지 기능", "Lv2 앉은자세", "앞으로 손 뻗기", "상지 도달 및 체간 조절", 10, 2, 4, "환측", "🤲", "앉은 자세에서 앞에 놓인 물건을 향해 손을 천천히 뻗었다가 돌아옵니다.", "몸이 과하게 앞으로 쏠리지 않게 주의하세요.", "seated-reach"], [21, "Balance", "Lv2 앉은자세", "앉아서 좌우 체중이동", "앉은 균형 및 체간 조절", 10, 2, 5, "좌/우 선택", "↔️", "의자에 앉아 몸통을 좌우로 천천히 이동합니다.", "균형이 불안하면 보호자가 옆에서 지켜봐 주세요.", "seated-weight-shift"], [22, "Balance", "Lv2 앉은자세", "앉은 자세 유지", "정적 앉은 균형 향상", 30, 3, 4, "해당 없음", "🪑", "발을 바닥에 두고 허리를 세워 앉은 자세를 유지합니다.", "어지러움이 있으면 등받이에 기대어 쉬세요.", "sitting-balance"], [23, "Balance", "Lv2 앉은자세", "앉아서 물건 잡기", "동적 앉은 균형 향상", 10, 2, 5, "좌/우 선택", "🤲", "앉은 자세에서 좌우 또는 앞쪽에 놓인 물건을 향해 손을 뻗어 잡습니다.", "몸이 과하게 기울면 보호자가 보조하세요.", "seated-object-reach"], [24, "Functional", "Lv2 앉은자세", "앉았다 일어서기", "하지 근력 및 기능적 이동 향상", 10, 2, 5, "해당 없음", "🧍", "의자에 앉은 상태에서 발을 바닥에 두고 몸을 앞으로 기울인 뒤 천천히 일어섭니다.", "무릎 통증이나 어지러움이 있으면 중단하세요.", "sit-to-stand"], [25, "Strengthening", "Lv2 앉은자세", "의자 팔걸이 밀기", "상지 지지 및 체중부하 훈련", 10, 2, 4, "양측", "🪑", "의자 팔걸이를 손으로 누르며 엉덩이를 살짝 들어 올리듯 힘을 줍니다.", "손목이나 어깨 통증이 있으면 강도를 줄이세요.", "chair-push-up"], [26, "Balance", "Lv3 선자세", "의자 잡고 한발 서기", "정적 균형 향상", 5, 3, 5, "좌/우 선택", "🧍", "튼튼한 의자나 난간을 잡고 한쪽 발을 살짝 들어 올린 뒤 가능한 범위에서 유지합니다.", "반드시 안정적인 지지물 가까이에서 시행하세요.", "single-leg-stance-chair"], [27, "Balance", "Lv3 선자세", "일자 서기", "좁은 지지면 균형 향상", 20, 3, 5, "좌/우 선택", "🧍", "한 발을 다른 발 앞에 일자로 두고 선 자세를 유지합니다.", "균형이 불안하면 보호자 감독하에 시행하세요.", "tandem-standing"], [28, "Balance", "Lv3 선자세", "발 모으고 서기", "정적 균형 향상", 30, 3, 4, "해당 없음", "🧍", "양발을 모으고 선 자세를 유지합니다.", "눈을 감고 시행하지 마세요.", "romberg-standing"], [29, "Balance", "Lv3 선자세", "서서 좌우 체중이동", "보행 전 체중이동 훈련", 10, 3, 5, "좌/우 선택", "↔️", "양발을 어깨너비로 벌리고 서서 체중을 좌우로 천천히 이동합니다.", "몸이 과하게 기울지 않게 주의하세요.", "standing-weight-shift"], [30, "Gait", "Lv3 선자세", "서서 제자리 발 들기", "보행 준비 및 하지 조절", 20, 2, 5, "양측", "🚶", "양발을 골반 너비로 벌리고 선 뒤 제자리에서 무릎을 번갈아 들어 올립니다.", "어지럽거나 균형이 불안하면 앉아서 쉬세요.", "standing-marching"], [31, "Strengthening", "Lv3 선자세", "미니 스쿼트", "하지 근력 강화", 10, 2, 5, "양측", "🏋️", "의자나 난간을 잡고 무릎을 살짝 굽혔다가 천천히 폅니다.", "무릎이 발끝보다 과하게 앞으로 나가지 않도록 주의하세요.", "mini-squat"], [32, "Strengthening", "Lv3 선자세", "서서 다리 옆으로 들기", "고관절 외전근 강화", 10, 2, 4, "좌/우 선택", "🦵", "의자를 잡고 선 상태에서 한쪽 다리를 옆으로 천천히 들어 올렸다가 내립니다.", "몸통이 반대쪽으로 기울지 않게 주의하세요.", "standing-hip-abduction"], [33, "Strengthening", "Lv3 선자세", "서서 다리 뒤로 들기", "고관절 신전근 강화", 10, 2, 4, "좌/우 선택", "🦵", "의자를 잡고 선 상태에서 무릎을 편 채 한쪽 다리를 뒤로 천천히 들어 올립니다.", "허리가 과하게 꺾이지 않도록 주의하세요.", "standing-hip-extension"], [34, "Strengthening", "Lv3 선자세", "서서 뒤꿈치 들기", "종아리 근력 강화", 15, 3, 4, "양측", "🦶", "의자나 난간을 잡고 양쪽 뒤꿈치를 천천히 들어 올렸다가 내립니다.", "발목 통증이나 균형 불안이 있으면 범위를 줄이세요.", "standing-heel-raise"], [35, "Gait", "Lv3 선자세", "스텝 터치", "발 위치 조절 및 체중이동 향상", 10, 2, 5, "좌/우 선택", "🦶", "앞에 낮은 발판이나 표시를 두고 한쪽 발로 가볍게 터치한 뒤 제자리로 돌아옵니다.", "발판이 미끄러지지 않도록 고정하세요.", "step-tap"], [36, "Gait", "Lv3 선자세", "낮은 계단 오르기", "하지 근력 및 계단 기능 향상", 10, 2, 6, "좌/우 선택", "🪜", "낮은 계단에 한 발을 올리고 천천히 올라갔다가 내려옵니다.", "난간을 잡고 보호자 감독하에 시행하세요.", "step-up-low"], [37, "Gait", "Lv3 선자세", "제자리 방향전환", "보행 중 방향전환 능력 향상", 5, 3, 5, "좌/우 선택", "🔄", "제자리에서 작은 보폭으로 천천히 방향을 바꿉니다.", "급하게 돌지 말고 어지러우면 중단하세요.", "turning-in-place"], [38, "Gait", "Lv4 동적활동", "실내 걷기", "기본 보행 능력 및 활동량 향상", 10, 1, 10, "해당 없음", "👟", "평평한 실내에서 편안한 속도로 걷습니다. 필요 시 보행보조도구를 사용합니다.", "어지러움이나 통증이 있으면 쉬어가며 시행하세요.", "indoor-walking"], [39, "Gait", "Lv4 동적활동", "복도 걷기", "보행 지구력 향상", 10, 1, 10, "해당 없음", "🚶", "안전한 복도에서 일정한 속도로 걷습니다. 중간에 필요하면 휴식합니다.", "사람이나 장애물에 부딪히지 않도록 주의하세요.", "corridor-walking"], [40, "Gait", "Lv4 동적활동", "속도 변화 걷기", "보행 조절 능력 향상", 5, 2, 8, "해당 없음", "👟", "평소 속도로 걷다가 조금 빠르게 또는 천천히 걷습니다.", "무리하게 빠르게 걷지 마세요.", "speed-change-walking"], [41, "Gait", "Lv4 동적활동", "낮은 장애물 넘기", "보행 중 발 들기 및 균형 향상", 10, 2, 8, "양측", "🚧", "낮은 장애물을 천천히 넘어갑니다. 발끝이 걸리지 않도록 충분히 들어 올립니다.", "보호자 감독하에 낮은 장애물부터 시작하세요.", "obstacle-crossing"], [42, "Balance", "Lv4 동적활동", "옆으로 걷기", "측방 균형 및 고관절 근력 향상", 10, 2, 8, "좌/우 선택", "↔️", "난간이나 벽 가까이에서 옆으로 한 발씩 천천히 이동합니다.", "발이 꼬이지 않도록 천천히 시행하세요.", "side-walking"], [43, "Balance", "Lv4 동적활동", "뒤로 걷기", "후방 보행 조절 및 균형 향상", 10, 2, 8, "해당 없음", "↩️", "안전한 공간에서 짧은 거리만 천천히 뒤로 걷습니다.", "반드시 보호자 감독 또는 난간 가까이에서 시행하세요.", "backward-walking"], [44, "Balance", "Lv4 동적활동", "일자 걷기", "동적 균형 향상", 10, 2, 8, "해당 없음", "🚶", "한 발을 다른 발 앞에 놓듯이 선을 따라 천천히 걷습니다.", "균형이 불안하면 난간을 잡고 시행하세요.", "tandem-walking"], [45, "Functional", "Lv4 동적활동", "계단 오르기", "계단 기능 및 하지 근력 향상", 5, 2, 8, "좌/우 선택", "🪜", "난간을 잡고 한 계단씩 천천히 올라갑니다.", "무릎 통증이나 숨참이 심하면 중단하세요.", "stair-up"], [46, "Functional", "Lv4 동적활동", "계단 내려오기", "계단 하강 조절 능력 향상", 5, 2, 8, "좌/우 선택", "🪜", "난간을 잡고 한 계단씩 천천히 내려옵니다.", "급하게 내려오지 말고 반드시 난간을 잡으세요.", "stair-down"], [47, "Functional", "Lv4 동적활동", "가벼운 물건 옮기기", "기능적 보행 및 양손 사용 향상", 5, 2, 6, "해당 없음", "📦", "가벼운 물건을 들고 짧은 거리를 천천히 이동한 뒤 내려놓습니다.", "무거운 물건은 피하고 균형이 불안하면 보호자가 도와주세요.", "carrying-object"], [48, "Endurance", "Lv4 동적활동", "고정식 자전거", "심폐지구력 및 하지 반복운동", 10, 1, 10, "해당 없음", "🚲", "고정식 자전거에 앉아 편안한 강도로 페달을 밟습니다.", "숨이 너무 차거나 어지러우면 즉시 중단하세요.", "stationary-bike"], [49, "Endurance", "Lv4 동적활동", "트레드밀 걷기", "보행 지구력 및 속도 조절", 10, 1, 10, "해당 없음", "🏃", "트레드밀에서 안전 손잡이를 잡고 느린 속도부터 걷습니다.", "반드시 치료사 또는 보호자 감독하에 시행하세요.", "treadmill-walking"], [50, "Endurance", "Lv4 동적활동", "야외 걷기", "일상 활동량 및 지구력 향상", 10, 1, 15, "해당 없음", "🌳", "평평하고 안전한 야외 보행로에서 편안한 속도로 걷습니다.", "경사로, 미끄러운 길, 사람이 많은 곳은 피하세요.", "outdoor-walking"]];
+const VERSION = "20260530b";
+const STORAGE_KEY = "exercise-homework-patients-v2";
+const DEFAULT_MEMO = "통증이나 어지럼증 등의 증상 발생 시 잠시 중단하고 충분한 휴식을 취해주세요.";
+const SIDE_OPTIONS = ["해당 없음", "좌측", "우측", "양측", "환측", "건측"];
+const LEVELS = ["전체", "Lv1 침상운동", "Lv2 앉은자세", "Lv3 선자세", "Lv4 동적활동"];
+const LAYOUTS = ["자동", "큰 사진형", "2단 압축형", "인지저하 큰글씨"];
 
-  <script type="text/babel">
-const { useEffect, useMemo, useState } = React;
+const exercises = ROWS.map(r => ({
+  id:r[0], category:r[1], level:r[2], title:r[3], target:r[4],
+  reps:r[5], sets:r[6], durationMin:r[7], side:r[8], image:r[9],
+  description:r[10], caution:r[11], imageKey:r[12],
+  imageUrl:`./exercise-images/${r[12]}.webp?v=${VERSION}`,
+  videoUrl:`https://example.com/exercise-${r[0]}`
+}));
 
-const Icon = ({ children, size = 18 }) => (
-  <span style={{fontSize: size, lineHeight: 1, display: "inline-flex"}}>{children}</span>
-);
-
-const initialExercises = [
-  {
-    id: 1,
-    category: "하지 근력",
-    level: "Lv2 앉은자세",
-    title: "앉아서 무릎 펴기",
-    target: "대퇴사두근 강화",
-    reps: 10,
-    sets: 3,
-    durationMin: 4,
-    side: "양측",
-    image: "🦵",
-    imageUrl: "",
-    videoUrl: "https://example.com/knee-extension",
-    description:
-      "의자에 허리를 세우고 앉은 상태에서 한쪽 무릎을 천천히 펴서 발끝이 앞을 향하게 합니다. 2초간 유지한 뒤 천천히 내립니다. 반대쪽도 같은 방법으로 실시합니다.",
-    caution: "허리가 뒤로 젖혀지지 않도록 주의하세요.",
-    safetyTags: ["통증 주의"]
-  },
-  {
-    id: 2,
-    category: "균형",
-    level: "Lv3 선자세",
-    title: "의자 잡고 한발 서기",
-    target: "정적 균형 향상",
-    reps: 5,
-    sets: 3,
-    durationMin: 5,
-    side: "좌/우 선택",
-    image: "🧍",
-    imageUrl: "",
-    videoUrl: "https://example.com/single-leg-stance",
-    description:
-      "튼튼한 의자나 난간을 가볍게 잡고 섭니다. 한쪽 발을 바닥에서 살짝 들어 올린 뒤 가능한 범위에서 자세를 유지합니다. 균형이 흔들리면 바로 발을 내려놓습니다.",
-    caution: "반드시 보호자 또는 안정적인 지지물 가까이에서 시행하세요.",
-    safetyTags: ["낙상 주의", "보호자 감독"]
-  },
-  {
-    id: 3,
-    category: "상지 기능",
-    level: "Lv2 앉은자세",
-    title: "벽 짚고 팔 올리기",
-    target: "어깨 관절가동범위 유지",
-    reps: 10,
-    sets: 2,
-    durationMin: 4,
-    side: "환측",
-    image: "🙆",
-    imageUrl: "",
-    videoUrl: "https://example.com/wall-climb",
-    description:
-      "벽을 마주 보고 선 뒤 손가락을 벽에 대고 천천히 위로 걸어 올라가듯 팔을 올립니다. 통증이 없는 범위까지만 올리고, 천천히 원위치로 돌아옵니다.",
-    caution: "어깨 통증이 심해지면 중단하세요.",
-    safetyTags: ["통증 주의"]
-  },
-  {
-    id: 4,
-    category: "보행",
-    level: "Lv3 선자세",
-    title: "제자리 발 들기",
-    target: "보행 전 체중이동 및 하지 조절",
-    reps: 20,
-    sets: 2,
-    durationMin: 5,
-    side: "양측",
-    image: "🚶",
-    imageUrl: "",
-    videoUrl: "https://example.com/marching",
-    description:
-      "양발을 골반 너비로 벌리고 선 뒤, 제자리에서 무릎을 번갈아 들어 올립니다. 몸통이 한쪽으로 과하게 기울지 않도록 천천히 시행합니다.",
-    caution: "어지러움이 있거나 균형이 불안하면 앉아서 쉬세요.",
-    safetyTags: ["낙상 주의", "어지러움 주의"]
-  },
-  {
-    id: 5,
-    category: "호흡/유산소",
-    level: "Lv4 동적활동",
-    title: "걷기 운동",
-    target: "심폐지구력 및 활동량 증가",
-    reps: 10,
-    sets: 1,
-    durationMin: 10,
-    side: "해당 없음",
-    image: "👟",
-    imageUrl: "",
-    videoUrl: "https://example.com/walking",
-    description:
-      "평평하고 안전한 장소에서 편안한 속도로 걷습니다. 숨이 너무 차지 않는 강도로 시행하며, 필요 시 중간에 쉬어도 됩니다.",
-    caution: "가슴통증, 심한 호흡곤란, 어지러움이 있으면 즉시 중단하세요.",
-    safetyTags: ["호흡곤란 주의", "흉통 주의"]
-  },
-  {
-    id: 6,
-    category: "스트레칭",
-    level: "Lv2 앉은자세",
-    title: "종아리 스트레칭",
-    target: "발목 가동범위 및 보행 준비",
-    reps: 30,
-    sets: 3,
-    durationMin: 4,
-    side: "양측",
-    image: "🦶",
-    imageUrl: "",
-    videoUrl: "https://example.com/calf-stretch",
-    description:
-      "벽을 짚고 한쪽 다리를 뒤로 뻗습니다. 뒤쪽 무릎을 편 상태에서 발뒤꿈치가 바닥에서 떨어지지 않게 유지하며 종아리가 당기는 느낌을 느낍니다.",
-    caution: "반동을 주지 말고 천천히 유지하세요.",
-    safetyTags: ["통증 주의"]
-  },
-  {
-    id: 7,
-    category: "침상운동",
-    level: "Lv1 침상운동",
-    title: "발목 펌프 운동",
-    target: "하지 순환 및 발목 움직임 유지",
-    reps: 20,
-    sets: 3,
-    durationMin: 3,
-    side: "양측",
-    image: "🛏️",
-    imageUrl: "",
-    videoUrl: "https://example.com/ankle-pump",
-    description:
-      "누운 자세에서 발끝을 몸쪽으로 당겼다가 아래로 천천히 내립니다. 발목이 움직이는 범위 안에서 반복합니다.",
-    caution: "종아리 통증이나 심한 붓기가 있으면 치료사에게 알려주세요.",
-    safetyTags: ["부종 확인"]
-  }
+const presets = [
+  { name:"선택 안 함", ids:[] },
+  { name:"Stroke 초기 기본", ids:[1,2,7,14,21,22,24] },
+  { name:"Stroke 보행훈련", ids:[21,24,29,30,35,38] },
+  { name:"TKA POD#1~3", ids:[1,2,6,14,17] },
+  { name:"TKA POD#4~7", ids:[14,24,31,34,36] },
+  { name:"고령 허약 기본", ids:[14,15,24,34,38] },
+  { name:"낙상예방", ids:[21,26,27,29,35,42] },
+  { name:"상지 기능 기본", ids:[7,8,9,18,19,20] },
+  { name:"지구력 향상", ids:[38,39,48,50] }
 ];
 
-const presetGroups = [
-  { name: "선택 안 함", ids: [] },
-  { name: "Stroke 초기 기본", ids: [1, 3, 4, 6] },
-  { name: "TKA 초기", ids: [1, 6, 7] },
-  { name: "균형/낙상 예방", ids: [2, 4, 5] },
-  { name: "고령 허약 기본", ids: [1, 2, 5, 7] }
-];
+let state = {
+  query:"",
+  category:"전체",
+  level:"전체",
+  selected:[],
+  patient:newPatientData(),
+  savedPatients:loadSavedPatients(),
+  layoutMode:"자동",
+  showQr:true,
+  showChecklist:true,
+  showPainLog:true,
+  preview:false,
+  message:""
+};
 
-const categories = ["전체", ...Array.from(new Set(initialExercises.map((e) => e.category)))];
-const levels = ["전체", "Lv1 침상운동", "Lv2 앉은자세", "Lv3 선자세", "Lv4 동적활동"];
-const sideOptions = ["해당 없음", "좌측", "우측", "양측", "환측", "건측"];
-const layoutOptions = ["자동", "큰 사진형", "2단 압축형", "인지저하 큰글씨"];
-const STORAGE_KEY = "exercise-homework-patients-v1";
+function newPatientData() {
+  return {
+    id:"patient-" + Date.now(),
+    name:"",
+    date:new Date().toISOString().slice(0,10),
+    memo:DEFAULT_MEMO,
+    note:""
+  };
+}
 
-const defaultPatient = () => ({
-  id: `patient-${Date.now()}`,
-  name: "",
-  date: new Date().toISOString().slice(0, 10),
-  memo: "통증이나 어지럼증 등의 증상 발생 시 잠시 중단하고 충분한 휴식을 취해주세요.",
-  note: ""
-});
+function loadSavedPatients() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch(e) { return []; }
+}
+
+function persist() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.savedPatients)); } catch(e) {}
+}
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+}
+
+function imgTag(ex, cls="h-full w-full object-contain bg-white") {
+  return `<img src="${esc(ex.imageUrl)}" alt="${esc(ex.title)} 일러스트" class="${cls}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+          <span class="hidden h-full w-full items-center justify-center text-5xl">${esc(ex.image)}</span>`;
+}
 
 function qrUrl(url) {
-  if (!url) return "";
   return `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(url)}`;
 }
 
-function safetyBanner(selected) {
-  const tags = (Array.isArray(selected) ? selected : []).flatMap((item) => item?.safetyTags || []);
-  if (tags.includes("낙상 주의")) return "낙상 위험이 있으므로 반드시 보호자 감독 또는 안정적인 지지물 가까이에서 시행하세요.";
-  if (tags.includes("호흡곤란 주의") || tags.includes("흉통 주의")) return "운동 중 흉통, 심한 호흡곤란, 어지러움이 있으면 즉시 중단하세요.";
-  if (tags.includes("통증 주의")) return "통증이 평소보다 심해지면 운동 강도와 횟수를 줄이거나 중단하세요.";
+function safetyBanner(list) {
+  const txt = list.map(x => (x.caution || "")).join(" ");
+  if (txt.includes("낙상") || txt.includes("보호자") || txt.includes("균형")) return "낙상 위험이 있으므로 반드시 보호자 감독 또는 안정적인 지지물 가까이에서 시행하세요.";
+  if (txt.includes("호흡") || txt.includes("숨")) return "운동 중 흉통, 심한 호흡곤란, 어지러움이 있으면 즉시 중단하세요.";
+  if (txt.includes("통증")) return "통증이 평소보다 심해지면 운동 강도와 횟수를 줄이거나 중단하세요.";
   return "안전한 범위에서 천천히 시행하고, 불편감이 있으면 치료사에게 알려주세요.";
 }
 
-function ExerciseHomeworkLeafletBuilder() {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("전체");
-  const [level, setLevel] = useState("전체");
-  const [selected, setSelected] = useState([]);
-  const [layoutMode, setLayoutMode] = useState("자동");
-  const [showQr, setShowQr] = useState(true);
-  const [showChecklist, setShowChecklist] = useState(true);
-  const [showPainLog, setShowPainLog] = useState(true);
-  const [previewMode, setPreviewMode] = useState(false);
-  const [patient, setPatient] = useState(defaultPatient());
-  const [savedPatients, setSavedPatients] = useState([]);
-  const [saveMessage, setSaveMessage] = useState("");
+function totalMinutes() {
+  return state.selected.reduce((sum,x)=>sum+(Number(x.durationMin)||0),0);
+}
 
-  useEffect(() => {
-    try {
-      const raw = window.localStorage ? window.localStorage.getItem(STORAGE_KEY) : null;
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setSavedPatients(Array.isArray(parsed) ? parsed : []);
-      }
-    } catch (error) {
-      console.error("저장된 환자 목록을 불러오지 못했습니다.", error);
-    }
-  }, []);
+function categories() {
+  return ["전체", ...Array.from(new Set(exercises.map(e=>e.category)))];
+}
 
-  const persistPatients = (patients) => {
-    const safePatients = Array.isArray(patients) ? patients : [];
-    setSavedPatients(safePatients);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(safePatients));
-    } catch (error) {
-      console.error("환자 목록을 저장하지 못했습니다.", error);
-    }
+function filtered() {
+  const q = state.query.trim();
+  return exercises.filter(e => 
+    (state.category === "전체" || e.category === state.category) &&
+    (state.level === "전체" || e.level === state.level) &&
+    (!q || [e.title,e.target,e.description,e.category,e.level].join(" ").includes(q))
+  );
+}
+
+function setField(k,v) { state[k]=v; render(); }
+function setPatientField(k,v) { state.patient[k]=v; render(); }
+
+function addExercise(id) {
+  if (state.selected.some(x=>x.id===id)) return;
+  const ex = exercises.find(e=>e.id===id);
+  if (ex) state.selected.push({...ex});
+  render();
+}
+
+function removeExercise(id) {
+  state.selected = state.selected.filter(x=>x.id!==id);
+  render();
+}
+
+function updateSelected(id, field, value) {
+  state.selected = state.selected.map(x => x.id===id ? {...x, [field]: ["reps","sets","durationMin"].includes(field) ? Number(value) : value} : x);
+  render();
+}
+
+function applyPreset(name) {
+  const p = presets.find(x=>x.name===name);
+  if (!p) return;
+  state.selected = exercises.filter(e=>p.ids.includes(e.id)).map(e=>({...e}));
+  render();
+}
+
+function saveCurrentPatient() {
+  const record = {
+    ...state.patient,
+    id: state.patient.id || "patient-" + Date.now(),
+    savedAt: new Date().toISOString(),
+    selected: state.selected,
+    settings: { layoutMode: state.layoutMode, showQr: state.showQr, showChecklist: state.showChecklist, showPainLog: state.showPainLog }
   };
+  const exists = state.savedPatients.some(x=>x.id===record.id);
+  state.savedPatients = exists ? state.savedPatients.map(x=>x.id===record.id ? record : x) : [record, ...state.savedPatients];
+  state.patient = record;
+  state.message = `${record.name || "이름 없는 환자"} 저장 완료`;
+  persist();
+  render();
+}
 
-  const newPatient = () => {
-    setPatient(defaultPatient());
-    setSelected([]);
-    setPreviewMode(false);
-    setSaveMessage("새 환자 작성 화면으로 전환했습니다.");
-  };
+function newPatient() {
+  state.patient = newPatientData();
+  state.selected = [];
+  state.preview = false;
+  state.message = "새 환자 작성 화면으로 전환했습니다.";
+  render();
+}
 
-  const saveCurrentPatient = () => {
-    const record = {
-      ...patient,
-      id: patient.id || `patient-${Date.now()}`,
-      savedAt: new Date().toISOString(),
-      selected,
-      settings: { layoutMode, showQr, showChecklist, showPainLog }
-    };
+function loadPatient(id) {
+  const r = state.savedPatients.find(x=>x.id===id);
+  if (!r) return;
+  state.patient = {id:r.id, name:r.name||"", date:r.date||new Date().toISOString().slice(0,10), memo:r.memo||DEFAULT_MEMO, note:r.note||""};
+  state.selected = Array.isArray(r.selected) ? r.selected : [];
+  if (r.settings) {
+    state.layoutMode = r.settings.layoutMode ?? "자동";
+    state.showQr = r.settings.showQr ?? true;
+    state.showChecklist = r.settings.showChecklist ?? true;
+    state.showPainLog = r.settings.showPainLog ?? true;
+  }
+  state.message = `${r.name || "이름 없는 환자"} 불러오기 완료`;
+  render();
+}
 
-    const patientList = Array.isArray(savedPatients) ? savedPatients : [];
-    const exists = patientList.some((item) => item.id === record.id);
-    const nextPatients = exists
-      ? patientList.map((item) => (item.id === record.id ? record : item))
-      : [record, ...patientList];
+function duplicatePatient(id) {
+  const r = state.savedPatients.find(x=>x.id===id);
+  if (!r) return;
+  state.patient = {id:"patient-"+Date.now(), name:(r.name||"이름 없는 환자")+" 복사본", date:new Date().toISOString().slice(0,10), memo:r.memo||DEFAULT_MEMO, note:r.note||""};
+  state.selected = Array.isArray(r.selected) ? r.selected.map(x=>({...x})) : [];
+  state.message = "복사본을 만들었습니다. 이름을 수정한 뒤 저장하세요.";
+  render();
+}
 
-    persistPatients(nextPatients);
-    setPatient(record);
-    setSaveMessage(`${record.name || "이름 없는 환자"} 저장 완료`);
-  };
+function deletePatient(id) {
+  state.savedPatients = state.savedPatients.filter(x=>x.id!==id);
+  persist();
+  state.message = "저장된 환자 기록을 삭제했습니다.";
+  render();
+}
 
-  const loadPatient = (record) => {
-    setPatient({
-      id: record.id,
-      name: record.name || "",
-      date: record.date || new Date().toISOString().slice(0, 10),
-      memo: record.memo || "통증이나 어지럼증 등의 증상 발생 시 잠시 중단하고 충분한 휴식을 취해주세요.",
-      note: record.note || ""
-    });
-    setSelected(Array.isArray(record.selected) ? record.selected : []);
-    if (record.settings) {
-      setLayoutMode(record.settings.layoutMode ?? "자동");
-      setShowQr(record.settings.showQr ?? true);
-      setShowChecklist(record.settings.showChecklist ?? true);
-      setShowPainLog(record.settings.showPainLog ?? true);
-    }
-    setSaveMessage(`${record.name || "이름 없는 환자"} 불러오기 완료`);
-  };
+function render() {
+  document.getElementById("app").innerHTML = `
+  <div class="min-h-screen bg-slate-50 text-slate-900">
+    <header class="no-print sticky top-0 z-10 border-b bg-white/90 backdrop-blur">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight">운동 숙제 리플릿 만들기</h1>
+          <p class="text-sm text-slate-500">운동 선택, 환자별 수정, QR 영상, 체크표, 통증기록까지 한 번에 출력합니다.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="newPatient()" class="rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold hover:bg-slate-100">새 환자</button>
+          <button onclick="saveCurrentPatient()" class="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">현재 환자 저장</button>
+          <button onclick="state.preview=true;render()" class="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-700">🖨️ 리플릿 미리보기</button>
+        </div>
+      </div>
+    </header>
 
-  const duplicatePatient = (record) => {
-    setPatient({
-      id: `patient-${Date.now()}`,
-      name: `${record.name || "이름 없는 환자"} 복사본`,
-      date: new Date().toISOString().slice(0, 10),
-      memo: record.memo || "통증이나 어지럼증 등의 증상 발생 시 잠시 중단하고 충분한 휴식을 취해주세요.",
-      note: record.note || ""
-    });
-    setSelected(Array.isArray(record.selected) ? record.selected : []);
-    if (record.settings) {
-      setLayoutMode(record.settings.layoutMode ?? "자동");
-      setShowQr(record.settings.showQr ?? true);
-      setShowChecklist(record.settings.showChecklist ?? true);
-      setShowPainLog(record.settings.showPainLog ?? true);
-    }
-    setSaveMessage("복사본을 만들었습니다. 이름을 수정한 뒤 저장하세요.");
-  };
+    ${state.preview ? previewOverlay() : ""}
 
-  const deletePatient = (id) => {
-    const patientList = Array.isArray(savedPatients) ? savedPatients : [];
-    persistPatients(patientList.filter((item) => item.id !== id));
-    setSaveMessage("저장된 환자 기록을 삭제했습니다.");
-  };
+    <main class="no-print mx-auto grid max-w-[1800px] gap-6 px-6 py-6 lg:grid-cols-[320px_1fr_420px]">
+      ${leftPanel()}
+      ${exercisePanel()}
+      ${cartPanel()}
+    </main>
 
-  const filteredExercises = useMemo(() => {
-    const normalizedQuery = query.trim();
-    return initialExercises.filter((exercise) => {
-      const matchesCategory = category === "전체" || exercise.category === category;
-      const matchesLevel = level === "전체" || exercise.level === level;
-      const searchableText = [exercise.title, exercise.target, exercise.description].filter(Boolean).join(" ");
-      const matchesQuery = !normalizedQuery || searchableText.includes(normalizedQuery);
-      return matchesCategory && matchesLevel && matchesQuery;
-    });
-  }, [query, category, level]);
+    <section class="print-area mx-auto hidden max-w-4xl bg-white p-8">${leafletHTML()}</section>
+  </div>`;
+}
 
-  const addExercise = (exercise) => {
-    if (selected.some((item) => item.id === exercise.id)) return;
-    setSelected([...selected, { ...exercise }]);
-  };
+function leftPanel() {
+  return `<aside class="space-y-5 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto pr-1">
+    <section class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <div class="mb-4 flex items-center justify-between gap-3">
+        <div class="font-semibold">👤 환자 정보</div>
+        ${state.message ? `<span class="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700">${esc(state.message)}</span>` : ""}
+      </div>
+      <div class="grid gap-3">
+        <input value="${esc(state.patient.name)}" oninput="setPatientField('name',this.value)" placeholder="환자 이름" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" />
+        <input type="date" value="${esc(state.patient.date)}" onchange="setPatientField('date',this.value)" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" />
+        <textarea oninput="setPatientField('memo',this.value)" rows="3" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300">${esc(state.patient.memo)}</textarea>
+        <input value="${esc(state.patient.note)}" oninput="setPatientField('note',this.value)" placeholder="메모 예: Stroke gait, TKA POD#5" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" />
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="saveCurrentPatient()" class="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-500">저장</button>
+          <button onclick="newPatient()" class="rounded-2xl border border-slate-300 px-4 py-3 text-sm font-bold hover:bg-slate-100">새 환자</button>
+        </div>
+      </div>
+    </section>
 
-  const applyPreset = (presetName) => {
-    const preset = presetGroups.find((item) => item.name === presetName);
-    if (!preset) return;
-    const presetExercises = initialExercises.filter((exercise) => preset.ids.includes(exercise.id));
-    setSelected(presetExercises.map((exercise) => ({ ...exercise })));
-  };
-
-  const removeExercise = (id) => setSelected(selected.filter((item) => item.id !== id));
-
-  const updateSelected = (id, field, value) => {
-    setSelected(
-      selected.map((item) =>
-        item.id === id
-          ? { ...item, [field]: ["reps", "sets", "durationMin"].includes(field) ? Number(value) : value }
-          : item
-      )
-    );
-  };
-
-  const safeSelected = Array.isArray(selected) ? selected : [];
-  const safeSavedPatients = Array.isArray(savedPatients) ? savedPatients : [];
-  const selectedCount = safeSelected.length;
-  const totalMinutes = safeSelected.reduce((sum, item) => sum + (Number(item?.durationMin) || 0), 0);
-  const currentSafetyBanner = safetyBanner(safeSelected);
-  const printGridClass =
-    layoutMode === "2단 압축형" || (layoutMode === "자동" && safeSelected.length >= 5)
-      ? "grid grid-cols-2 gap-4"
-      : "space-y-5";
-  const printTextClass = layoutMode === "인지저하 큰글씨" ? "text-xl leading-9" : "leading-7";
-  const printImageClass = layoutMode === "큰 사진형" || layoutMode === "인지저하 큰글씨" ? "h-32 w-32 text-6xl" : "h-24 w-24 text-5xl";
-
-  return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="no-print sticky top-0 z-10 border-b bg-white/90 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">운동 숙제 리플릿 만들기</h1>
-            <p className="text-sm text-slate-500">운동 선택, 환자별 수정, QR 영상, 체크표, 통증기록까지 한 번에 출력합니다.</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <button onClick={newPatient} className="rounded-2xl border border-slate-300 px-4 py-3 text-sm font-semibold hover:bg-slate-100">새 환자</button>
-            <button onClick={saveCurrentPatient} className="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500">현재 환자 저장</button>
-            <button onClick={() => setPreviewMode(true)} className="inline-flex items-center gap-2 rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-sm hover:bg-slate-700">
-              <Icon>🖨️</Icon> 리플릿 미리보기
+    <section class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <div class="mb-4 flex items-center justify-between">
+        <div class="font-semibold">저장된 환자</div>
+        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">${state.savedPatients.length}명</span>
+      </div>
+      ${state.savedPatients.length===0 ? `<div class="rounded-2xl border border-dashed border-slate-300 p-5 text-center text-sm text-slate-500">아직 저장된 환자가 없습니다.</div>` :
+      `<div class="max-h-64 space-y-2 overflow-auto pr-1">${state.savedPatients.map(r=>`
+        <div class="rounded-2xl border border-slate-200 p-3">
+          <div class="flex items-start justify-between gap-2">
+            <button onclick="loadPatient('${r.id}')" class="min-w-0 flex-1 text-left">
+              <div class="truncate font-bold">${esc(r.name || "이름 없는 환자")}</div>
+              <div class="truncate text-xs text-slate-500">${esc(r.date||"")} · ${esc(r.note||"메모 없음")}</div>
+              <div class="text-xs text-slate-400">운동 ${Array.isArray(r.selected)?r.selected.length:0}개</div>
             </button>
+            <button onclick="deletePatient('${r.id}')" class="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-500">🗑️</button>
           </div>
+          <button onclick="duplicatePatient('${r.id}')" class="mt-2 w-full rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100">복사해서 새 환자 만들기</button>
+        </div>`).join("")}</div>`}
+    </section>
+
+    <section class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <div class="mb-4 font-semibold">출력 옵션</div>
+      <div class="grid gap-3">
+        <label class="text-sm font-medium text-slate-600">A4 레이아웃
+          <select onchange="setField('layoutMode',this.value)" class="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3">
+            ${LAYOUTS.map(x=>`<option ${state.layoutMode===x?"selected":""}>${x}</option>`).join("")}
+          </select>
+        </label>
+        <div class="grid grid-cols-3 gap-2 text-sm">
+          <label class="rounded-2xl border border-slate-200 p-3"><input type="checkbox" ${state.showQr?"checked":""} onchange="setField('showQr',this.checked)" /> QR</label>
+          <label class="rounded-2xl border border-slate-200 p-3"><input type="checkbox" ${state.showChecklist?"checked":""} onchange="setField('showChecklist',this.checked)" /> 체크표</label>
+          <label class="rounded-2xl border border-slate-200 p-3"><input type="checkbox" ${state.showPainLog?"checked":""} onchange="setField('showPainLog',this.checked)" /> 통증</label>
         </div>
-      </header>
-
-      {previewMode && (
-        <div className="no-print fixed inset-0 z-50 overflow-auto bg-slate-900/70 p-6">
-          <div className="mx-auto max-w-5xl rounded-3xl bg-white shadow-2xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-6 py-4">
-              <div>
-                <h2 className="text-xl font-black">리플릿 미리보기</h2>
-                <p className="text-sm text-slate-500">아래 화면이 실제 출력물입니다.</p>
-              </div>
-              <div className="flex gap-2">
-                <button onClick={() => window.print()} className="rounded-2xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">인쇄하기</button>
-                <button onClick={() => setPreviewMode(false)} className="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-bold">닫기</button>
-              </div>
-            </div>
-            <div className="preview-sheet p-6">
-              <PrintableLeaflet
-                selected={safeSelected}
-                patient={patient}
-                totalMinutes={totalMinutes}
-                currentSafetyBanner={currentSafetyBanner}
-                printGridClass={printGridClass}
-                printTextClass={printTextClass}
-                printImageClass={printImageClass}
-                showQr={showQr}
-                showChecklist={showChecklist}
-                showPainLog={showPainLog}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      <main className="no-print mx-auto grid max-w-[1800px] gap-6 px-6 py-6 lg:grid-cols-[320px_1fr_420px]">
-        <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto pr-1">
-          <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 font-semibold"><Icon>👤</Icon> 환자 정보</div>
-              {saveMessage && <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-bold text-green-700">{saveMessage}</span>}
-            </div>
-            <div className="grid gap-3">
-              <input value={patient.name} onChange={(e) => setPatient({ ...patient, name: e.target.value })} placeholder="환자 이름" className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" />
-              <input type="date" value={patient.date} onChange={(e) => setPatient({ ...patient, date: e.target.value })} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" />
-              <textarea value={patient.memo} onChange={(e) => setPatient({ ...patient, memo: e.target.value })} rows={3} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" />
-              <input value={patient.note} onChange={(e) => setPatient({ ...patient, note: e.target.value })} placeholder="메모 예: Stroke gait, TKA POD#5" className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" />
-              <div className="grid grid-cols-2 gap-2">
-                <button onClick={saveCurrentPatient} className="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-bold text-white hover:bg-blue-500">저장</button>
-                <button onClick={newPatient} className="rounded-2xl border border-slate-300 px-4 py-3 text-sm font-bold hover:bg-slate-100">새 환자</button>
-              </div>
-            </div>
-          </section>
-
-          <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="font-semibold">저장된 환자</div>
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-600">{safeSavedPatients.length}명</span>
-            </div>
-            {safeSavedPatients.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-300 p-5 text-center text-sm text-slate-500">아직 저장된 환자가 없습니다.</div>
-            ) : (
-              <div className="max-h-64 space-y-2 overflow-auto pr-1">
-                {safeSavedPatients.map((record) => (
-                  <div key={record.id} className="rounded-2xl border border-slate-200 p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <button onClick={() => loadPatient(record)} className="min-w-0 flex-1 text-left">
-                        <div className="truncate font-bold">{record.name || "이름 없는 환자"}</div>
-                        <div className="truncate text-xs text-slate-500">{record.date} · {record.note || "메모 없음"}</div>
-                        <div className="text-xs text-slate-400">운동 {Array.isArray(record.selected) ? record.selected.length : 0}개</div>
-                      </button>
-                      <button onClick={() => deletePatient(record.id)} className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-500">🗑️</button>
-                    </div>
-                    <button onClick={() => duplicatePatient(record)} className="mt-2 w-full rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100">복사해서 새 환자 만들기</button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <div className="mb-4 font-semibold">출력 옵션</div>
-            <div className="grid gap-3">
-              <label className="text-sm font-medium text-slate-600">A4 레이아웃
-                <select value={layoutMode} onChange={(e) => setLayoutMode(e.target.value)} className="mt-1 w-full rounded-2xl border border-slate-200 px-4 py-3">
-                  {layoutOptions.map((option) => <option key={option}>{option}</option>)}
-                </select>
-              </label>
-              <div className="grid grid-cols-3 gap-2 text-sm">
-                <label className="rounded-2xl border border-slate-200 p-3"><input type="checkbox" checked={showQr} onChange={(e) => setShowQr(e.target.checked)} /> QR</label>
-                <label className="rounded-2xl border border-slate-200 p-3"><input type="checkbox" checked={showChecklist} onChange={(e) => setShowChecklist(e.target.checked)} /> 체크표</label>
-                <label className="rounded-2xl border border-slate-200 p-3"><input type="checkbox" checked={showPainLog} onChange={(e) => setShowPainLog(e.target.checked)} /> 통증</label>
-              </div>
-            </div>
-          </section>
-        </aside>
-
-        <section className="space-y-5">
-          <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <div className="mb-4 flex items-center gap-2 font-semibold"><Icon>🔎</Icon> 운동 검색 및 필터</div>
-            <div className="grid gap-3 sm:grid-cols-[1fr_160px_180px]">
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="예: 균형, 무릎, 걷기, 침상" className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" />
-              <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300">{categories.map((cat) => <option key={cat}>{cat}</option>)}</select>
-              <select value={level} onChange={(e) => setLevel(e.target.value)} className="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300">{levels.map((lv) => <option key={lv}>{lv}</option>)}</select>
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-            <div className="mb-3 font-semibold">환자군 프리셋</div>
-            <div className="flex flex-wrap gap-2">
-              {presetGroups.map((preset) => (
-                <button key={preset.name} onClick={() => applyPreset(preset.name)} className="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold hover:bg-slate-100">{preset.name}</button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid gap-4">
-            {filteredExercises.map((exercise) => {
-              const alreadyAdded = selected.some((item) => item.id === exercise.id);
-              return (
-                <article key={exercise.id} className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
-                  <div className="flex items-start gap-5">
-                    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-slate-100 text-5xl">
-                      {exercise.imageUrl ? <img src={exercise.imageUrl} alt="" className="h-full w-full object-cover" /> : exercise.image}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="mb-1 flex flex-wrap gap-1">
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">{exercise.category}</span>
-                        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">{exercise.level}</span>
-                      </div>
-                      <h2 className="text-lg font-bold">{exercise.title}</h2>
-                      <p className="text-sm text-slate-500">{exercise.target}</p>
-                      <p className="mt-2 line-clamp-2 text-sm leading-6 text-slate-700">{exercise.description}</p>
-                      <div className="mt-3 flex flex-wrap gap-1">
-                        {(exercise.safetyTags || []).map((tag) => <span key={tag} className="rounded-full bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">⚠ {tag}</span>)}
-                      </div>
-                      <div className="mt-4 flex items-center justify-between text-sm">
-                        <span className="font-medium text-slate-600">{exercise.reps}회 × {exercise.sets}세트 · 약 {exercise.durationMin}분</span>
-                        <button onClick={() => addExercise(exercise)} disabled={alreadyAdded} className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 font-semibold ${alreadyAdded ? "bg-slate-100 text-slate-400" : "bg-blue-600 text-white hover:bg-blue-500"}`}>
-                          <Icon>＋</Icon> {alreadyAdded ? "담김" : "담기"}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto pr-1">
-          <section className="rounded-3xl bg-white p-5 shadow-sm ring-2 ring-blue-100">
-            <div className="mb-4 flex items-center justify-between">
-              <div className="flex items-center gap-2 font-semibold"><Icon>🧺</Icon> 운동 장바구니</div>
-              <span className="rounded-full bg-blue-50 px-3 py-1 text-sm font-bold text-blue-700">{selectedCount}개 · 약 {totalMinutes}분</span>
-            </div>
-
-            {safeSelected.length > 0 && (
-              <div className="mb-3 rounded-2xl bg-amber-50 p-3 text-xs font-semibold leading-5 text-amber-800">⚠ {currentSafetyBanner}</div>
-            )}
-
-            {safeSelected.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">가운데 운동 리스트에서 운동을 담아주세요.</div>
-            ) : (
-              <div className="overflow-hidden rounded-2xl border border-slate-200">
-                <div className="bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">운동 리스트</div>
-                <div className="max-h-72 divide-y divide-slate-100 overflow-y-auto">
-                  {safeSelected.map((item) => (
-                    <div key={item.id} className="px-3 py-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 text-sm font-semibold leading-5 break-words">{item.title}</div>
-                        <button onClick={() => removeExercise(item.id)} className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 shrink-0">🗑️</button>
-                      </div>
-                      <div className="mt-2 text-xs text-slate-500">{item.level} · 약 {item.durationMin}분</div>
-                      <div className="mt-3 grid grid-cols-3 gap-2">
-                        <label className="text-xs font-medium text-slate-500">횟수<input type="number" value={item.reps} onChange={(e) => updateSelected(item.id, "reps", e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-2 text-center text-sm" /></label>
-                        <label className="text-xs font-medium text-slate-500">세트<input type="number" value={item.sets} onChange={(e) => updateSelected(item.id, "sets", e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-2 text-center text-sm" /></label>
-                        <label className="text-xs font-medium text-slate-500">좌/우<select value={item.side} onChange={(e) => updateSelected(item.id, "side", e.target.value)} className="mt-1 w-full rounded-lg border border-slate-200 px-2 py-2 text-xs">{sideOptions.map((side) => <option key={side}>{side}</option>)}</select></label>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <details className="border-t border-slate-200 bg-slate-50 p-3">
-                  <summary className="cursor-pointer text-sm font-bold text-slate-600">세부 설명/사진/QR 수정 열기</summary>
-                  <div className="mt-3 max-h-80 space-y-4 overflow-y-auto pr-1">
-                    {safeSelected.map((item) => (
-                      <div key={item.id} className="rounded-2xl bg-white p-3 ring-1 ring-slate-200">
-                        <div className="mb-2 font-bold">{item.title}</div>
-                        <div className="grid grid-cols-2 gap-3">
-                          <label className="text-xs font-medium text-slate-500">예상 분<input type="number" value={item.durationMin} onChange={(e) => updateSelected(item.id, "durationMin", e.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" /></label>
-                          <label className="text-xs font-medium text-slate-500">사진 URL<input value={item.imageUrl} onChange={(e) => updateSelected(item.id, "imageUrl", e.target.value)} placeholder="이미지 주소" className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" /></label>
-                        </div>
-                        <label className="mt-3 block text-xs font-medium text-slate-500">영상/QR URL<input value={item.videoUrl} onChange={(e) => updateSelected(item.id, "videoUrl", e.target.value)} className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm" /></label>
-                        <textarea value={item.description} onChange={(e) => updateSelected(item.id, "description", e.target.value)} rows={2} className="mt-3 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm leading-6" />
-                      </div>
-                    ))}
-                  </div>
-                </details>
-              </div>
-            )}
-          </section>
-        </aside>
-      </main>
-
-      <section className="print-area mx-auto hidden max-w-4xl bg-white p-8">
-        <PrintableLeaflet selected={safeSelected} patient={patient} totalMinutes={totalMinutes} currentSafetyBanner={currentSafetyBanner} printGridClass={printGridClass} printTextClass={printTextClass} printImageClass={printImageClass} showQr={showQr} showChecklist={showChecklist} showPainLog={showPainLog} />
-      </section>
-    </div>
-  );
+      </div>
+    </section>
+  </aside>`;
 }
 
-function PrintableLeaflet({ selected, patient, totalMinutes, currentSafetyBanner, printGridClass, printTextClass, printImageClass, showQr, showChecklist, showPainLog }) {
-  return (
-    <div className="mx-auto max-w-4xl bg-white">
-      <div className="mb-5 border-b-2 border-slate-900 pb-4">
-        <div className="flex items-end justify-between gap-4">
+function exercisePanel() {
+  return `<section class="space-y-5">
+    <div class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <div class="mb-4 font-semibold">🔎 운동 검색 및 필터</div>
+      <div class="grid gap-3 sm:grid-cols-[1fr_160px_180px]">
+        <input value="${esc(state.query)}" oninput="setField('query',this.value)" placeholder="예: 균형, 무릎, 걷기, 침상" class="rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-2 focus:ring-slate-300" />
+        <select onchange="setField('category',this.value)" class="rounded-2xl border border-slate-200 px-4 py-3">${categories().map(x=>`<option ${state.category===x?"selected":""}>${x}</option>`).join("")}</select>
+        <select onchange="setField('level',this.value)" class="rounded-2xl border border-slate-200 px-4 py-3">${LEVELS.map(x=>`<option ${state.level===x?"selected":""}>${x}</option>`).join("")}</select>
+      </div>
+    </div>
+
+    <div class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+      <div class="mb-3 font-semibold">환자군 프리셋</div>
+      <div class="flex flex-wrap gap-2">${presets.map(p=>`<button onclick="applyPreset('${p.name}')" class="rounded-2xl border border-slate-200 px-4 py-2 text-sm font-semibold hover:bg-slate-100">${p.name}</button>`).join("")}</div>
+    </div>
+
+    <div class="grid gap-4">
+      ${filtered().map(e => exerciseCard(e)).join("")}
+    </div>
+  </section>`;
+}
+
+function exerciseCard(e) {
+  const added = state.selected.some(x=>x.id===e.id);
+  return `<article class="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+    <div class="flex items-start gap-5">
+      <div class="flex h-36 w-44 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-white text-5xl ring-1 ring-slate-100">${imgTag(e)}</div>
+      <div class="min-w-0 flex-1">
+        <div class="mb-1 flex flex-wrap gap-1">
+          <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">${esc(e.category)}</span>
+          <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">${esc(e.level)}</span>
+        </div>
+        <h2 class="text-lg font-bold">${esc(e.title)}</h2>
+        <p class="text-sm text-slate-500">${esc(e.target)}</p>
+        <p class="mt-2 line-clamp-2 text-sm leading-6 text-slate-700">${esc(e.description)}</p>
+        <div class="mt-3 flex flex-wrap gap-1"><span class="rounded-full bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">⚠ 주의</span></div>
+        <div class="mt-4 flex items-center justify-between text-sm">
+          <span class="font-medium text-slate-600">${e.reps}회 × ${e.sets}세트 · 약 ${e.durationMin}분</span>
+          <button onclick="addExercise(${e.id})" ${added?"disabled":""} class="rounded-2xl px-4 py-2 font-semibold ${added?"bg-slate-100 text-slate-400":"bg-blue-600 text-white hover:bg-blue-500"}">＋ ${added?"담김":"담기"}</button>
+        </div>
+      </div>
+    </div>
+  </article>`;
+}
+
+function cartPanel() {
+  return `<aside class="space-y-5 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-120px)] lg:overflow-y-auto pr-1">
+    <section class="rounded-3xl bg-white p-5 shadow-sm ring-2 ring-blue-100">
+      <div class="mb-4 flex items-center justify-between">
+        <div class="font-semibold">🧺 운동 장바구니</div>
+        <span class="rounded-full bg-blue-50 px-3 py-1 text-sm font-bold text-blue-700">${state.selected.length}개 · 약 ${totalMinutes()}분</span>
+      </div>
+      ${state.selected.length>0 ? `<div class="mb-3 rounded-2xl bg-amber-50 p-3 text-xs font-semibold leading-5 text-amber-800">⚠ ${safetyBanner(state.selected)}</div>` : ""}
+      ${state.selected.length===0 ? `<div class="rounded-2xl border border-dashed border-slate-300 p-8 text-center text-sm text-slate-500">가운데 운동 리스트에서 운동을 담아주세요.</div>` : cartList()}
+    </section>
+  </aside>`;
+}
+
+function cartList() {
+  return `<div class="overflow-hidden rounded-2xl border border-slate-200">
+    <div class="bg-slate-50 px-3 py-2 text-xs font-bold text-slate-500">운동 리스트</div>
+    <div class="max-h-72 divide-y divide-slate-100 overflow-y-auto">
+      ${state.selected.map(item=>`
+        <div class="px-3 py-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 text-sm font-semibold leading-5 break-words">${esc(item.title)}</div>
+            <button onclick="removeExercise(${item.id})" class="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-500">🗑️</button>
+          </div>
+          <div class="mt-2 text-xs text-slate-500">${esc(item.level)} · 약 ${item.durationMin}분</div>
+          <div class="mt-3 grid grid-cols-3 gap-2">
+            <label class="text-xs font-medium text-slate-500">횟수<input type="number" value="${item.reps}" onchange="updateSelected(${item.id},'reps',this.value)" class="mt-1 w-full rounded-lg border border-slate-200 px-2 py-2 text-center text-sm"></label>
+            <label class="text-xs font-medium text-slate-500">세트<input type="number" value="${item.sets}" onchange="updateSelected(${item.id},'sets',this.value)" class="mt-1 w-full rounded-lg border border-slate-200 px-2 py-2 text-center text-sm"></label>
+            <label class="text-xs font-medium text-slate-500">좌/우<select onchange="updateSelected(${item.id},'side',this.value)" class="mt-1 w-full rounded-lg border border-slate-200 px-2 py-2 text-xs">${SIDE_OPTIONS.map(s=>`<option ${item.side===s?"selected":""}>${s}</option>`).join("")}</select></label>
+          </div>
+        </div>`).join("")}
+    </div>
+    <details class="border-t border-slate-200 bg-slate-50 p-3">
+      <summary class="cursor-pointer text-sm font-bold text-slate-600">세부 설명/사진/QR 수정 열기</summary>
+      <div class="mt-3 max-h-80 space-y-4 overflow-y-auto pr-1">
+        ${state.selected.map(item=>`
+          <div class="rounded-2xl bg-white p-3 ring-1 ring-slate-200">
+            <div class="mb-2 font-bold">${esc(item.title)}</div>
+            <input value="${esc(item.imageUrl)}" onchange="updateSelected(${item.id},'imageUrl',this.value)" placeholder="사진 URL" class="mb-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+            <input value="${esc(item.videoUrl)}" onchange="updateSelected(${item.id},'videoUrl',this.value)" placeholder="영상/QR URL" class="mb-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">
+            <textarea onchange="updateSelected(${item.id},'description',this.value)" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm">${esc(item.description)}</textarea>
+          </div>`).join("")}
+      </div>
+    </details>
+  </div>`;
+}
+
+function previewOverlay() {
+  return `<div class="no-print fixed inset-0 z-50 overflow-auto bg-slate-900/70 p-6">
+    <div class="mx-auto max-w-5xl rounded-3xl bg-white shadow-2xl">
+      <div class="sticky top-0 z-10 flex items-center justify-between border-b bg-white px-6 py-4">
+        <div><h2 class="text-xl font-black">리플릿 미리보기</h2><p class="text-sm text-slate-500">아래 화면이 실제 출력물입니다.</p></div>
+        <div class="flex gap-2">
+          <button onclick="window.print()" class="rounded-2xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">인쇄하기</button>
+          <button onclick="state.preview=false;render()" class="rounded-2xl border border-slate-300 px-4 py-2 text-sm font-bold">닫기</button>
+        </div>
+      </div>
+      <div class="p-6">${leafletHTML()}</div>
+    </div>
+  </div>`;
+}
+
+function leafletHTML() {
+  const grid = state.layoutMode==="2단 압축형" || (state.layoutMode==="자동" && state.selected.length>=5);
+  const textClass = state.layoutMode==="인지저하 큰글씨" ? "text-xl leading-9" : "leading-7";
+  const imageClass = state.layoutMode==="큰 사진형" || state.layoutMode==="인지저하 큰글씨" ? "h-44 w-56 text-6xl" : "h-36 w-44 text-5xl";
+  return `<div class="mx-auto max-w-4xl bg-white">
+    <div class="mb-5 border-b-2 border-slate-900 pb-4">
+      <div class="flex items-end justify-between gap-4">
+        <div><h1 class="text-3xl font-black">환자 맞춤 운동 숙제</h1><p class="mt-2 text-slate-600">안전한 범위에서 천천히 시행해주세요.</p></div>
+        <div class="text-right text-sm leading-7">
+          <p><b>환자명</b> ${esc(state.patient.name || "____________")}</p>
+          <p><b>작성일</b> ${esc(state.patient.date)}</p>
+          <p><b>예상 소요시간</b> 약 ${totalMinutes()}분</p>
+        </div>
+      </div>
+    </div>
+    ${state.selected.length>0 ? `<div class="mb-5 rounded-3xl border-2 border-amber-400 bg-amber-50 p-4 font-bold leading-7 text-amber-900">⚠ ${safetyBanner(state.selected)}</div>` : ""}
+    ${state.selected.length===0 ? `<div class="rounded-2xl border border-slate-300 p-8 text-center text-slate-500">선택된 운동이 없습니다.</div>` :
+    `<div class="${grid?"grid grid-cols-2 gap-4":"space-y-5"}">${state.selected.map((item,i)=>`
+      <article class="page-break rounded-3xl border border-slate-300 p-5">
+        <div class="grid grid-cols-[auto_1fr] gap-5">
+          <div class="flex shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-white ring-1 ring-slate-100 ${imageClass}">${imgTag(item)}</div>
           <div>
-            <h1 className="text-3xl font-black">환자 맞춤 운동 숙제</h1>
-            <p className="mt-2 text-slate-600">안전한 범위에서 천천히 시행해주세요.</p>
-          </div>
-          <div className="text-right text-sm leading-7">
-            <p><b>환자명</b> {patient.name || "____________"}</p>
-            <p><b>작성일</b> {patient.date}</p>
-            <p><b>예상 소요시간</b> 약 {totalMinutes}분</p>
+            <div class="mb-1 text-sm font-bold text-slate-500">운동 ${i+1} · ${esc(item.level)}</div>
+            <h2 class="text-2xl font-black">${esc(item.title)}</h2>
+            <p class="mt-1 text-sm font-semibold text-slate-600">목표: ${esc(item.target)}</p>
+            <div class="mt-3 inline-flex rounded-2xl border-2 border-slate-900 px-4 py-2 text-lg font-black">${esc(item.side)} · ${item.reps}회/초 × ${item.sets}세트</div>
           </div>
         </div>
-      </div>
-
-      {selected.length > 0 && <div className="mb-5 rounded-3xl border-2 border-amber-400 bg-amber-50 p-4 font-bold leading-7 text-amber-900">⚠ {currentSafetyBanner}</div>}
-
-      {selected.length === 0 ? (
-        <div className="rounded-2xl border border-slate-300 p-8 text-center text-slate-500">선택된 운동이 없습니다.</div>
-      ) : (
-        <div className={printGridClass}>
-          {selected.map((item, index) => (
-            <article key={item.id} className="page-break rounded-3xl border border-slate-300 p-5">
-              <div className="grid grid-cols-[auto_1fr] gap-5">
-                <div className={`flex shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-slate-100 ${printImageClass}`}>{item.imageUrl ? <img src={item.imageUrl} alt="운동 동작" className="h-full w-full object-cover" /> : item.image}</div>
-                <div>
-                  <div className="mb-1 text-sm font-bold text-slate-500">운동 {index + 1} · {item.level}</div>
-                  <h2 className="text-2xl font-black">{item.title}</h2>
-                  <p className="mt-1 text-sm font-semibold text-slate-600">목표: {item.target}</p>
-                  <div className="mt-3 inline-flex rounded-2xl border-2 border-slate-900 px-4 py-2 text-lg font-black">{item.side} · {item.reps}회/초 × {item.sets}세트</div>
-                </div>
-              </div>
-              <div className={`mt-4 rounded-2xl bg-slate-50 p-4 ${printTextClass}`}><b>방법: </b>{item.description}</div>
-              <div className="mt-3 rounded-2xl bg-amber-50 p-4 text-sm leading-6"><b>주의사항: </b>{item.caution}</div>
-              {showQr && item.videoUrl && (
-                <div className="mt-3 flex items-center gap-3 rounded-2xl border border-slate-200 p-3">
-                  <img src={qrUrl(item.videoUrl)} alt="운동 영상 QR" className="h-20 w-20" />
-                  <div className="text-sm leading-6">📱 스마트폰으로 QR코드를 촬영하면 운동 영상을 확인할 수 있습니다.</div>
-                </div>
-              )}
-            </article>
-          ))}
-        </div>
-      )}
-
-      {showChecklist && selected.length > 0 && (
-        <div className="mt-6 rounded-3xl border-2 border-slate-900 p-5">
-          <h3 className="mb-3 flex items-center gap-2 text-lg font-black">📅 운동 수행 체크표</h3>
-          <table className="w-full border-collapse text-center text-sm">
-            <thead><tr>{["월", "화", "수", "목", "금", "토", "일"].map((d) => <th key={d} className="border border-slate-400 p-2">{d}</th>)}</tr></thead>
-            <tbody><tr>{["월", "화", "수", "목", "금", "토", "일"].map((d) => <td key={d} className="h-12 border border-slate-400 p-2">□</td>)}</tr></tbody>
-          </table>
-        </div>
-      )}
-
-      {showPainLog && selected.length > 0 && (
-        <div className="mt-6 rounded-3xl border-2 border-slate-900 p-5">
-          <h3 className="mb-3 flex items-center gap-2 text-lg font-black">✅ 통증/피로도 기록</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="rounded-2xl border border-slate-300 p-4">운동 전 통증 NRS: 0 1 2 3 4 5 6 7 8 9 10</div>
-            <div className="rounded-2xl border border-slate-300 p-4">운동 후 통증 NRS: 0 1 2 3 4 5 6 7 8 9 10</div>
-            <div className="rounded-2xl border border-slate-300 p-4">운동 전 피로도: 낮음 / 보통 / 높음</div>
-            <div className="rounded-2xl border border-slate-300 p-4">운동 후 피로도: 낮음 / 보통 / 높음</div>
-          </div>
-        </div>
-      )}
-
-      <div className="mt-6 rounded-3xl border-2 border-slate-900 p-5">
-        <h3 className="mb-2 text-lg font-black">공통 주의사항</h3>
-        <p className="leading-7">{patient.memo}</p>
-      </div>
-    </div>
-  );
+        <div class="mt-4 rounded-2xl bg-slate-50 p-4 ${textClass}"><b>방법: </b>${esc(item.description)}</div>
+        <div class="mt-3 rounded-2xl bg-amber-50 p-4 text-sm leading-6"><b>주의사항: </b>${esc(item.caution)}</div>
+        ${state.showQr && item.videoUrl ? `<div class="mt-3 flex items-center gap-3 rounded-2xl border border-slate-200 p-3"><img src="${qrUrl(item.videoUrl)}" class="h-20 w-20"><div class="text-sm leading-6">📱 스마트폰으로 QR코드를 촬영하면 운동 영상을 확인할 수 있습니다.</div></div>` : ""}
+      </article>`).join("")}</div>`}
+    ${state.showChecklist && state.selected.length>0 ? checklistHTML() : ""}
+    ${state.showPainLog && state.selected.length>0 ? painHTML() : ""}
+    <div class="mt-6 rounded-3xl border-2 border-slate-900 p-5"><h3 class="mb-2 text-lg font-black">공통 주의사항</h3><p class="leading-7">${esc(state.patient.memo)}</p></div>
+  </div>`;
 }
 
-ReactDOM.createRoot(document.getElementById("root")).render(<ExerciseHomeworkLeafletBuilder />);
-  </script>
+function checklistHTML() {
+  return `<div class="mt-6 rounded-3xl border-2 border-slate-900 p-5"><h3 class="mb-3 text-lg font-black">📅 운동 수행 체크표</h3><table class="w-full border-collapse text-center text-sm"><thead><tr>${["월","화","수","목","금","토","일"].map(d=>`<th class="border border-slate-400 p-2">${d}</th>`).join("")}</tr></thead><tbody><tr>${["월","화","수","목","금","토","일"].map(d=>`<td class="h-12 border border-slate-400 p-2">□</td>`).join("")}</tr></tbody></table></div>`;
+}
+
+function painHTML() {
+  return `<div class="mt-6 rounded-3xl border-2 border-slate-900 p-5"><h3 class="mb-3 text-lg font-black">✅ 통증/피로도 기록</h3><div class="grid grid-cols-2 gap-4 text-sm"><div class="rounded-2xl border border-slate-300 p-4">운동 전 통증 NRS: 0 1 2 3 4 5 6 7 8 9 10</div><div class="rounded-2xl border border-slate-300 p-4">운동 후 통증 NRS: 0 1 2 3 4 5 6 7 8 9 10</div><div class="rounded-2xl border border-slate-300 p-4">운동 전 피로도: 낮음 / 보통 / 높음</div><div class="rounded-2xl border border-slate-300 p-4">운동 후 피로도: 낮음 / 보통 / 높음</div></div></div>`;
+}
+
+render();
+</script>
 </body>
 </html>
