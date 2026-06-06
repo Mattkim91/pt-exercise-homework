@@ -315,7 +315,7 @@ const EXERCISES = [
   {"id": 74, "category": "AROM", "level": "Lv2 앉은자세", "title": "햄스트링 스트레칭", "target": "무릎 뒤쪽 유연성 및 보행 준비", "reps": 30, "sets": 3, "durationMin": 4, "side": "좌/우 선택", "image": "🦵", "description": "의자에 앉아 한쪽 다리를 앞으로 펴고 발끝을 가볍게 당깁니다. 허리를 세운 상태에서 몸을 천천히 앞으로 기울여 허벅지 뒤쪽이 당기는 느낌을 유지합니다.", "caution": "허리를 과하게 굽히거나 반동을 주지 마세요. 저림이나 통증이 있으면 중단하세요.", "imageKey": "hamstring-stretch"}
 ];
 
-const VERSION      = "v2.56";
+const VERSION      = "v2.57";
 const VERSION_DATE = "2026-06-07";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
@@ -2149,14 +2149,14 @@ function render(){
         <div class="flex border-b border-transparent gap-1">
           ${["👤 환자 정보","🔎 운동 선택","🧺 담은 운동","⚙️ 출력 옵션","🤖 AI/관리"].map((t,i)=>`
             <button onclick="state.tab=${i};render()" class="px-3 py-2 text-sm font-semibold transition-colors border-b-2 ${state.tab===i?"tab-active":"tab-inactive hover:text-slate-600"}">
-              ${t}${i===2&&state.selected.length>0?`<span class="ml-1.5 rounded-full bg-blue-600 text-white text-xs px-1.5 py-0.5">${state.selected.length}</span>`:""}
+              ${t}${i===2?`<span class="tab-cart-badge ml-1.5 rounded-full bg-blue-600 text-white text-xs px-1.5 py-0.5" style="display:${state.selected.length>0?"":"none"}">${state.selected.length}</span>`:""}
             </button>`).join("")}
         </div>
       </div>
     </header>
 
     <!-- ── 탭 콘텐츠 ── -->
-    <main class="no-print flex-1 mx-auto w-full max-w-5xl px-3 py-4 pb-24 sm:pb-5">
+    <main class="no-print flex-1 mx-auto w-full max-w-5xl px-3 py-4 pb-24 sm:pb-5 overflow-hidden">
       ${state.tab===0?tabPatient():""}
       ${state.tab===1?tabExercise():""}
       ${state.tab===2?tabCart():""}
@@ -2212,32 +2212,66 @@ function renderMain(){
 }
 
 function syncBottomNav(){
-  // 모바일 탭 뱃지
-  const badge=document.querySelector(".btab-badge");
-  if(badge) badge.textContent=state.selected.length;
-  // 플로팅 FAB
-  let fab=document.getElementById("cart-fab");
-  if(state.tab===1&&state.selected.length>0){
+  const cnt = state.selected.length;
+
+  // ── 모바일 하단 탭 뱃지 ──
+  const mBadge = document.querySelector(".btab-badge");
+  if(cnt > 0){
+    if(mBadge){
+      mBadge.textContent = cnt;
+    } else {
+      // 뱃지 없으면 담은운동 탭 버튼에 추가
+      const btabs = document.querySelectorAll(".btab-wrap");
+      if(btabs[2]){
+        const b = document.createElement("span");
+        b.className = "btab-badge";
+        b.textContent = cnt;
+        btabs[2].appendChild(b);
+      }
+    }
+  } else if(mBadge){
+    mBadge.remove();
+  }
+
+  // ── 플로팅 FAB ──
+  let fab = document.getElementById("cart-fab");
+  if(state.tab===1 && cnt > 0){
     if(!fab){
-      fab=document.createElement("div");
-      fab.id="cart-fab";
-      fab.className="no-print sm:hidden fixed bottom-20 right-4 z-30 flex items-center gap-2 rounded-2xl bg-blue-600 text-white px-4 py-3 text-sm font-bold cursor-pointer anim-pop";
-      fab.onclick=()=>{state.tab=2;render();};
+      fab = document.createElement("div");
+      fab.id = "cart-fab";
+      fab.className = "no-print sm:hidden fixed bottom-20 right-4 z-30 flex items-center gap-2 rounded-2xl bg-blue-600 text-white px-4 py-3 text-sm font-bold cursor-pointer anim-pop";
+      fab.onclick = ()=>{ state.tab=2; render(); };
       document.body.appendChild(fab);
     }
-    fab.innerHTML=`🧺 <span>${state.selected.length}개 담음</span><span class="text-blue-200">·</span><span class="text-blue-100">${totalMinutes()}분</span>`;
+    fab.innerHTML = `🧺 <span>${cnt}개 담음</span><span class="text-blue-200">·</span><span class="text-blue-100">${totalMinutes()}분</span>`;
   } else if(fab){
     fab.remove();
   }
-  // 헤더 운동 개수 뱃지
-  const hbadge=document.getElementById("patient-header-badge");
-  if(hbadge&&state.patient.name){
-    const countEl=hbadge.querySelector(".selected-count");
-    if(countEl) countEl.textContent=`운동 ${state.selected.length}개`;
+
+  // ── 헤더 환자 뱃지 운동 개수 ──
+  const hbadge = document.getElementById("patient-header-badge");
+  if(hbadge && state.patient.name){
+    const countEl = hbadge.querySelector(".selected-count");
+    if(countEl) countEl.textContent = `운동 ${cnt}개`;
   }
-  // 데스크탑 탭 담은운동 뱃지
-  const tabBadges=document.querySelectorAll(".tab-cart-badge");
-  tabBadges.forEach(el=>{ el.textContent=state.selected.length; el.style.display=state.selected.length>0?"":"none"; });
+
+  // ── 데스크탑 탭 "담은 운동" 뱃지 — DOM 직접 갱신 ──
+  // 탭 버튼들 중 index 2 (🧺 담은 운동) 찾아서 뱃지 처리
+  const desktopTabs = document.querySelectorAll("header .tab-active, header .tab-inactive");
+  desktopTabs.forEach(btn => {
+    if(!btn.textContent.includes("담은 운동")) return;
+    let dBadge = btn.querySelector(".tab-cart-badge");
+    if(cnt > 0){
+      if(!dBadge){
+        dBadge = document.createElement("span");
+        dBadge.className = "tab-cart-badge ml-1.5 rounded-full bg-blue-600 text-white text-xs px-1.5 py-0.5";
+        btn.appendChild(dBadge);
+      }
+      dBadge.textContent = cnt;
+    } else if(dBadge){
+      dBadge.remove();
+    }
+  });
 }
 
 /* 운동선택 탭: 결과 영역만 업데이트 (검색·필터·추가·해제 시 깜빡임 없음) */
@@ -2465,105 +2499,121 @@ function tabExercise(){
   const anyAdded=list.some(e=>state.selected.some(x=>x.id===e.id));
   const bbsRec=activeBbsRecommendation();
 
-  return `<div class="anim-fadeup space-y-3">
+  return `<div class="anim-fadeup">
+    <!-- 데스크탑: 좌우 분할 / 모바일: 1열 -->
+    <div class="flex flex-col sm:flex-row gap-4 sm:gap-5" style="height:calc(100vh - 160px)">
 
-    <!-- 검색 + 레벨 pill + 카테고리 pill -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-      <input value="${esc(state.query)}" oninput="state.query=this.value;state.activePreset=null;state.bbsMode=false;renderExerciseResults()" placeholder="🔎  운동 검색 (예: 균형, 무릎, 걷기, Stroke, TKA)" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm mb-3 focus:border-blue-400 transition-colors"/>
-      <div class="flex flex-wrap gap-1.5 mb-3">
-        ${LEVELS.map((lv,idx)=>{
-          const fullLv=idx===0?"전체":LEVELS_FULL[idx];
-          const pillClass=LV_PILL_CLASS[fullLv]||"lvpill-all";
-          const isActive=state.level===lv;
-          return `<button onclick="state.level='${lv}';state.activePreset=null;state.bbsMode=false;renderExerciseResults()" class="px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${pillClass} ${isActive?"lvpill-active":"lvpill-inactive"}">${lv}</button>`;
-        }).join("")}
-      </div>
-      <div class="flex flex-wrap gap-1.5 mb-3">
-        ${categories().map(c=>{
-          const catCls=CAT_CLASS[c]||"";
-          const isActive=state.category===c;
-          return `<button onclick="state.category='${c}';state.activePreset=null;state.bbsMode=false;renderExerciseResults()" class="px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${isActive?`${catCls} border-current`:"bg-white text-slate-500 border-slate-200 hover:border-slate-400"}">${c}</button>`;
-        }).join("")}
-      </div>
-      <div class="rounded-xl bg-slate-50 border border-slate-100 p-3 space-y-2">
-        <div><span class="inline-block w-14 text-[11px] font-black text-slate-400">신체</span><span class="inline-flex flex-wrap gap-1.5 align-middle">${chipButtons(BODY_FILTERS,'bodyFilter',state.bodyFilter)}</span></div>
-        <div><span class="inline-block w-14 text-[11px] font-black text-slate-400">목적</span><span class="inline-flex flex-wrap gap-1.5 align-middle">${chipButtons(PURPOSE_FILTERS,'purposeFilter',state.purposeFilter)}</span></div>
-        <div><span class="inline-block w-14 text-[11px] font-black text-slate-400">태그</span><span class="inline-flex flex-wrap gap-1.5 align-middle">${chipButtons(TAG_FILTERS,'tagFilter',state.tagFilter)}</span></div>
-        <div class="flex items-center justify-between pt-1 border-t border-slate-200/70">
-          <button onclick="state.showFavoritesOnly=!state.showFavoritesOnly;state.activePreset=null;state.bbsMode=false;renderMain()" class="px-3 py-1.5 rounded-xl border text-xs font-bold ${state.showFavoritesOnly?"bg-amber-500 text-white border-amber-500":"bg-white text-slate-600 border-slate-200 hover:bg-amber-50"}">★ 즐겨찾기만 ${state.showFavoritesOnly?"해제":"보기"}</button>
-          <button onclick="state.level='전체';state.category='전체';state.bodyFilter='전체';state.purposeFilter='전체';state.tagFilter='전체';state.showFavoritesOnly=false;state.activePreset=null;state.bbsMode=false;state.query='';renderMain()" class="text-xs font-bold text-slate-400 hover:text-slate-700">필터 초기화</button>
+      <!-- ── 좌측: 필터 패널 (독립 스크롤) ── -->
+      <div id="filter-panel" class="w-full sm:w-[300px] sm:shrink-0 overflow-y-auto overscroll-contain space-y-3 pb-4"
+           style="scrollbar-gutter:stable">
+
+        <!-- 검색 + 레벨 pill + 카테고리 pill -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+          <input value="${esc(state.query)}" oninput="state.query=this.value;state.activePreset=null;state.bbsMode=false;renderExerciseResults()" placeholder="🔎  운동 검색 (예: 균형, 무릎, 걷기, Stroke, TKA)" class="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm mb-3 focus:border-blue-400 transition-colors"/>
+          <div class="flex flex-wrap gap-1.5 mb-3">
+            ${LEVELS.map((lv,idx)=>{
+              const fullLv=idx===0?"전체":LEVELS_FULL[idx];
+              const pillClass=LV_PILL_CLASS[fullLv]||"lvpill-all";
+              const isActive=state.level===lv;
+              return `<button onclick="state.level='${lv}';state.activePreset=null;state.bbsMode=false;renderExerciseResults()" class="px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${pillClass} ${isActive?"lvpill-active":"lvpill-inactive"}">${lv}</button>`;
+            }).join("")}
+          </div>
+          <div class="flex flex-wrap gap-1.5 mb-3">
+            ${categories().map(c=>{
+              const catCls=CAT_CLASS[c]||"";
+              const isActive=state.category===c;
+              return `<button onclick="state.category='${c}';state.activePreset=null;state.bbsMode=false;renderExerciseResults()" class="px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${isActive?`${catCls} border-current`:"bg-white text-slate-500 border-slate-200 hover:border-slate-400"}">${c}</button>`;
+            }).join("")}
+          </div>
+          <div class="rounded-xl bg-slate-50 border border-slate-100 p-3 space-y-2">
+            <div><span class="inline-block w-14 text-[11px] font-black text-slate-400">신체</span><span class="inline-flex flex-wrap gap-1.5 align-middle">${chipButtons(BODY_FILTERS,'bodyFilter',state.bodyFilter)}</span></div>
+            <div><span class="inline-block w-14 text-[11px] font-black text-slate-400">목적</span><span class="inline-flex flex-wrap gap-1.5 align-middle">${chipButtons(PURPOSE_FILTERS,'purposeFilter',state.purposeFilter)}</span></div>
+            <div><span class="inline-block w-14 text-[11px] font-black text-slate-400">태그</span><span class="inline-flex flex-wrap gap-1.5 align-middle">${chipButtons(TAG_FILTERS,'tagFilter',state.tagFilter)}</span></div>
+            <div class="flex items-center justify-between pt-1 border-t border-slate-200/70">
+              <button onclick="state.showFavoritesOnly=!state.showFavoritesOnly;state.activePreset=null;state.bbsMode=false;renderMain()" class="px-3 py-1.5 rounded-xl border text-xs font-bold ${state.showFavoritesOnly?"bg-amber-500 text-white border-amber-500":"bg-white text-slate-600 border-slate-200 hover:bg-amber-50"}">★ 즐겨찾기만 ${state.showFavoritesOnly?"해제":"보기"}</button>
+              <button onclick="state.level='전체';state.category='전체';state.bodyFilter='전체';state.purposeFilter='전체';state.tagFilter='전체';state.showFavoritesOnly=false;state.activePreset=null;state.bbsMode=false;state.query='';renderMain()" class="text-xs font-bold text-slate-400 hover:text-slate-700">필터 초기화</button>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- BBS 기반 추천 -->
-    <div class="bg-white rounded-2xl shadow-sm border border-indigo-100 p-4">
-      <div class="flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <p class="text-xs font-bold text-indigo-700">🧭 BBS 기반 추천</p>
-          <p class="text-[11px] text-slate-400 mt-0.5">Berg Balance Scale 점수를 입력하면 균형 수준에 맞는 운동을 필터링합니다.</p>
+        <!-- BBS 기반 추천 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-indigo-100 p-4">
+          <div class="flex items-center justify-between gap-3 flex-wrap">
+            <div>
+              <p class="text-xs font-bold text-indigo-700">🧭 BBS 기반 추천</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">Berg Balance Scale 점수로 균형 수준에 맞는 운동을 필터링합니다.</p>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <input value="${esc(state.bbsScore)}" oninput="state.bbsScore=this.value" placeholder="0~56" class="w-20 rounded-xl border border-slate-200 px-3 py-2 text-sm text-center font-bold focus:border-indigo-400"/>
+              <button onclick="applyBbsMode()" class="rounded-xl bg-indigo-600 text-white px-3 py-2 text-xs font-bold hover:bg-indigo-700">추천보기</button>
+              <button onclick="addBbsRecommended()" class="rounded-xl border border-indigo-200 text-indigo-700 px-3 py-2 text-xs font-bold hover:bg-indigo-50">추천 담기</button>
+              ${state.bbsMode?`<button onclick="clearBbsMode()" class="rounded-xl border border-slate-200 text-slate-500 px-3 py-2 text-xs font-bold hover:bg-slate-50">해제</button>`:""}
+            </div>
+          </div>
+          ${bbsRec?`<div class="mt-3 rounded-xl ${state.bbsMode?"bg-indigo-50 border-indigo-200":"bg-slate-50 border-slate-100"} border px-3 py-2 text-xs"><b>${bbsRec.label}</b> · ${bbsRec.desc} <span class="text-slate-400">(${bbsRec.ids.length}개 추천)</span></div>`:""}
         </div>
-        <div class="flex items-center gap-2">
-          <input value="${esc(state.bbsScore)}" oninput="state.bbsScore=this.value" placeholder="0~56" class="w-20 rounded-xl border border-slate-200 px-3 py-2 text-sm text-center font-bold focus:border-indigo-400"/>
-          <button onclick="applyBbsMode()" class="rounded-xl bg-indigo-600 text-white px-3 py-2 text-xs font-bold hover:bg-indigo-700">추천보기</button>
-          <button onclick="addBbsRecommended()" class="rounded-xl border border-indigo-200 text-indigo-700 px-3 py-2 text-xs font-bold hover:bg-indigo-50">추천 담기</button>
-          ${state.bbsMode?`<button onclick="clearBbsMode()" class="rounded-xl border border-slate-200 text-slate-500 px-3 py-2 text-xs font-bold hover:bg-slate-50">해제</button>`:""}
+
+        <!-- 환자군 프리셋 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+          <p class="text-xs font-bold text-slate-500 mb-2">⚡ 환자군 프리셋</p>
+          <div class="flex flex-wrap gap-2">
+            ${presets.filter(p=>p.ids.length>0).map(p=>{
+              const isActive=state.activePreset===p.name;
+              return `<button onclick="applyPreset('${p.name}')" class="px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${isActive?"bg-blue-600 text-white border-blue-600":"border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"}">${p.name}${isActive?" ✕":""}</button>`;
+            }).join("")}
+          </div>
+          ${state.activePreset?`<p class="text-[11px] text-blue-500 font-semibold mt-2">「${state.activePreset}」 운동만 표시 중 — 다시 클릭하면 해제</p>`:""}
         </div>
-      </div>
-      ${bbsRec?`<div class="mt-3 rounded-xl ${state.bbsMode?"bg-indigo-50 border-indigo-200":"bg-slate-50 border-slate-100"} border px-3 py-2 text-xs"><b>${bbsRec.label}</b> · ${bbsRec.desc} <span class="text-slate-400">(${bbsRec.ids.length}개 추천)</span></div>`:""}
-    </div>
 
-    <!-- 환자군 프리셋 -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
-      <p class="text-xs font-bold text-slate-500 mb-2">⚡ 환자군 프리셋</p>
-      <div class="flex flex-wrap gap-2">
-        ${presets.filter(p=>p.ids.length>0).map(p=>{
-          const isActive=state.activePreset===p.name;
-          return `<button onclick="applyPreset('${p.name}')" class="px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${isActive?"bg-blue-600 text-white border-blue-600":"border-slate-200 text-slate-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700"}">${p.name}${isActive?" ✕":""}</button>`;
-        }).join("")}
-      </div>
-      ${state.activePreset?`<p class="text-[11px] text-blue-500 font-semibold mt-2">「${state.activePreset}」 운동만 표시 중 — 다시 클릭하면 해제</p>`:""}
-    </div>
-
-    <!-- 최근 사용/즐겨찾기 운동 -->
-    ${favIds.length>0?`
-    <div class="bg-yellow-50 rounded-2xl border border-yellow-100 p-4">
-      <p class="text-xs font-bold text-yellow-700 mb-2">★ 즐겨찾기 운동</p>
-      <div class="flex flex-wrap gap-2">
-        ${favIds.map(id=>exercises.find(e=>e.id===id)).filter(Boolean).slice(0,12).map(e=>{
-          const added=state.selected.some(x=>x.id===e.id);
-          return `<button onclick="${added?"removeExercise("+e.id+")":"addExercise("+e.id+")"}" class="recent-tag ${added?"bg-blue-50 border-blue-200 text-blue-700":""}">
-            <span>${esc(e.image)}</span><span>${esc(e.title)}</span><span class="${added?"text-blue-500":"text-slate-400"}">${added?"−":"＋"}</span>
-          </button>`;
-        }).join("")}
-      </div>
-    </div>`:""}
-    ${recentExs.length>0?`
-    <div class="bg-amber-50 rounded-2xl border border-amber-100 p-4">
-      <p class="text-xs font-bold text-amber-700 mb-2">🕐 최근 사용한 운동</p>
-      <div class="flex flex-wrap gap-2">
-        ${recentExs.map(e=>{
-          const added=state.selected.some(x=>x.id===e.id);
-          return `<button onclick="${added?"removeExercise("+e.id+")":"addExercise("+e.id+")"}" class="recent-tag ${added?"bg-blue-50 border-blue-200 text-blue-700":""}">
-            <span>${esc(e.image)}</span><span>${esc(e.title)}</span>
-            <span class="${added?"text-blue-500":"text-slate-400"}">${added?"−":"＋"}</span>
-          </button>`;
-        }).join("")}
-      </div>
-    </div>`:""}
-
-    <div id="exercise-results">
-      <div class="flex items-center justify-between px-1">
-        <p class="text-xs text-slate-400 font-semibold">${list.length}개 운동</p>
-        ${list.length>0?`
-        <div class="flex gap-2">
-          <button onclick="addAllFiltered()" ${allAdded?"disabled":""} class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${allAdded?"bg-slate-100 text-slate-300 border-slate-100 cursor-default":"bg-blue-600 text-white border-blue-600 hover:bg-blue-700"}">＋ 전체 넣기</button>
-          <button onclick="removeAllFiltered()" ${!anyAdded?"disabled":""} class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${!anyAdded?"bg-slate-100 text-slate-300 border-slate-100 cursor-default":"bg-white text-red-500 border-red-200 hover:bg-red-50"}">− 전체 해제</button>
+        <!-- 즐겨찾기 -->
+        ${favIds.length>0?`
+        <div class="bg-yellow-50 rounded-2xl border border-yellow-100 p-4">
+          <p class="text-xs font-bold text-yellow-700 mb-2">★ 즐겨찾기 운동</p>
+          <div class="flex flex-wrap gap-2">
+            ${favIds.map(id=>exercises.find(e=>e.id===id)).filter(Boolean).slice(0,12).map(e=>{
+              const added=state.selected.some(x=>x.id===e.id);
+              return `<button onclick="${added?"removeExercise("+e.id+")":"addExercise("+e.id+")"}" class="recent-tag ${added?"bg-blue-50 border-blue-200 text-blue-700":""}">
+                <span>${esc(e.image)}</span><span>${esc(e.title)}</span><span class="${added?"text-blue-500":"text-slate-400"}">${added?"−":"＋"}</span>
+              </button>`;
+            }).join("")}
+          </div>
         </div>`:""}
-      </div>
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        ${list.length===0?`<div class="p-10 text-center text-sm text-slate-400">검색 결과가 없습니다.</div>`:list.map((e,idx)=>exerciseCardRow(e,idx)).join("")}
-      </div>
+
+        <!-- 최근 사용 -->
+        ${recentExs.length>0?`
+        <div class="bg-amber-50 rounded-2xl border border-amber-100 p-4">
+          <p class="text-xs font-bold text-amber-700 mb-2">🕐 최근 사용한 운동</p>
+          <div class="flex flex-wrap gap-2">
+            ${recentExs.map(e=>{
+              const added=state.selected.some(x=>x.id===e.id);
+              return `<button onclick="${added?"removeExercise("+e.id+")":"addExercise("+e.id+")"}" class="recent-tag ${added?"bg-blue-50 border-blue-200 text-blue-700":""}">
+                <span>${esc(e.image)}</span><span>${esc(e.title)}</span>
+                <span class="${added?"text-blue-500":"text-slate-400"}">${added?"−":"＋"}</span>
+              </button>`;
+            }).join("")}
+          </div>
+        </div>`:""}
+
+      </div><!-- /filter-panel -->
+
+      <!-- ── 우측: 운동 카드 리스트 (독립 스크롤) ── -->
+      <div id="exercise-results-wrap" class="flex-1 min-w-0 overflow-y-auto overscroll-contain pb-4"
+           style="scrollbar-gutter:stable">
+        <div id="exercise-results">
+          <div class="flex items-center justify-between px-1 mb-2">
+            <p class="text-xs text-slate-400 font-semibold">${list.length}개 운동</p>
+            ${list.length>0?`
+            <div class="flex gap-2">
+              <button onclick="addAllFiltered()" ${allAdded?"disabled":""} class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${allAdded?"bg-slate-100 text-slate-300 border-slate-100 cursor-default":"bg-blue-600 text-white border-blue-600 hover:bg-blue-700"}">＋ 전체 넣기</button>
+              <button onclick="removeAllFiltered()" ${!anyAdded?"disabled":""} class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${!anyAdded?"bg-slate-100 text-slate-300 border-slate-100 cursor-default":"bg-white text-red-500 border-red-200 hover:bg-red-50"}">− 전체 해제</button>
+            </div>`:""}
+          </div>
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            ${list.length===0?`<div class="p-10 text-center text-sm text-slate-400">검색 결과가 없습니다.</div>`:list.map((e,idx)=>exerciseCardRow(e,idx)).join("")}
+          </div>
+        </div>
+      </div><!-- /exercise-results-wrap -->
+
     </div>
   </div>`;
 }
