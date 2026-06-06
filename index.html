@@ -58,13 +58,13 @@
     .ex-card-row:hover { background:#f8fafc; }
 
     /* ── 카테고리 컬러 코딩 (⑥ 개선) ────── */
-    .cat-ROM         { background:#eff6ff; color:#1d4ed8; }
+    .cat-PROM        { background:#f0f9ff; color:#0369a1; }
+    .cat-AROM        { background:#eff6ff; color:#1d4ed8; }
     .cat-Strengthening { background:#f0fdf4; color:#15803d; }
     .cat-Balance     { background:#fef3c7; color:#b45309; }
     .cat-Gait        { background:#fdf4ff; color:#7e22ce; }
-    .cat-Functional  { background:#fff1f2; color:#be123c; }
-    .cat-상지기능     { background:#ecfdf5; color:#065f46; }
     .cat-Endurance   { background:#fef9c3; color:#854d0e; }
+    .cat-ADL         { background:#fff1f2; color:#be123c; }
 
     /* 카테고리 사이드바 컬러 */
     .catbar-ROM         { border-left:3px solid #3b82f6; }
@@ -228,9 +228,88 @@ const EXERCISE_IMAGES = {
   "scapular-rotation": "data:image/webp;base64,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",
 };
 
-const ROWS = [[1,"ROM","Lv1 침상운동","발목 펌프 운동","하지 순환 및 발목 움직임 유지",20,3,3,"양측","🛏️","누운 자세에서 발끝을 몸쪽으로 당겼다가 아래로 천천히 내립니다.","종아리 통증이나 심한 붓기가 있으면 치료사에게 알려주세요.","ankle-pump"],[2,"ROM","Lv1 침상운동","무릎 굽혔다 펴기","무릎 관절가동범위 유지",10,3,5,"양측","🛏️","누운 자세에서 발뒤꿈치를 침대 위로 미끄러뜨리며 무릎을 천천히 굽혔다가 다시 폅니다.","통증이 심하면 무릎을 굽히는 범위를 줄이세요.","heel-slide"],[3,"Strengthening","Lv1 침상운동","다리 들어올리기","고관절 굴곡근 및 대퇴사두근 강화",10,2,5,"좌측","🦵","누운 자세에서 무릎을 편 상태로 한쪽 다리를 천천히 들어 올렸다가 내립니다.","허리가 과하게 뜨거나 통증이 있으면 중단하세요.","straight-leg-raise"],[4,"Strengthening","Lv1 침상운동","다리 벌리기","고관절 외전근 강화",10,2,4,"양측","🦵","누운 자세에서 한쪽 다리를 옆으로 천천히 벌렸다가 다시 모읍니다.","골반이 함께 돌아가지 않도록 주의하세요.","supine-hip-abduction"],[5,"Strengthening","Lv1 침상운동","엉덩이 힘주기","둔근 활성화",10,3,3,"양측","🛏️","누운 자세에서 엉덩이에 힘을 주고 3초간 유지한 뒤 천천히 힘을 뺍니다.","허리나 다리에 통증이 생기면 강도를 줄이세요.","glute-set"],[6,"Strengthening","Lv1 침상운동","무릎 누르기","대퇴사두근 활성화",10,3,3,"양측","🦵","무릎 아래에 수건을 놓고 무릎을 아래로 눌러 허벅지 앞쪽에 힘을 줍니다.","무릎 통증이 심하면 힘주는 강도를 줄이세요.","quad-set"],[7,"상지 기능","Lv1 침상운동","손 쥐었다 펴기","손 기능 및 순환 유지",20,3,3,"양측","✋","손을 천천히 쥐었다가 손가락을 가능한 범위에서 펴줍니다.","손가락 통증이나 저림이 심하면 중단하세요.","hand-open-close"],[8,"상지 기능","Lv1 침상운동","손목 굽힘/폄","손목 관절가동범위 유지",10,3,3,"양측","🤲","팔을 편안히 둔 상태에서 손목을 천천히 위아래로 움직입니다.","반동 없이 천천히 시행하세요.","wrist-flexion-extension"],[9,"상지 기능","Lv1 침상운동","팔꿈치 굽힘/폄","팔꿈치 관절가동범위 유지",10,3,4,"양측","💪","팔꿈치를 천천히 굽혔다가 폅니다. 통증이 없는 범위에서 반복합니다.","어깨가 과하게 들리지 않도록 주의하세요.","elbow-flexion-extension"],[10,"상지 기능","Lv1 침상운동","누워서 팔 올리기","어깨 관절가동범위 유지",10,2,4,"양측","🙆","누운 자세에서 양손을 잡거나 막대를 이용하여 팔을 천천히 머리 위 방향으로 올립니다.","어깨 통증이 있으면 범위를 줄이세요.","supine-shoulder-flexion"],[11,"Functional","Lv1 침상운동","브릿지","둔근 강화 및 침상 이동 준비",10,2,5,"해당 없음","🌉","무릎을 세우고 누운 뒤 엉덩이를 천천히 들어 올렸다가 내립니다.","허리 통증이 심하면 중단하세요.","bridge"],[12,"ROM","Lv1 침상운동","골반 기울이기","골반 조절 및 요부 긴장 완화",10,2,4,"해당 없음","🛏️","무릎을 세우고 누운 자세에서 허리를 바닥 쪽으로 가볍게 누르며 골반을 움직입니다.","통증이 없는 작은 범위에서 시행하세요.","pelvic-tilt"],[13,"Functional","Lv1 침상운동","옆으로 돌아눕기","침상 이동 능력 향상",5,3,5,"좌/우 선택","🔄","누운 자세에서 무릎을 살짝 굽히고 몸통을 천천히 옆으로 돌립니다.","어지럽거나 통증이 있으면 천천히 쉬어가며 시행하세요.","log-rolling"],[14,"Strengthening","Lv2 앉은자세","앉아서 무릎 펴기","대퇴사두근 강화",10,3,4,"양측","🪑","의자에 허리를 세우고 앉아 한쪽 무릎을 천천히 펴고 2초간 유지한 뒤 내립니다.","허리가 뒤로 젖혀지지 않도록 주의하세요.","seated-knee-extension"],[15,"Gait","Lv2 앉은자세","앉아서 제자리 발 들기","고관절 굴곡 및 보행 준비",20,2,4,"양측","🪑","의자에 앉아 무릎을 번갈아 들어 올립니다. 몸통이 뒤로 넘어가지 않게 유지합니다.","허리가 뒤로 젖혀지면 범위를 줄이세요.","seated-marching"],[16,"Strengthening","Lv2 앉은자세","앉아서 뒤꿈치 들기","종아리 근력 강화",15,3,3,"양측","🦶","의자에 앉아 발끝은 바닥에 두고 뒤꿈치를 천천히 들어 올렸다가 내립니다.","발목 통증이 있으면 천천히 시행하세요.","seated-heel-raise"],[17,"Strengthening","Lv2 앉은자세","앉아서 발끝 들기","발목 배측굴곡근 강화",15,3,3,"양측","🦶","의자에 앉아 뒤꿈치는 바닥에 두고 발끝을 몸쪽으로 천천히 들어 올립니다.","무리하게 당기지 마세요.","seated-toe-raise"],[18,"상지 기능","Lv2 앉은자세","테이블 위 팔 밀기","어깨 움직임 및 상지 조절",10,2,5,"환측","🪑","테이블 위에 수건을 놓고 손을 올린 뒤 팔을 앞으로 천천히 밀었다가 돌아옵니다.","어깨 통증이 심해지면 중단하세요.","table-slide"],[19,"상지 기능","Lv2 앉은자세","막대 잡고 양팔 올리기","양측 상지 협응 및 어깨 ROM",10,2,5,"양측","🙆","양손으로 막대를 잡고 팔을 천천히 앞으로 들어 올렸다가 내립니다.","아픈 팔은 반대팔로 보조하며 무리하지 마세요.","cane-shoulder-flexion"],[20,"상지 기능","Lv2 앉은자세","앞으로 손 뻗기","상지 도달 및 체간 조절",10,2,4,"환측","🤲","앉은 자세에서 앞에 놓인 물건을 향해 손을 천천히 뻗었다가 돌아옵니다.","몸이 과하게 앞으로 쏠리지 않게 주의하세요.","seated-reach"],[21,"Balance","Lv2 앉은자세","앉아서 좌우 체중이동","앉은 균형 및 체간 조절",10,2,5,"좌/우 선택","↔️","의자에 앉아 몸통을 좌우로 천천히 이동합니다.","균형이 불안하면 보호자가 옆에서 지켜봐 주세요.","seated-weight-shift"],[22,"Balance","Lv2 앉은자세","앉은 자세 유지","정적 앉은 균형 향상",30,3,4,"해당 없음","🪑","발을 바닥에 두고 허리를 세워 앉은 자세를 유지합니다.","어지러움이 있으면 등받이에 기대어 쉬세요.","sitting-balance"],[23,"Balance","Lv2 앉은자세","앉아서 물건 잡기","동적 앉은 균형 향상",10,2,5,"좌/우 선택","🤲","앉은 자세에서 좌우 또는 앞쪽에 놓인 물건을 향해 손을 뻗어 잡습니다.","몸이 과하게 기울면 보호자가 보조하세요.","seated-object-reach"],[24,"Functional","Lv2 앉은자세","앉았다 일어서기","하지 근력 및 기능적 이동 향상",10,2,5,"해당 없음","🧍","의자에 앉은 상태에서 발을 바닥에 두고 몸을 앞으로 기울인 뒤 천천히 일어섭니다.","무릎 통증이나 어지러움이 있으면 중단하세요.","sit-to-stand"],[25,"Strengthening","Lv2 앉은자세","의자 팔걸이 밀기","상지 지지 및 체중부하 훈련",10,2,4,"양측","🪑","의자 팔걸이를 손으로 누르며 엉덩이를 살짝 들어 올리듯 힘을 줍니다.","손목이나 어깨 통증이 있으면 강도를 줄이세요.","chair-push-up"],[26,"Balance","Lv3 선자세","의자 잡고 한발 서기","정적 균형 향상",5,3,5,"좌/우 선택","🧍","튼튼한 의자나 난간을 잡고 한쪽 발을 살짝 들어 올린 뒤 가능한 범위에서 유지합니다.","반드시 안정적인 지지물 가까이에서 시행하세요.","single-leg-stance-chair"],[27,"Balance","Lv3 선자세","일자 서기","좁은 지지면 균형 향상",20,3,5,"좌/우 선택","🧍","한 발을 다른 발 앞에 일자로 두고 선 자세를 유지합니다.","균형이 불안하면 보호자 감독하에 시행하세요.","tandem-standing"],[28,"Balance","Lv3 선자세","발 모으고 서기","정적 균형 향상",30,3,4,"해당 없음","🧍","양발을 모으고 선 자세를 유지합니다.","눈을 감고 시행하지 마세요.","romberg-standing"],[29,"Balance","Lv3 선자세","서서 좌우 체중이동","보행 전 체중이동 훈련",10,3,5,"좌/우 선택","↔️","양발을 어깨너비로 벌리고 서서 체중을 좌우로 천천히 이동합니다.","몸이 과하게 기울지 않게 주의하세요.","standing-weight-shift"],[30,"Gait","Lv3 선자세","서서 제자리 발 들기","보행 준비 및 하지 조절",20,2,5,"양측","🚶","양발을 골반 너비로 벌리고 선 뒤 제자리에서 무릎을 번갈아 들어 올립니다.","어지럽거나 균형이 불안하면 앉아서 쉬세요.","standing-marching"],[31,"Strengthening","Lv3 선자세","미니 스쿼트","하지 근력 강화",10,2,5,"양측","🏋️","의자나 난간을 잡고 무릎을 살짝 굽혔다가 천천히 폅니다.","무릎이 발끝보다 과하게 앞으로 나가지 않도록 주의하세요.","mini-squat"],[32,"Strengthening","Lv3 선자세","서서 다리 옆으로 들기","고관절 외전근 강화",10,2,4,"좌/우 선택","🦵","의자를 잡고 선 상태에서 한쪽 다리를 옆으로 천천히 들어 올렸다가 내립니다.","몸통이 반대쪽으로 기울지 않게 주의하세요.","standing-hip-abduction"],[33,"Strengthening","Lv3 선자세","서서 다리 뒤로 들기","고관절 신전근 강화",10,2,4,"좌/우 선택","🦵","의자를 잡고 선 상태에서 무릎을 편 채 한쪽 다리를 뒤로 천천히 들어 올립니다.","허리가 과하게 꺾이지 않도록 주의하세요.","standing-hip-extension"],[34,"Strengthening","Lv3 선자세","서서 뒤꿈치 들기","종아리 근력 강화",15,3,4,"양측","🦶","의자나 난간을 잡고 양쪽 뒤꿈치를 천천히 들어 올렸다가 내립니다.","발목 통증이나 균형 불안이 있으면 범위를 줄이세요.","standing-heel-raise"],[35,"Gait","Lv3 선자세","스텝 터치","발 위치 조절 및 체중이동 향상",10,2,5,"좌/우 선택","🦶","앞에 낮은 발판이나 표시를 두고 한쪽 발로 가볍게 터치한 뒤 제자리로 돌아옵니다.","발판이 미끄러지지 않도록 고정하세요.","step-tap"],[36,"Gait","Lv3 선자세","낮은 계단 오르기","하지 근력 및 계단 기능 향상",10,2,6,"좌/우 선택","🪜","낮은 계단에 한 발을 올리고 천천히 올라갔다가 내려옵니다.","난간을 잡고 보호자 감독하에 시행하세요.","step-up-low"],[37,"Gait","Lv3 선자세","제자리 방향전환","보행 중 방향전환 능력 향상",5,3,5,"좌/우 선택","🔄","제자리에서 작은 보폭으로 천천히 방향을 바꿉니다.","급하게 돌지 말고 어지러우면 중단하세요.","turning-in-place"],[38,"Gait","Lv4 동적활동","실내 걷기","기본 보행 능력 및 활동량 향상",10,1,10,"해당 없음","👟","평평한 실내에서 편안한 속도로 걷습니다. 필요 시 보행보조도구를 사용합니다.","어지러움이나 통증이 있으면 쉬어가며 시행하세요.","indoor-walking"],[39,"Gait","Lv4 동적활동","복도 걷기","보행 지구력 향상",10,1,10,"해당 없음","🚶","안전한 복도에서 일정한 속도로 걷습니다. 중간에 필요하면 휴식합니다.","사람이나 장애물에 부딪히지 않도록 주의하세요.","corridor-walking"],[40,"Gait","Lv4 동적활동","속도 변화 걷기","보행 조절 능력 향상",5,2,8,"해당 없음","👟","평소 속도로 걷다가 조금 빠르게 또는 천천히 걷습니다.","무리하게 빠르게 걷지 마세요.","speed-change-walking"],[41,"Gait","Lv4 동적활동","낮은 장애물 넘기","보행 중 발 들기 및 균형 향상",10,2,8,"양측","🚧","낮은 장애물을 천천히 넘어갑니다. 발끝이 걸리지 않도록 충분히 들어 올립니다.","보호자 감독하에 낮은 장애물부터 시작하세요.","obstacle-crossing"],[42,"Balance","Lv4 동적활동","옆으로 걷기","측방 균형 및 고관절 근력 향상",10,2,8,"좌/우 선택","↔️","난간이나 벽 가까이에서 옆으로 한 발씩 천천히 이동합니다.","발이 꼬이지 않도록 천천히 시행하세요.","side-walking"],[43,"Balance","Lv4 동적활동","뒤로 걷기","후방 보행 조절 및 균형 향상",10,2,8,"해당 없음","↩️","안전한 공간에서 짧은 거리만 천천히 뒤로 걷습니다.","반드시 보호자 감독 또는 난간 가까이에서 시행하세요.","backward-walking"],[44,"Balance","Lv4 동적활동","일자 걷기","동적 균형 향상",10,2,8,"해당 없음","🚶","한 발을 다른 발 앞에 놓듯이 선을 따라 천천히 걷습니다.","균형이 불안하면 난간을 잡고 시행하세요.","tandem-walking"],[45,"Functional","Lv4 동적활동","계단 오르기","계단 기능 및 하지 근력 향상",5,2,8,"좌/우 선택","🪜","난간을 잡고 한 계단씩 천천히 올라갑니다.","무릎 통증이나 숨참이 심하면 중단하세요.","stair-up"],[46,"Functional","Lv4 동적활동","계단 내려오기","계단 하강 조절 능력 향상",5,2,8,"좌/우 선택","🪜","난간을 잡고 한 계단씩 천천히 내려옵니다.","급하게 내려오지 말고 반드시 난간을 잡으세요.","stair-down"],[47,"Functional","Lv4 동적활동","가벼운 물건 옮기기","기능적 보행 및 양손 사용 향상",5,2,6,"해당 없음","📦","가벼운 물건을 들고 짧은 거리를 천천히 이동한 뒤 내려놓습니다.","무거운 물건은 피하고 균형이 불안하면 보호자가 도와주세요.","carrying-object"],[48,"Endurance","Lv4 동적활동","고정식 자전거","심폐지구력 및 하지 반복운동",10,1,10,"해당 없음","🚲","고정식 자전거에 앉아 편안한 강도로 페달을 밟습니다.","숨이 너무 차거나 어지러우면 즉시 중단하세요.","stationary-bike"],[49,"Endurance","Lv4 동적활동","트레드밀 걷기","보행 지구력 및 속도 조절",10,1,10,"해당 없음","🏃","트레드밀에서 안전 손잡이를 잡고 느린 속도부터 걷습니다.","반드시 치료사 또는 보호자 감독하에 시행하세요.","treadmill-walking"],[50,"Endurance","Lv4 동적활동","야외 걷기","일상 활동량 및 지구력 향상",10,1,15,"해당 없음","🌳","평평하고 안전한 야외 보행로에서 편안한 속도로 걷습니다.","경사로, 미끄러운 길, 사람이 많은 곳은 피하세요.","outdoor-walking"],[51,"상지 기능","Lv2 앉은자세","날개뼈 크게 돌리기","견갑골 가동범위 및 어깨 주변 근육 활성화",10,2,5,"양측","🔄","의자에 허리를 세우고 앉아 양 어깨를 천천히 크게 원을 그리듯 뒤로 돌립니다. 앞으로 모았다가 위로 올리고, 뒤로 당겼다가 아래로 내리는 순서로 반복합니다.","어깨 통증이나 결림이 심하면 범위를 줄이세요.","scapular-rotation"],[52,"Strengthening","Lv1 침상운동","쇼트아크 쿼드","대퇴사두근 강화 및 무릎 펴기 조절",10,3,5,"양측","🦵","무릎 아래에 베개나 수건을 받치고 누운 자세에서 무릎을 천천히 펴며 발을 들어 올립니다.","무릎 통증이 심하면 범위를 줄이고 허벅지 앞쪽에 힘이 들어가는지 확인하세요.","short-arc-quad"],[53,"Strengthening","Lv1 침상운동","클램쉘","고관절 외전근 및 중둔근 강화",10,2,5,"양측","🦵","옆으로 누워 무릎을 구부린 상태에서 발은 붙이고 위쪽 무릎을 천천히 벌렸다가 모읍니다.","골반이 뒤로 넘어가지 않도록 주의하고 통증 없는 범위에서 시행하세요.","clam-shell"],[54,"Strengthening","Lv1 침상운동","옆으로 누워 다리 벌리기","고관절 외전근 강화 및 골반 안정성 향상",10,2,5,"양측","🦵","옆으로 누운 자세에서 위쪽 다리를 편 상태로 천천히 위로 들었다가 내립니다.","허리나 골반이 과하게 움직이지 않도록 주의하세요.","side-lying-hip-abduction"],[55,"Strengthening","Lv3 선자세","서서 무릎 굽히기","햄스트링 강화 및 무릎 굽힘 조절",10,2,5,"양측","🦵","의자나 난간을 잡고 선 자세에서 한쪽 무릎을 뒤로 천천히 굽혔다가 내립니다.","상체가 앞으로 숙여지지 않도록 하고 균형이 불안하면 보호자 감독하에 시행하세요.","standing-knee-flexion"],[56,"Balance","Lv3 선자세","발끝 터치하기","발 조절 및 균형 능력 향상",10,2,5,"양측","🦶","앞에 놓인 낮은 표식이나 발판을 발끝으로 가볍게 터치한 뒤 원래 위치로 돌아옵니다.","발판을 세게 밟지 말고 균형이 불안하면 손잡이를 잡고 시행하세요.","toe-tapping"],[57,"상지 기능","Lv2 앉은자세","환측 팔 체중지지","상지 체중지지 및 어깨 안정성 향상",10,2,5,"환측","✋","테이블 위에 환측 팔을 올리고 손바닥 또는 전완으로 천천히 체중을 실어 유지합니다.","어깨 통증이나 손목 통증이 있으면 각도와 체중을 줄이세요.","affected-arm-weight-bearing"],[58,"Balance","Lv3 선자세","서서 앞으로 손 뻗기","전방 체중이동 및 선 자세 균형 향상",10,2,5,"양측","🙋","안정적으로 선 자세에서 한 손 또는 양손을 앞으로 천천히 뻗었다가 돌아옵니다.","넘어질 위험이 있으면 보호자 또는 난간 가까이에서 시행하세요.","standing-forward-reach"],[59,"상지 기능","Lv2 앉은자세","콘 잡기","상지 도달 및 시각 탐색 능력 향상",10,2,5,"양측","🔺","앉은 자세에서 앞이나 옆에 놓인 콘을 향해 손을 뻗어 잡았다가 제자리로 돌아옵니다.","몸통을 과하게 기울이지 않도록 하고 필요 시 보호자 감독하에 시행하세요.","cone-reaching"],[60,"Balance","Lv3 선자세","한발 올리고 체중이동","계단 준비 및 하지 체중부하 조절",10,2,5,"양측","🦵","한쪽 발을 낮은 발판 위에 올리고 앞뒤 또는 좌우로 천천히 체중을 이동합니다.","무릎이 안쪽으로 무너지지 않도록 하고 균형이 불안하면 손잡이를 잡으세요.","step-weight-shift"],[61,"Functional","Lv3 선자세","일어서서 자세 유지","하지 근력 및 선 자세 안정성 향상",5,2,5,"해당 없음","🪑","의자에서 일어난 뒤 바른 선 자세를 3~5초 유지하고 천천히 다시 앉습니다.","어지럼증이나 무릎 통증이 있으면 즉시 중단하세요.","sit-to-stand-hold"],[62,"Gait","Lv4 동적활동","벽 잡고 일자 걷기","좁은 보폭 균형 및 보행 안정성 향상",10,2,5,"해당 없음","🚶","벽이나 난간 가까이에서 한 발을 다른 발 바로 앞에 놓으며 천천히 걷습니다.","균형이 불안하면 반드시 보호자 감독하에 시행하세요.","supported-tandem-walk"],[63,"Gait","Lv4 동적활동","콘 사이 걷기","방향전환 및 장애물 회피 능력 향상",10,2,5,"해당 없음","🔺","바닥에 놓인 콘이나 표식 사이를 천천히 지그재그로 걸어갑니다.","콘에 걸리지 않도록 충분한 간격을 두고 시행하세요.","obstacle-weaving"],[64,"Gait","Lv4 동적활동","8자 걷기","방향전환 및 동적 균형 향상",10,2,5,"해당 없음","8️⃣","두 개의 표식을 중심으로 8자 모양 경로를 따라 천천히 걷습니다.","어지럽거나 균형이 흔들리면 즉시 멈추세요.","figure-8-walking"],[65,"상지 기능","Lv2 앉은자세","손가락 맞대기","손가락 협응 및 미세운동 향상",10,2,5,"양측","👌","엄지손가락을 검지, 중지, 약지, 새끼손가락에 차례로 맞댔다가 폅니다.","손가락 통증이 있으면 천천히 작은 범위로 시행하세요.","finger-opposition"],[66,"상지 기능","Lv2 앉은자세","수건 쥐기","손 근력 및 쥐기 기능 향상",10,2,5,"양측","✊","작은 수건을 손에 쥐고 천천히 힘을 주어 눌렀다가 풉니다.","손가락 관절 통증이 있으면 강도를 줄이세요.","towel-squeeze"],[67,"상지 기능","Lv3 선자세","벽 타고 팔 올리기","어깨 관절가동범위 및 상지 기능 향상",10,2,5,"양측","🧱","벽을 마주 보고 서서 손가락을 벽 위로 천천히 걸어 올렸다가 내려옵니다.","어깨 통증이 심하면 높이를 낮추고 무리하지 마세요.","wall-slide"],[68,"상지 기능","Lv3 선자세","날개뼈 모으기","견갑골 안정화 및 자세 조절 향상",10,2,5,"양측","🔙","팔을 편안히 내린 자세에서 양쪽 날개뼈를 등 뒤로 천천히 모았다가 풉니다.","어깨를 으쓱하지 않도록 하고 목에 힘이 들어가면 범위를 줄이세요.","scapular-retraction"]];
+/* ── 운동 데이터
+   운동 추가: 아래 배열에 객체 하나 추가 (id는 순서대로 증가)
+   운동 수정: 해당 객체의 필드값 수정
+   운동 삭제: 해당 객체 줄 삭제 (id 재정렬 불필요)
+   사진:     EXERCISE_IMAGES[imageKey] 또는 ./exercise-images/{imageKey}.webp 자동 사용
+─────────────────────────────────────────── */
+const EXERCISES = [
+  {"id": 1, "category": "AROM", "level": "Lv1 침상운동", "title": "발목 펌프 운동", "target": "하지 순환 및 발목 움직임 유지", "reps": 20, "sets": 3, "durationMin": 3, "side": "양측", "image": "🛏️", "description": "누운 자세에서 발끝을 몸쪽으로 당겼다가 아래로 천천히 내립니다.", "caution": "종아리 통증이나 심한 붓기가 있으면 치료사에게 알려주세요.", "imageKey": "ankle-pump"},
+  {"id": 2, "category": "AROM", "level": "Lv1 침상운동", "title": "무릎 굽혔다 펴기", "target": "무릎 관절가동범위 유지", "reps": 10, "sets": 3, "durationMin": 5, "side": "양측", "image": "🛏️", "description": "누운 자세에서 발뒤꿈치를 침대 위로 미끄러뜨리며 무릎을 천천히 굽혔다가 다시 폅니다.", "caution": "통증이 심하면 무릎을 굽히는 범위를 줄이세요.", "imageKey": "heel-slide"},
+  {"id": 3, "category": "Strengthening", "level": "Lv1 침상운동", "title": "다리 들어올리기", "target": "고관절 굴곡근 및 대퇴사두근 강화", "reps": 10, "sets": 2, "durationMin": 5, "side": "좌측", "image": "🦵", "description": "누운 자세에서 무릎을 편 상태로 한쪽 다리를 천천히 들어 올렸다가 내립니다.", "caution": "허리가 과하게 뜨거나 통증이 있으면 중단하세요.", "imageKey": "straight-leg-raise"},
+  {"id": 4, "category": "Strengthening", "level": "Lv1 침상운동", "title": "다리 벌리기", "target": "고관절 외전근 강화", "reps": 10, "sets": 2, "durationMin": 4, "side": "양측", "image": "🦵", "description": "누운 자세에서 한쪽 다리를 옆으로 천천히 벌렸다가 다시 모읍니다.", "caution": "골반이 함께 돌아가지 않도록 주의하세요.", "imageKey": "supine-hip-abduction"},
+  {"id": 5, "category": "Strengthening", "level": "Lv1 침상운동", "title": "엉덩이 힘주기", "target": "둔근 활성화", "reps": 10, "sets": 3, "durationMin": 3, "side": "양측", "image": "🛏️", "description": "누운 자세에서 엉덩이에 힘을 주고 3초간 유지한 뒤 천천히 힘을 뺍니다.", "caution": "허리나 다리에 통증이 생기면 강도를 줄이세요.", "imageKey": "glute-set"},
+  {"id": 6, "category": "Strengthening", "level": "Lv1 침상운동", "title": "무릎 누르기", "target": "대퇴사두근 활성화", "reps": 10, "sets": 3, "durationMin": 3, "side": "양측", "image": "🦵", "description": "무릎 아래에 수건을 놓고 무릎을 아래로 눌러 허벅지 앞쪽에 힘을 줍니다.", "caution": "무릎 통증이 심하면 힘주는 강도를 줄이세요.", "imageKey": "quad-set"},
+  {"id": 7, "category": "ADL", "level": "Lv1 침상운동", "title": "손 쥐었다 펴기", "target": "손 기능 및 순환 유지", "reps": 20, "sets": 3, "durationMin": 3, "side": "양측", "image": "✋", "description": "손을 천천히 쥐었다가 손가락을 가능한 범위에서 펴줍니다.", "caution": "손가락 통증이나 저림이 심하면 중단하세요.", "imageKey": "hand-open-close"},
+  {"id": 8, "category": "ADL", "level": "Lv1 침상운동", "title": "손목 굽힘/폄", "target": "손목 관절가동범위 유지", "reps": 10, "sets": 3, "durationMin": 3, "side": "양측", "image": "🤲", "description": "팔을 편안히 둔 상태에서 손목을 천천히 위아래로 움직입니다.", "caution": "반동 없이 천천히 시행하세요.", "imageKey": "wrist-flexion-extension"},
+  {"id": 9, "category": "ADL", "level": "Lv1 침상운동", "title": "팔꿈치 굽힘/폄", "target": "팔꿈치 관절가동범위 유지", "reps": 10, "sets": 3, "durationMin": 4, "side": "양측", "image": "💪", "description": "팔꿈치를 천천히 굽혔다가 폅니다. 통증이 없는 범위에서 반복합니다.", "caution": "어깨가 과하게 들리지 않도록 주의하세요.", "imageKey": "elbow-flexion-extension"},
+  {"id": 10, "category": "ADL", "level": "Lv1 침상운동", "title": "누워서 팔 올리기", "target": "어깨 관절가동범위 유지", "reps": 10, "sets": 2, "durationMin": 4, "side": "양측", "image": "🙆", "description": "누운 자세에서 양손을 잡거나 막대를 이용하여 팔을 천천히 머리 위 방향으로 올립니다.", "caution": "어깨 통증이 있으면 범위를 줄이세요.", "imageKey": "supine-shoulder-flexion"},
+  {"id": 11, "category": "ADL", "level": "Lv1 침상운동", "title": "브릿지", "target": "둔근 강화 및 침상 이동 준비", "reps": 10, "sets": 2, "durationMin": 5, "side": "해당 없음", "image": "🌉", "description": "무릎을 세우고 누운 뒤 엉덩이를 천천히 들어 올렸다가 내립니다.", "caution": "허리 통증이 심하면 중단하세요.", "imageKey": "bridge"},
+  {"id": 12, "category": "AROM", "level": "Lv1 침상운동", "title": "골반 기울이기", "target": "골반 조절 및 요부 긴장 완화", "reps": 10, "sets": 2, "durationMin": 4, "side": "해당 없음", "image": "🛏️", "description": "무릎을 세우고 누운 자세에서 허리를 바닥 쪽으로 가볍게 누르며 골반을 움직입니다.", "caution": "통증이 없는 작은 범위에서 시행하세요.", "imageKey": "pelvic-tilt"},
+  {"id": 13, "category": "ADL", "level": "Lv1 침상운동", "title": "옆으로 돌아눕기", "target": "침상 이동 능력 향상", "reps": 5, "sets": 3, "durationMin": 5, "side": "좌/우 선택", "image": "🔄", "description": "누운 자세에서 무릎을 살짝 굽히고 몸통을 천천히 옆으로 돌립니다.", "caution": "어지럽거나 통증이 있으면 천천히 쉬어가며 시행하세요.", "imageKey": "log-rolling"},
+  {"id": 14, "category": "Strengthening", "level": "Lv2 앉은자세", "title": "앉아서 무릎 펴기", "target": "대퇴사두근 강화", "reps": 10, "sets": 3, "durationMin": 4, "side": "양측", "image": "🪑", "description": "의자에 허리를 세우고 앉아 한쪽 무릎을 천천히 펴고 2초간 유지한 뒤 내립니다.", "caution": "허리가 뒤로 젖혀지지 않도록 주의하세요.", "imageKey": "seated-knee-extension"},
+  {"id": 15, "category": "Gait", "level": "Lv2 앉은자세", "title": "앉아서 제자리 발 들기", "target": "고관절 굴곡 및 보행 준비", "reps": 20, "sets": 2, "durationMin": 4, "side": "양측", "image": "🪑", "description": "의자에 앉아 무릎을 번갈아 들어 올립니다. 몸통이 뒤로 넘어가지 않게 유지합니다.", "caution": "허리가 뒤로 젖혀지면 범위를 줄이세요.", "imageKey": "seated-marching"},
+  {"id": 16, "category": "Strengthening", "level": "Lv2 앉은자세", "title": "앉아서 뒤꿈치 들기", "target": "종아리 근력 강화", "reps": 15, "sets": 3, "durationMin": 3, "side": "양측", "image": "🦶", "description": "의자에 앉아 발끝은 바닥에 두고 뒤꿈치를 천천히 들어 올렸다가 내립니다.", "caution": "발목 통증이 있으면 천천히 시행하세요.", "imageKey": "seated-heel-raise"},
+  {"id": 17, "category": "Strengthening", "level": "Lv2 앉은자세", "title": "앉아서 발끝 들기", "target": "발목 배측굴곡근 강화", "reps": 15, "sets": 3, "durationMin": 3, "side": "양측", "image": "🦶", "description": "의자에 앉아 뒤꿈치는 바닥에 두고 발끝을 몸쪽으로 천천히 들어 올립니다.", "caution": "무리하게 당기지 마세요.", "imageKey": "seated-toe-raise"},
+  {"id": 18, "category": "ADL", "level": "Lv2 앉은자세", "title": "테이블 위 팔 밀기", "target": "어깨 움직임 및 상지 조절", "reps": 10, "sets": 2, "durationMin": 5, "side": "환측", "image": "🪑", "description": "테이블 위에 수건을 놓고 손을 올린 뒤 팔을 앞으로 천천히 밀었다가 돌아옵니다.", "caution": "어깨 통증이 심해지면 중단하세요.", "imageKey": "table-slide"},
+  {"id": 19, "category": "ADL", "level": "Lv2 앉은자세", "title": "막대 잡고 양팔 올리기", "target": "양측 상지 협응 및 어깨 ROM", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🙆", "description": "양손으로 막대를 잡고 팔을 천천히 앞으로 들어 올렸다가 내립니다.", "caution": "아픈 팔은 반대팔로 보조하며 무리하지 마세요.", "imageKey": "cane-shoulder-flexion"},
+  {"id": 20, "category": "ADL", "level": "Lv2 앉은자세", "title": "앞으로 손 뻗기", "target": "상지 도달 및 체간 조절", "reps": 10, "sets": 2, "durationMin": 4, "side": "환측", "image": "🤲", "description": "앉은 자세에서 앞에 놓인 물건을 향해 손을 천천히 뻗었다가 돌아옵니다.", "caution": "몸이 과하게 앞으로 쏠리지 않게 주의하세요.", "imageKey": "seated-reach"},
+  {"id": 21, "category": "Balance", "level": "Lv2 앉은자세", "title": "앉아서 좌우 체중이동", "target": "앉은 균형 및 체간 조절", "reps": 10, "sets": 2, "durationMin": 5, "side": "좌/우 선택", "image": "↔️", "description": "의자에 앉아 몸통을 좌우로 천천히 이동합니다.", "caution": "균형이 불안하면 보호자가 옆에서 지켜봐 주세요.", "imageKey": "seated-weight-shift"},
+  {"id": 22, "category": "Balance", "level": "Lv2 앉은자세", "title": "앉은 자세 유지", "target": "정적 앉은 균형 향상", "reps": 30, "sets": 3, "durationMin": 4, "side": "해당 없음", "image": "🪑", "description": "발을 바닥에 두고 허리를 세워 앉은 자세를 유지합니다.", "caution": "어지러움이 있으면 등받이에 기대어 쉬세요.", "imageKey": "sitting-balance"},
+  {"id": 23, "category": "Balance", "level": "Lv2 앉은자세", "title": "앉아서 물건 잡기", "target": "동적 앉은 균형 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "좌/우 선택", "image": "🤲", "description": "앉은 자세에서 좌우 또는 앞쪽에 놓인 물건을 향해 손을 뻗어 잡습니다.", "caution": "몸이 과하게 기울면 보호자가 보조하세요.", "imageKey": "seated-object-reach"},
+  {"id": 24, "category": "ADL", "level": "Lv2 앉은자세", "title": "앉았다 일어서기", "target": "하지 근력 및 기능적 이동 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "해당 없음", "image": "🧍", "description": "의자에 앉은 상태에서 발을 바닥에 두고 몸을 앞으로 기울인 뒤 천천히 일어섭니다.", "caution": "무릎 통증이나 어지러움이 있으면 중단하세요.", "imageKey": "sit-to-stand"},
+  {"id": 25, "category": "Strengthening", "level": "Lv2 앉은자세", "title": "의자 팔걸이 밀기", "target": "상지 지지 및 체중부하 훈련", "reps": 10, "sets": 2, "durationMin": 4, "side": "양측", "image": "🪑", "description": "의자 팔걸이를 손으로 누르며 엉덩이를 살짝 들어 올리듯 힘을 줍니다.", "caution": "손목이나 어깨 통증이 있으면 강도를 줄이세요.", "imageKey": "chair-push-up"},
+  {"id": 26, "category": "Balance", "level": "Lv3 선자세", "title": "의자 잡고 한발 서기", "target": "정적 균형 향상", "reps": 5, "sets": 3, "durationMin": 5, "side": "좌/우 선택", "image": "🧍", "description": "튼튼한 의자나 난간을 잡고 한쪽 발을 살짝 들어 올린 뒤 가능한 범위에서 유지합니다.", "caution": "반드시 안정적인 지지물 가까이에서 시행하세요.", "imageKey": "single-leg-stance-chair"},
+  {"id": 27, "category": "Balance", "level": "Lv3 선자세", "title": "일자 서기", "target": "좁은 지지면 균형 향상", "reps": 20, "sets": 3, "durationMin": 5, "side": "좌/우 선택", "image": "🧍", "description": "한 발을 다른 발 앞에 일자로 두고 선 자세를 유지합니다.", "caution": "균형이 불안하면 보호자 감독하에 시행하세요.", "imageKey": "tandem-standing"},
+  {"id": 28, "category": "Balance", "level": "Lv3 선자세", "title": "발 모으고 서기", "target": "정적 균형 향상", "reps": 30, "sets": 3, "durationMin": 4, "side": "해당 없음", "image": "🧍", "description": "양발을 모으고 선 자세를 유지합니다.", "caution": "눈을 감고 시행하지 마세요.", "imageKey": "romberg-standing"},
+  {"id": 29, "category": "Balance", "level": "Lv3 선자세", "title": "서서 좌우 체중이동", "target": "보행 전 체중이동 훈련", "reps": 10, "sets": 3, "durationMin": 5, "side": "좌/우 선택", "image": "↔️", "description": "양발을 어깨너비로 벌리고 서서 체중을 좌우로 천천히 이동합니다.", "caution": "몸이 과하게 기울지 않게 주의하세요.", "imageKey": "standing-weight-shift"},
+  {"id": 30, "category": "Gait", "level": "Lv3 선자세", "title": "서서 제자리 발 들기", "target": "보행 준비 및 하지 조절", "reps": 20, "sets": 2, "durationMin": 5, "side": "양측", "image": "🚶", "description": "양발을 골반 너비로 벌리고 선 뒤 제자리에서 무릎을 번갈아 들어 올립니다.", "caution": "어지럽거나 균형이 불안하면 앉아서 쉬세요.", "imageKey": "standing-marching"},
+  {"id": 31, "category": "Strengthening", "level": "Lv3 선자세", "title": "미니 스쿼트", "target": "하지 근력 강화", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🏋️", "description": "의자나 난간을 잡고 무릎을 살짝 굽혔다가 천천히 폅니다.", "caution": "무릎이 발끝보다 과하게 앞으로 나가지 않도록 주의하세요.", "imageKey": "mini-squat"},
+  {"id": 32, "category": "Strengthening", "level": "Lv3 선자세", "title": "서서 다리 옆으로 들기", "target": "고관절 외전근 강화", "reps": 10, "sets": 2, "durationMin": 4, "side": "좌/우 선택", "image": "🦵", "description": "의자를 잡고 선 상태에서 한쪽 다리를 옆으로 천천히 들어 올렸다가 내립니다.", "caution": "몸통이 반대쪽으로 기울지 않게 주의하세요.", "imageKey": "standing-hip-abduction"},
+  {"id": 33, "category": "Strengthening", "level": "Lv3 선자세", "title": "서서 다리 뒤로 들기", "target": "고관절 신전근 강화", "reps": 10, "sets": 2, "durationMin": 4, "side": "좌/우 선택", "image": "🦵", "description": "의자를 잡고 선 상태에서 무릎을 편 채 한쪽 다리를 뒤로 천천히 들어 올립니다.", "caution": "허리가 과하게 꺾이지 않도록 주의하세요.", "imageKey": "standing-hip-extension"},
+  {"id": 34, "category": "Strengthening", "level": "Lv3 선자세", "title": "서서 뒤꿈치 들기", "target": "종아리 근력 강화", "reps": 15, "sets": 3, "durationMin": 4, "side": "양측", "image": "🦶", "description": "의자나 난간을 잡고 양쪽 뒤꿈치를 천천히 들어 올렸다가 내립니다.", "caution": "발목 통증이나 균형 불안이 있으면 범위를 줄이세요.", "imageKey": "standing-heel-raise"},
+  {"id": 35, "category": "Gait", "level": "Lv3 선자세", "title": "스텝 터치", "target": "발 위치 조절 및 체중이동 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "좌/우 선택", "image": "🦶", "description": "앞에 낮은 발판이나 표시를 두고 한쪽 발로 가볍게 터치한 뒤 제자리로 돌아옵니다.", "caution": "발판이 미끄러지지 않도록 고정하세요.", "imageKey": "step-tap"},
+  {"id": 36, "category": "Gait", "level": "Lv3 선자세", "title": "낮은 계단 오르기", "target": "하지 근력 및 계단 기능 향상", "reps": 10, "sets": 2, "durationMin": 6, "side": "좌/우 선택", "image": "🪜", "description": "낮은 계단에 한 발을 올리고 천천히 올라갔다가 내려옵니다.", "caution": "난간을 잡고 보호자 감독하에 시행하세요.", "imageKey": "step-up-low"},
+  {"id": 37, "category": "Gait", "level": "Lv3 선자세", "title": "제자리 방향전환", "target": "보행 중 방향전환 능력 향상", "reps": 5, "sets": 3, "durationMin": 5, "side": "좌/우 선택", "image": "🔄", "description": "제자리에서 작은 보폭으로 천천히 방향을 바꿉니다.", "caution": "급하게 돌지 말고 어지러우면 중단하세요.", "imageKey": "turning-in-place"},
+  {"id": 38, "category": "Gait", "level": "Lv4 동적활동", "title": "실내 걷기", "target": "기본 보행 능력 및 활동량 향상", "reps": 10, "sets": 1, "durationMin": 10, "side": "해당 없음", "image": "👟", "description": "평평한 실내에서 편안한 속도로 걷습니다. 필요 시 보행보조도구를 사용합니다.", "caution": "어지러움이나 통증이 있으면 쉬어가며 시행하세요.", "imageKey": "indoor-walking"},
+  {"id": 39, "category": "Gait", "level": "Lv4 동적활동", "title": "복도 걷기", "target": "보행 지구력 향상", "reps": 10, "sets": 1, "durationMin": 10, "side": "해당 없음", "image": "🚶", "description": "안전한 복도에서 일정한 속도로 걷습니다. 중간에 필요하면 휴식합니다.", "caution": "사람이나 장애물에 부딪히지 않도록 주의하세요.", "imageKey": "corridor-walking"},
+  {"id": 40, "category": "Gait", "level": "Lv4 동적활동", "title": "속도 변화 걷기", "target": "보행 조절 능력 향상", "reps": 5, "sets": 2, "durationMin": 8, "side": "해당 없음", "image": "👟", "description": "평소 속도로 걷다가 조금 빠르게 또는 천천히 걷습니다.", "caution": "무리하게 빠르게 걷지 마세요.", "imageKey": "speed-change-walking"},
+  {"id": 41, "category": "Gait", "level": "Lv4 동적활동", "title": "낮은 장애물 넘기", "target": "보행 중 발 들기 및 균형 향상", "reps": 10, "sets": 2, "durationMin": 8, "side": "양측", "image": "🚧", "description": "낮은 장애물을 천천히 넘어갑니다. 발끝이 걸리지 않도록 충분히 들어 올립니다.", "caution": "보호자 감독하에 낮은 장애물부터 시작하세요.", "imageKey": "obstacle-crossing"},
+  {"id": 42, "category": "Balance", "level": "Lv4 동적활동", "title": "옆으로 걷기", "target": "측방 균형 및 고관절 근력 향상", "reps": 10, "sets": 2, "durationMin": 8, "side": "좌/우 선택", "image": "↔️", "description": "난간이나 벽 가까이에서 옆으로 한 발씩 천천히 이동합니다.", "caution": "발이 꼬이지 않도록 천천히 시행하세요.", "imageKey": "side-walking"},
+  {"id": 43, "category": "Balance", "level": "Lv4 동적활동", "title": "뒤로 걷기", "target": "후방 보행 조절 및 균형 향상", "reps": 10, "sets": 2, "durationMin": 8, "side": "해당 없음", "image": "↩️", "description": "안전한 공간에서 짧은 거리만 천천히 뒤로 걷습니다.", "caution": "반드시 보호자 감독 또는 난간 가까이에서 시행하세요.", "imageKey": "backward-walking"},
+  {"id": 44, "category": "Balance", "level": "Lv4 동적활동", "title": "일자 걷기", "target": "동적 균형 향상", "reps": 10, "sets": 2, "durationMin": 8, "side": "해당 없음", "image": "🚶", "description": "한 발을 다른 발 앞에 놓듯이 선을 따라 천천히 걷습니다.", "caution": "균형이 불안하면 난간을 잡고 시행하세요.", "imageKey": "tandem-walking"},
+  {"id": 45, "category": "ADL", "level": "Lv4 동적활동", "title": "계단 오르기", "target": "계단 기능 및 하지 근력 향상", "reps": 5, "sets": 2, "durationMin": 8, "side": "좌/우 선택", "image": "🪜", "description": "난간을 잡고 한 계단씩 천천히 올라갑니다.", "caution": "무릎 통증이나 숨참이 심하면 중단하세요.", "imageKey": "stair-up"},
+  {"id": 46, "category": "ADL", "level": "Lv4 동적활동", "title": "계단 내려오기", "target": "계단 하강 조절 능력 향상", "reps": 5, "sets": 2, "durationMin": 8, "side": "좌/우 선택", "image": "🪜", "description": "난간을 잡고 한 계단씩 천천히 내려옵니다.", "caution": "급하게 내려오지 말고 반드시 난간을 잡으세요.", "imageKey": "stair-down"},
+  {"id": 47, "category": "ADL", "level": "Lv4 동적활동", "title": "가벼운 물건 옮기기", "target": "기능적 보행 및 양손 사용 향상", "reps": 5, "sets": 2, "durationMin": 6, "side": "해당 없음", "image": "📦", "description": "가벼운 물건을 들고 짧은 거리를 천천히 이동한 뒤 내려놓습니다.", "caution": "무거운 물건은 피하고 균형이 불안하면 보호자가 도와주세요.", "imageKey": "carrying-object"},
+  {"id": 48, "category": "Endurance", "level": "Lv4 동적활동", "title": "고정식 자전거", "target": "심폐지구력 및 하지 반복운동", "reps": 10, "sets": 1, "durationMin": 10, "side": "해당 없음", "image": "🚲", "description": "고정식 자전거에 앉아 편안한 강도로 페달을 밟습니다.", "caution": "숨이 너무 차거나 어지러우면 즉시 중단하세요.", "imageKey": "stationary-bike"},
+  {"id": 49, "category": "Endurance", "level": "Lv4 동적활동", "title": "트레드밀 걷기", "target": "보행 지구력 및 속도 조절", "reps": 10, "sets": 1, "durationMin": 10, "side": "해당 없음", "image": "🏃", "description": "트레드밀에서 안전 손잡이를 잡고 느린 속도부터 걷습니다.", "caution": "반드시 치료사 또는 보호자 감독하에 시행하세요.", "imageKey": "treadmill-walking"},
+  {"id": 50, "category": "Endurance", "level": "Lv4 동적활동", "title": "야외 걷기", "target": "일상 활동량 및 지구력 향상", "reps": 10, "sets": 1, "durationMin": 15, "side": "해당 없음", "image": "🌳", "description": "평평하고 안전한 야외 보행로에서 편안한 속도로 걷습니다.", "caution": "경사로, 미끄러운 길, 사람이 많은 곳은 피하세요.", "imageKey": "outdoor-walking"},
+  {"id": 51, "category": "ADL", "level": "Lv2 앉은자세", "title": "날개뼈 크게 돌리기", "target": "견갑골 가동범위 및 어깨 주변 근육 활성화", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🔄", "description": "의자에 허리를 세우고 앉아 양 어깨를 천천히 크게 원을 그리듯 뒤로 돌립니다. 앞으로 모았다가 위로 올리고, 뒤로 당겼다가 아래로 내리는 순서로 반복합니다.", "caution": "어깨 통증이나 결림이 심하면 범위를 줄이세요.", "imageKey": "scapular-rotation"},
+  {"id": 52, "category": "Strengthening", "level": "Lv1 침상운동", "title": "쇼트아크 쿼드", "target": "대퇴사두근 강화 및 무릎 펴기 조절", "reps": 10, "sets": 3, "durationMin": 5, "side": "양측", "image": "🦵", "description": "무릎 아래에 베개나 수건을 받치고 누운 자세에서 무릎을 천천히 펴며 발을 들어 올립니다.", "caution": "무릎 통증이 심하면 범위를 줄이고 허벅지 앞쪽에 힘이 들어가는지 확인하세요.", "imageKey": "short-arc-quad"},
+  {"id": 53, "category": "Strengthening", "level": "Lv1 침상운동", "title": "클램쉘", "target": "고관절 외전근 및 중둔근 강화", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦵", "description": "옆으로 누워 무릎을 구부린 상태에서 발은 붙이고 위쪽 무릎을 천천히 벌렸다가 모읍니다.", "caution": "골반이 뒤로 넘어가지 않도록 주의하고 통증 없는 범위에서 시행하세요.", "imageKey": "clam-shell"},
+  {"id": 54, "category": "Strengthening", "level": "Lv1 침상운동", "title": "옆으로 누워 다리 벌리기", "target": "고관절 외전근 강화 및 골반 안정성 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦵", "description": "옆으로 누운 자세에서 위쪽 다리를 편 상태로 천천히 위로 들었다가 내립니다.", "caution": "허리나 골반이 과하게 움직이지 않도록 주의하세요.", "imageKey": "side-lying-hip-abduction"},
+  {"id": 55, "category": "Strengthening", "level": "Lv3 선자세", "title": "서서 무릎 굽히기", "target": "햄스트링 강화 및 무릎 굽힘 조절", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦵", "description": "의자나 난간을 잡고 선 자세에서 한쪽 무릎을 뒤로 천천히 굽혔다가 내립니다.", "caution": "상체가 앞으로 숙여지지 않도록 하고 균형이 불안하면 보호자 감독하에 시행하세요.", "imageKey": "standing-knee-flexion"},
+  {"id": 56, "category": "Balance", "level": "Lv3 선자세", "title": "발끝 터치하기", "target": "발 조절 및 균형 능력 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦶", "description": "앞에 놓인 낮은 표식이나 발판을 발끝으로 가볍게 터치한 뒤 원래 위치로 돌아옵니다.", "caution": "발판을 세게 밟지 말고 균형이 불안하면 손잡이를 잡고 시행하세요.", "imageKey": "toe-tapping"},
+  {"id": 57, "category": "ADL", "level": "Lv2 앉은자세", "title": "환측 팔 체중지지", "target": "상지 체중지지 및 어깨 안정성 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "환측", "image": "✋", "description": "테이블 위에 환측 팔을 올리고 손바닥 또는 전완으로 천천히 체중을 실어 유지합니다.", "caution": "어깨 통증이나 손목 통증이 있으면 각도와 체중을 줄이세요.", "imageKey": "affected-arm-weight-bearing"},
+  {"id": 58, "category": "Balance", "level": "Lv3 선자세", "title": "서서 앞으로 손 뻗기", "target": "전방 체중이동 및 선 자세 균형 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🙋", "description": "안정적으로 선 자세에서 한 손 또는 양손을 앞으로 천천히 뻗었다가 돌아옵니다.", "caution": "넘어질 위험이 있으면 보호자 또는 난간 가까이에서 시행하세요.", "imageKey": "standing-forward-reach"},
+  {"id": 59, "category": "ADL", "level": "Lv2 앉은자세", "title": "콘 잡기", "target": "상지 도달 및 시각 탐색 능력 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🔺", "description": "앉은 자세에서 앞이나 옆에 놓인 콘을 향해 손을 뻗어 잡았다가 제자리로 돌아옵니다.", "caution": "몸통을 과하게 기울이지 않도록 하고 필요 시 보호자 감독하에 시행하세요.", "imageKey": "cone-reaching"},
+  {"id": 60, "category": "Balance", "level": "Lv3 선자세", "title": "한발 올리고 체중이동", "target": "계단 준비 및 하지 체중부하 조절", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦵", "description": "한쪽 발을 낮은 발판 위에 올리고 앞뒤 또는 좌우로 천천히 체중을 이동합니다.", "caution": "무릎이 안쪽으로 무너지지 않도록 하고 균형이 불안하면 손잡이를 잡으세요.", "imageKey": "step-weight-shift"},
+  {"id": 61, "category": "ADL", "level": "Lv3 선자세", "title": "일어서서 자세 유지", "target": "하지 근력 및 선 자세 안정성 향상", "reps": 5, "sets": 2, "durationMin": 5, "side": "해당 없음", "image": "🪑", "description": "의자에서 일어난 뒤 바른 선 자세를 3~5초 유지하고 천천히 다시 앉습니다.", "caution": "어지럼증이나 무릎 통증이 있으면 즉시 중단하세요.", "imageKey": "sit-to-stand-hold"},
+  {"id": 62, "category": "Gait", "level": "Lv4 동적활동", "title": "벽 잡고 일자 걷기", "target": "좁은 보폭 균형 및 보행 안정성 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "해당 없음", "image": "🚶", "description": "벽이나 난간 가까이에서 한 발을 다른 발 바로 앞에 놓으며 천천히 걷습니다.", "caution": "균형이 불안하면 반드시 보호자 감독하에 시행하세요.", "imageKey": "supported-tandem-walk"},
+  {"id": 63, "category": "Gait", "level": "Lv4 동적활동", "title": "콘 사이 걷기", "target": "방향전환 및 장애물 회피 능력 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "해당 없음", "image": "🔺", "description": "바닥에 놓인 콘이나 표식 사이를 천천히 지그재그로 걸어갑니다.", "caution": "콘에 걸리지 않도록 충분한 간격을 두고 시행하세요.", "imageKey": "obstacle-weaving"},
+  {"id": 64, "category": "Gait", "level": "Lv4 동적활동", "title": "8자 걷기", "target": "방향전환 및 동적 균형 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "해당 없음", "image": "8️⃣", "description": "두 개의 표식을 중심으로 8자 모양 경로를 따라 천천히 걷습니다.", "caution": "어지럽거나 균형이 흔들리면 즉시 멈추세요.", "imageKey": "figure-8-walking"},
+  {"id": 65, "category": "ADL", "level": "Lv2 앉은자세", "title": "손가락 맞대기", "target": "손가락 협응 및 미세운동 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "👌", "description": "엄지손가락을 검지, 중지, 약지, 새끼손가락에 차례로 맞댔다가 폅니다.", "caution": "손가락 통증이 있으면 천천히 작은 범위로 시행하세요.", "imageKey": "finger-opposition"},
+  {"id": 66, "category": "ADL", "level": "Lv2 앉은자세", "title": "수건 쥐기", "target": "손 근력 및 쥐기 기능 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "✊", "description": "작은 수건을 손에 쥐고 천천히 힘을 주어 눌렀다가 풉니다.", "caution": "손가락 관절 통증이 있으면 강도를 줄이세요.", "imageKey": "towel-squeeze"},
+  {"id": 67, "category": "ADL", "level": "Lv3 선자세", "title": "벽 타고 팔 올리기", "target": "어깨 관절가동범위 및 상지 기능 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🧱", "description": "벽을 마주 보고 서서 손가락을 벽 위로 천천히 걸어 올렸다가 내려옵니다.", "caution": "어깨 통증이 심하면 높이를 낮추고 무리하지 마세요.", "imageKey": "wall-slide"},
+  {"id": 68, "category": "ADL", "level": "Lv3 선자세", "title": "날개뼈 모으기", "target": "견갑골 안정화 및 자세 조절 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🔙", "description": "팔을 편안히 내린 자세에서 양쪽 날개뼈를 등 뒤로 천천히 모았다가 풉니다.", "caution": "어깨를 으쓱하지 않도록 하고 목에 힘이 들어가면 범위를 줄이세요.", "imageKey": "scapular-retraction"},
+  {"id": 69, "category": "PROM", "level": "Lv1 침상운동", "title": "발목 수동관절운동", "target": "발목 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦶", "description": "치료사 또는 보조자가 환자의 발목을 부드럽게 위아래로 움직여줍니다. 환자는 힘을 빼고 편안하게 유지합니다.", "caution": "통증이 있으면 즉시 중단하고 치료사에게 알려주세요. 저항 없이 부드럽게 시행하세요.", "imageKey": "ankle-pump"},
+  {"id": 70, "category": "PROM", "level": "Lv1 침상운동", "title": "무릎·고관절 수동관절운동", "target": "하지 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦵", "description": "치료사 또는 보조자가 무릎을 천천히 굽혔다 펴고, 고관절을 부드럽게 굽혀줍니다. 환자는 힘을 빼고 편안하게 유지합니다.", "caution": "관절 이상음이나 통증이 있으면 즉시 중단하세요. 골절·수술 부위 주의.", "imageKey": "heel-slide"},
+  {"id": 71, "category": "PROM", "level": "Lv1 침상운동", "title": "어깨 수동관절운동", "target": "어깨 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🙆", "description": "치료사 또는 보조자가 팔을 부드럽게 앞으로 들어 올리고, 옆으로 벌려줍니다. 환자는 힘을 빼고 편안하게 유지합니다.", "caution": "어깨 탈구 병력이 있으면 치료사에게 먼저 알려주세요. 통증 없는 범위에서만 시행하세요.", "imageKey": "supine-shoulder-flexion"},
+  {"id": 72, "category": "PROM", "level": "Lv1 침상운동", "title": "손목·손가락 수동관절운동", "target": "손목·손가락 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "✋", "description": "치료사 또는 보조자가 손목을 위아래로 움직이고 손가락을 부드럽게 펴줍니다. 환자는 힘을 빼고 편안하게 유지합니다.", "caution": "손가락 경직이 심하면 무리하게 펴지 말고 가능한 범위에서만 시행하세요.", "imageKey": "hand-open-close"}
+];
 
-const VERSION      = "v2.39";
+const VERSION      = "v2.43";
 const VERSION_DATE = "2026-06-07";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
@@ -251,381 +330,66 @@ const LV_PILL_CLASS = {
 
 /* 카테고리 → CSS 클래스 */
 const CAT_CLASS = {
-  "ROM":"cat-ROM","Strengthening":"cat-Strengthening","Balance":"cat-Balance",
-  "Gait":"cat-Gait","Functional":"cat-Functional","상지 기능":"cat-상지기능","Endurance":"cat-Endurance"
+  "PROM":          "bg-sky-50 text-sky-700",
+  "AROM":          "bg-blue-50 text-blue-700",
+  "Strengthening": "bg-green-50 text-green-700",
+  "Balance":       "bg-amber-50 text-amber-700",
+  "Gait":          "bg-purple-50 text-purple-700",
+  "Endurance":     "bg-yellow-50 text-yellow-700",
+  "ADL":           "bg-rose-50 text-rose-700"
 };
 const CAT_BAR = {
-  "ROM":"catbar-ROM","Strengthening":"catbar-Strengthening","Balance":"catbar-Balance",
-  "Gait":"catbar-Gait","Functional":"catbar-Functional","상지 기능":"catbar-상지기능","Endurance":"catbar-Endurance"
+  "PROM":          "border-l-2 border-sky-300",
+  "AROM":          "border-l-2 border-blue-300",
+  "Strengthening": "border-l-2 border-green-300",
+  "Balance":       "border-l-2 border-amber-300",
+  "Gait":          "border-l-2 border-purple-300",
+  "Endurance":     "border-l-2 border-yellow-300",
+  "ADL":           "border-l-2 border-rose-300"
 };
 const LV_CLASS = {
   "Lv1 침상운동":"lv1","Lv2 앉은자세":"lv2","Lv3 선자세":"lv3","Lv4 동적활동":"lv4"
 };
 
-const IMAGE_META = {
-  "ankle-pump": {
-    "cropType": "lower-leg-foot",
-    "arrowType": "dorsi-plantar",
-    "imagePriority": "A"
-  },
-  "heel-slide": {
-    "cropType": "pelvis-leg",
-    "arrowType": "flexion-extension",
-    "imagePriority": "A"
-  },
-  "straight-leg-raise": {
-    "cropType": "pelvis-leg",
-    "arrowType": "lift",
-    "imagePriority": "A"
-  },
-  "supine-hip-abduction": {
-    "cropType": "pelvis-leg",
-    "arrowType": "abduction",
-    "imagePriority": "A"
-  },
-  "glute-set": {
-    "cropType": "pelvis-focused",
-    "arrowType": "contraction",
-    "imagePriority": "B"
-  },
-  "quad-set": {
-    "cropType": "knee-focused",
-    "arrowType": "press-down",
-    "imagePriority": "A"
-  },
-  "hand-open-close": {
-    "cropType": "hand-only",
-    "arrowType": "open-close",
-    "imagePriority": "B"
-  },
-  "wrist-flexion-extension": {
-    "cropType": "forearm-hand",
-    "arrowType": "flexion-extension",
-    "imagePriority": "B"
-  },
-  "elbow-flexion-extension": {
-    "cropType": "arm-focused",
-    "arrowType": "flexion-extension",
-    "imagePriority": "B"
-  },
-  "supine-shoulder-flexion": {
-    "cropType": "upper-body",
-    "arrowType": "overhead-lift",
-    "imagePriority": "A"
-  },
-  "bridge": {
-    "cropType": "trunk-knee",
-    "arrowType": "pelvis-lift",
-    "imagePriority": "A"
-  },
-  "pelvic-tilt": {
-    "cropType": "trunk-pelvis",
-    "arrowType": "pelvic-tilt",
-    "imagePriority": "B"
-  },
-  "log-rolling": {
-    "cropType": "full-body-bed",
-    "arrowType": "rolling",
-    "imagePriority": "B"
-  },
-  "seated-knee-extension": {
-    "cropType": "knee-leg",
-    "arrowType": "knee-extension",
-    "imagePriority": "A"
-  },
-  "seated-marching": {
-    "cropType": "sitting-lower-body",
-    "arrowType": "lift",
-    "imagePriority": "A"
-  },
-  "seated-heel-raise": {
-    "cropType": "foot-focused",
-    "arrowType": "heel-raise",
-    "imagePriority": "A"
-  },
-  "seated-toe-raise": {
-    "cropType": "foot-focused",
-    "arrowType": "toe-raise",
-    "imagePriority": "A"
-  },
-  "table-slide": {
-    "cropType": "arm-table",
-    "arrowType": "forward-slide",
-    "imagePriority": "A"
-  },
-  "cane-shoulder-flexion": {
-    "cropType": "upper-body",
-    "arrowType": "overhead-lift",
-    "imagePriority": "A"
-  },
-  "seated-reach": {
-    "cropType": "sitting-upper-body",
-    "arrowType": "forward-reach",
-    "imagePriority": "B"
-  },
-  "seated-weight-shift": {
-    "cropType": "sitting-full",
-    "arrowType": "weight-shift",
-    "imagePriority": "B"
-  },
-  "sitting-balance": {
-    "cropType": "sitting-full",
-    "arrowType": "posture",
-    "imagePriority": "C"
-  },
-  "seated-object-reach": {
-    "cropType": "sitting-full",
-    "arrowType": "reach-side",
-    "imagePriority": "B"
-  },
-  "sit-to-stand": {
-    "cropType": "standing-full",
-    "arrowType": "stand-up",
-    "imagePriority": "A"
-  },
-  "chair-push-up": {
-    "cropType": "chair-body",
-    "arrowType": "push-up",
-    "imagePriority": "A"
-  },
-  "single-leg-stance-chair": {
-    "cropType": "standing-full",
-    "arrowType": "single-leg",
-    "imagePriority": "A"
-  },
-  "tandem-standing": {
-    "cropType": "standing-full",
-    "arrowType": "tandem",
-    "imagePriority": "A"
-  },
-  "romberg-standing": {
-    "cropType": "standing-full",
-    "arrowType": "feet-together",
-    "imagePriority": "C"
-  },
-  "standing-weight-shift": {
-    "cropType": "standing-full",
-    "arrowType": "weight-shift",
-    "imagePriority": "B"
-  },
-  "standing-marching": {
-    "cropType": "standing-full",
-    "arrowType": "marching",
-    "imagePriority": "A"
-  },
-  "mini-squat": {
-    "cropType": "standing-full",
-    "arrowType": "squat",
-    "imagePriority": "A"
-  },
-  "standing-hip-abduction": {
-    "cropType": "standing-full",
-    "arrowType": "abduction",
-    "imagePriority": "A"
-  },
-  "standing-hip-extension": {
-    "cropType": "standing-full",
-    "arrowType": "hip-extension",
-    "imagePriority": "A"
-  },
-  "standing-heel-raise": {
-    "cropType": "lower-body",
-    "arrowType": "heel-raise",
-    "imagePriority": "A"
-  },
-  "step-tap": {
-    "cropType": "lower-body",
-    "arrowType": "tap",
-    "imagePriority": "A"
-  },
-  "step-up-low": {
-    "cropType": "stair-lower-body",
-    "arrowType": "stair-up",
-    "imagePriority": "A"
-  },
-  "turning-in-place": {
-    "cropType": "standing-full",
-    "arrowType": "turning",
-    "imagePriority": "B"
-  },
-  "indoor-walking": {
-    "cropType": "gait-full",
-    "arrowType": "gait",
-    "imagePriority": "C"
-  },
-  "corridor-walking": {
-    "cropType": "gait-full",
-    "arrowType": "gait",
-    "imagePriority": "C"
-  },
-  "speed-change-walking": {
-    "cropType": "gait-full",
-    "arrowType": "speed-change",
-    "imagePriority": "B"
-  },
-  "obstacle-crossing": {
-    "cropType": "gait-full",
-    "arrowType": "obstacle-cross",
-    "imagePriority": "A"
-  },
-  "side-walking": {
-    "cropType": "gait-full",
-    "arrowType": "side-gait",
-    "imagePriority": "B"
-  },
-  "backward-walking": {
-    "cropType": "gait-full",
-    "arrowType": "backward-gait",
-    "imagePriority": "B"
-  },
-  "tandem-walking": {
-    "cropType": "gait-full",
-    "arrowType": "tandem-gait",
-    "imagePriority": "A"
-  },
-  "stair-up": {
-    "cropType": "stair-full",
-    "arrowType": "stair-up",
-    "imagePriority": "A"
-  },
-  "stair-down": {
-    "cropType": "stair-full",
-    "arrowType": "stair-down",
-    "imagePriority": "A"
-  },
-  "carrying-object": {
-    "cropType": "gait-full",
-    "arrowType": "carrying",
-    "imagePriority": "B"
-  },
-  "stationary-bike": {
-    "cropType": "bike-full",
-    "arrowType": "cycling",
-    "imagePriority": "B"
-  },
-  "treadmill-walking": {
-    "cropType": "treadmill-full",
-    "arrowType": "treadmill",
-    "imagePriority": "B"
-  },
-  "outdoor-walking": {
-    "cropType": "outdoor-full",
-    "arrowType": "gait",
-    "imagePriority": "C"
-  },
-  "scapular-rotation": {
-    "cropType": "upper-body",
-    "arrowType": "shoulder-rotation",
-    "imagePriority": "B"
-  },
-  "short-arc-quad": {
-    "cropType": "knee-focused",
-    "arrowType": "knee-extension",
-    "imagePriority": "A"
-  },
-  "clam-shell": {
-    "cropType": "hip-knee",
-    "arrowType": "abduction",
-    "imagePriority": "A"
-  },
-  "side-lying-hip-abduction": {
-    "cropType": "pelvis-leg",
-    "arrowType": "abduction",
-    "imagePriority": "A"
-  },
-  "standing-knee-flexion": {
-    "cropType": "lower-body",
-    "arrowType": "knee-flexion",
-    "imagePriority": "A"
-  },
-  "toe-tapping": {
-    "cropType": "lower-body",
-    "arrowType": "tap",
-    "imagePriority": "A"
-  },
-  "affected-arm-weight-bearing": {
-    "cropType": "upper-extremity",
-    "arrowType": "weight-bearing",
-    "imagePriority": "A"
-  },
-  "standing-forward-reach": {
-    "cropType": "standing-full",
-    "arrowType": "forward-reach",
-    "imagePriority": "B"
-  },
-  "cone-reaching": {
-    "cropType": "sitting-full",
-    "arrowType": "multi-reach",
-    "imagePriority": "B"
-  },
-  "step-weight-shift": {
-    "cropType": "standing-full",
-    "arrowType": "step-shift",
-    "imagePriority": "A"
-  },
-  "sit-to-stand-hold": {
-    "cropType": "standing-full",
-    "arrowType": "hold",
-    "imagePriority": "B"
-  },
-  "supported-tandem-walk": {
-    "cropType": "gait-full",
-    "arrowType": "tandem-gait",
-    "imagePriority": "A"
-  },
-  "obstacle-weaving": {
-    "cropType": "gait-full",
-    "arrowType": "weave",
-    "imagePriority": "B"
-  },
-  "figure-8-walking": {
-    "cropType": "gait-full",
-    "arrowType": "figure8",
-    "imagePriority": "B"
-  },
-  "finger-opposition": {
-    "cropType": "hand-only",
-    "arrowType": "finger-touch",
-    "imagePriority": "B"
-  },
-  "towel-squeeze": {
-    "cropType": "hand-only",
-    "arrowType": "squeeze",
-    "imagePriority": "B"
-  },
-  "wall-slide": {
-    "cropType": "upper-body-wall",
-    "arrowType": "wall-slide",
-    "imagePriority": "A"
-  },
-  "scapular-retraction": {
-    "cropType": "upper-body",
-    "arrowType": "retraction",
-    "imagePriority": "B"
-  }
-};
 
-const TIME_BASED_IDS = new Set([38,39,40,48,49,50]); // 걷기/자전거 운동
-const exercises = ROWS.map(r=>({
-  id:r[0], category:r[1], level:r[2], title:r[3], target:r[4],
-  reps:r[5], sets:r[6], durationMin:r[7], side:r[8], image:r[9],
-  description:r[10], caution:r[11], imageKey:r[12],
-  imageUrl: EXERCISE_IMAGES[r[12]] || `./exercise-images/${r[12]}.webp`,
-  ...(IMAGE_META[r[12]] || {}),
-  videoUrl:"",
-  isTimeBased: TIME_BASED_IDS.has(r[0])
+const TIME_BASED_IDS = new Set([38,39,40,48,49,50]); // 걷기/자전거 운동 (id 기준)
+const exercises = EXERCISES.map(e=>({
+  ...e,
+  imageUrl: EXERCISE_IMAGES[e.imageKey] || `./exercise-images/${e.imageKey}.webp`,
+  videoUrl: "",
+  isTimeBased: TIME_BASED_IDS.has(e.id)
 }));
 
 const presets = [
-  {name:"선택 안 함",ids:[]},
-  {name:"Stroke 초기 기본",ids:[1,2,7,14,21,22,24]},
-  {name:"Stroke 보행훈련",ids:[21,24,29,30,35,38]},
-  {name:"TKA POD#1~3",ids:[1,2,6,14,17]},
-  {name:"TKA POD#4~7",ids:[14,24,31,34,36]},
-  {name:"고령 허약 기본",ids:[14,15,24,34,38]},
-  {name:"낙상예방",ids:[21,26,27,29,35,42]},
-  {name:"상지 기능 기본",ids:[7,8,9,18,19,20]},
-  {name:"지구력 향상",ids:[38,39,48,50]}
+  // ── 뇌졸중 ────────────────────────────────────────
+  {name:"Stroke 중증",     ids:[1,2,5,7,8,11,12,13,21,22]},
+  // Lv1 침상 위주, 상지+하지 기본 ROM·근활성화·침상이동·앉은균형
+  {name:"Stroke 경증",     ids:[14,15,18,19,20,21,23,24,29,30,35,37,38,57,59,65]},
+  // 앉기·서기 이행, 상지기능·보행준비 중심
+  // ── 척수/기타 운동장애 ─────────────────────────────
+  {name:"SCI-Cervical",   ids:[69,70,71,72,7,8,9,10,11,12,13,19,21,22,51,65,66,68]},
+  // 경추 손상: 상지ROM·손기능·체간조절·앉은균형 중심, 하지는 수동적 ROM
+  {name:"SCI-Thoracic",   ids:[1,2,3,4,5,11,12,13,21,22,24,25,51,57,66,68]},
+  // 흉추 손상: 상지 강화·체간 안정·앉기 이행·휠체어 push-up 준비
+  {name:"SCI-Lumbar",     ids:[1,2,3,4,5,14,15,17,21,24,26,29,34,52,53,55,61]},
+  // 요추 손상: 하지 잔존기능 활용, 선자세·보행 이행 목표
+  {name:"Ataxia",         ids:[21,22,23,26,27,28,29,35,37,42,44,56,58,60,62]},
+  // 협응·균형 중심: 앉은균형→선균형→보행변형
+  // ── 근골격/노인 ───────────────────────────────────
+  {name:"Sarcopenia",     ids:[14,16,17,24,31,32,33,34,38,48,52,55,61]},
+  // 하지 근력(대퇴·종아리·둔근)·기능적 이동 중심
+  {name:"고령 허약",       ids:[1,14,15,17,22,24,26,29,34,38,48,61]},
+  // 침상~앉기~서기 안전 이행, 낙상 예방, 지구력 기초
+  // ── 내과·종양 ─────────────────────────────────────
+  {name:"호흡질환",        ids:[1,5,11,14,22,24,34,38,48,51,68]},
+  // 저강도 전신운동: 호흡보조근 이완, 지구력 기초, 자세 교정
+  {name:"심장질환",        ids:[1,14,16,17,24,34,38,39,48,50]},
+  // 저~중강도 유산소 중심, 하지 근력 보조, 과부하 배제
+  {name:"Cancer",         ids:[1,5,11,14,22,24,31,34,38,48,50,61]},
+  // 피로·근감소 대응: 침상~앉기~서기 순, 저강도 유산소
+  // ── 와상 ───────────────────────────────────────────
+  {name:"Bedridden",      ids:[69,70,71,72,1,2,3,4,5,6,7,8,9,10,11,12,13,52,53,54]},
+  // 전신 침상운동: 하지+상지 ROM, 근활성화, 체위변경
 ];
 
 /* ── State ─────────────────────────────── */
@@ -720,7 +484,11 @@ function imgTag(ex,cls="h-full w-full object-contain"){
 function qrUrl(url){return `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(url)}`;}
 function isValidVideoUrl(url){return url&&url.trim()!==""&&!url.includes("example.com");}
 function totalMinutes(){return state.selected.reduce((s,x)=>s+(Number(x.durationMin)||0),0);}
-function categories(){return["전체",...Array.from(new Set(exercises.map(e=>e.category)))];}
+function categories(){
+  const ORDER=["전체","PROM","AROM","Strengthening","Balance","Gait","Endurance","ADL"];
+  const present=new Set(exercises.map(e=>e.category));
+  return ORDER.filter(c=>c==="전체"||present.has(c));
+}
 
 /* level 필터: 단축명 → 전체명 매핑 */
 function levelFull(lv){
@@ -748,12 +516,14 @@ function addAllFiltered(){
   filtered().forEach(e=>{
     if(!state.selected.some(x=>x.id===e.id)) state.selected.push({...e});
   });
+  autoSave();
   renderExerciseResults();
 }
 /* 현재 필터 결과 전체 해제 */
 function removeAllFiltered(){
   const ids=new Set(filtered().map(e=>e.id));
   state.selected=state.selected.filter(x=>!ids.has(x.id));
+  autoSave();
   renderExerciseResults();
 }
 function safetyBanner(list){
@@ -851,10 +621,6 @@ function removeExerciseSilent(id){
   state.selected=state.selected.filter(x=>x.id!==id);
   autoSave();
   renderExerciseResults();
-}
-function updateSelected(id,field,value){
-  state.selected=state.selected.map(x=>x.id===id?{...x,[field]:["reps","sets","durationMin"].includes(field)?Number(value):value}:x);
-  renderMain();
 }
 // side select 전용 — state만 업데이트 (깜빡임 없음)
 function updateSelectedSideSilent(id,value){
@@ -1534,7 +1300,7 @@ function tabCart(){
         <span class="rounded-full bg-blue-50 text-blue-700 text-sm font-bold px-3 py-1 border border-blue-100">${state.selected.length}개 · 약 ${totalMinutes()}분</span>
         ${state.selected.length>0&&!sel?`
           <button onclick="state.cartSelectMode=true;state.cartChecked=new Set();renderMain()" class="rounded-xl border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1.5 hover:bg-slate-50 transition-colors">선택 삭제</button>
-          <button onclick="if(confirm('담은 운동을 전체 삭제하시겠습니까?')){state.selected=[];renderMain();}" class="rounded-xl bg-red-50 text-red-500 border border-red-200 text-xs font-bold px-3 py-1.5 hover:bg-red-100 transition-colors">전체 삭제</button>
+          <button onclick="if(confirm('담은 운동을 전체 삭제하시겠습니까?')){state.selected=[];autoSave();renderMain();}" class="rounded-xl bg-red-50 text-red-500 border border-red-200 text-xs font-bold px-3 py-1.5 hover:bg-red-100 transition-colors">전체 삭제</button>
         `:""}
         ${sel?`
           <button onclick="
@@ -1542,7 +1308,7 @@ function tabCart(){
             if(ids.size===0){state.cartSelectMode=false;renderMain();return;}
             if(!confirm(ids.size+'개를 삭제하시겠습니까?'))return;
             state.selected=state.selected.filter(x=>!ids.has(x.id));
-            state.cartSelectMode=false;state.cartChecked=new Set();renderMain();"
+            state.cartSelectMode=false;state.cartChecked=new Set();autoSave();renderMain();"
             class="rounded-xl text-white text-xs font-bold px-3 py-1.5 transition-colors ${chk.size>0?'bg-red-500 hover:bg-red-600':'bg-slate-300 cursor-not-allowed'}">
             ${chk.size>0?chk.size+'개 삭제':'선택 없음'}
           </button>
