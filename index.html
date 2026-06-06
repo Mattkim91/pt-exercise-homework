@@ -315,7 +315,7 @@ const EXERCISES = [
   {"id": 74, "category": "AROM", "level": "Lv2 앉은자세", "title": "햄스트링 스트레칭", "target": "무릎 뒤쪽 유연성 및 보행 준비", "reps": 30, "sets": 3, "durationMin": 4, "side": "좌/우 선택", "image": "🦵", "description": "의자에 앉아 한쪽 다리를 앞으로 펴고 발끝을 가볍게 당깁니다. 허리를 세운 상태에서 몸을 천천히 앞으로 기울여 허벅지 뒤쪽이 당기는 느낌을 유지합니다.", "caution": "허리를 과하게 굽히거나 반동을 주지 마세요. 저림이나 통증이 있으면 중단하세요.", "imageKey": "hamstring-stretch"}
 ];
 
-const VERSION      = "v2.52";
+const VERSION      = "v2.56";
 const VERSION_DATE = "2026-06-07";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
@@ -1576,7 +1576,7 @@ let state = {
   preview:false, message:"", expandedId:null, therapistName:"",
   editingPatientId:null,
   isNewPatient:true,
-  cartSelectMode:false, cartChecked:new Set()
+  cartSelectMode:false, cartChecked:new Set(), cartDraftSelected:null
 };
 let msgTimer=null;
 
@@ -2663,56 +2663,170 @@ function onDrop(e, targetId) {
   render();
 }
 
+/* 담은 운동 다중선택 이동/정렬 */
+const LEVEL_SORT_ORDER = {
+  "Lv0 PROM/보호자":0, "Lv1 침상운동":1, "Lv2 앉은자세":2,
+  "Lv3 선자세":3, "Lv4 보행훈련":4, "Lv5 유산소운동":5
+};
+const PURPOSE_SORT_ORDER = ["PROM","ROM","AROM","Stretching","Strengthening","ADL","Balance","Gait","Endurance"];
+function levelRank(e){ return LEVEL_SORT_ORDER[e.level] ?? 99; }
+function purposeRank(e){
+  const tags=e.purposeTags||[];
+  const tagIdx=PURPOSE_SORT_ORDER.findIndex(x=>tags.includes(x));
+  const catIdx=PURPOSE_SORT_ORDER.indexOf(e.category);
+  const idx=tagIdx>=0?tagIdx:catIdx;
+  return idx>=0?idx:99;
+}
+function difficultyRank(e){
+  // 실제 환자에게 느껴지는 난이도: 자세 레벨 → 운동 목적 → ID 순으로 안정 정렬
+  const base=levelRank(e)*10;
+  const add={"PROM":0,"ROM":1,"AROM":2,"Stretching":2,"ADL":3,"Strengthening":4,"Balance":5,"Gait":6,"Endurance":7}[e.category] ?? 5;
+  return base+add;
+}
+function cartWorkingList(){
+  return state.cartSelectMode && Array.isArray(state.cartDraftSelected) ? state.cartDraftSelected : state.selected;
+}
+function enterCartEditMode(){
+  state.cartSelectMode=true;
+  state.cartChecked=new Set();
+  state.cartDraftSelected=state.selected.map(x=>({...x}));
+  renderMain();
+}
+function saveCartEditMode(){
+  if(!state.cartSelectMode) return;
+  state.selected=Array.isArray(state.cartDraftSelected)?state.cartDraftSelected.map(x=>({...x})):state.selected;
+  state.cartSelectMode=false;
+  state.cartChecked=new Set();
+  state.cartDraftSelected=null;
+  autoSave();
+  showMessage('담은 운동 순서 변경을 저장했습니다.');
+  renderMain();
+}
+function cancelCartEditMode(){
+  state.cartSelectMode=false;
+  state.cartChecked=new Set();
+  state.cartDraftSelected=null;
+  renderMain();
+}
+
+function sortCart(mode){
+  const before=state.selected.map(x=>x.id).join(',');
+  state.selected=state.selected.map((x,i)=>({...x,_orig:i})).sort((a,b)=>{
+    if(mode==='difficulty') return difficultyRank(a)-difficultyRank(b) || a.id-b.id || a._orig-b._orig;
+    if(mode==='posture') return levelRank(a)-levelRank(b) || a.id-b.id || a._orig-b._orig;
+    // AI 자동정렬: 보호자/PROM → ROM/준비 → 근력/ADL → 균형 → 보행 → 유산소의 임상 흐름
+    return levelRank(a)-levelRank(b) || purposeRank(a)-purposeRank(b) || (a.imagePriority||'Z').localeCompare(b.imagePriority||'Z') || a.id-b.id || a._orig-b._orig;
+  }).map(({_orig,...x})=>x);
+  const after=state.selected.map(x=>x.id).join(',');
+  if(before!==after){ autoSave(); showMessage(mode==='difficulty'?'난이도순으로 정렬했습니다.':mode==='posture'?'자세/레벨순으로 정렬했습니다.':'AI 자동정렬을 적용했습니다.'); }
+  renderMain();
+}
+function moveCheckedCart(direction){
+  const ids=state.cartChecked;
+  if(!ids || ids.size===0){ alert('이동할 운동을 먼저 선택해주세요.'); return; }
+  let arr=[...cartWorkingList()];
+  if(direction==='top'){
+    const picked=arr.filter(x=>ids.has(x.id));
+    const rest=arr.filter(x=>!ids.has(x.id));
+    arr=[...picked,...rest];
+  } else if(direction==='bottom'){
+    const picked=arr.filter(x=>ids.has(x.id));
+    const rest=arr.filter(x=>!ids.has(x.id));
+    arr=[...rest,...picked];
+  } else if(direction==='up'){
+    for(let i=1;i<arr.length;i++){
+      if(ids.has(arr[i].id) && !ids.has(arr[i-1].id)){
+        [arr[i-1],arr[i]]=[arr[i],arr[i-1]];
+      }
+    }
+  } else if(direction==='down'){
+    for(let i=arr.length-2;i>=0;i--){
+      if(ids.has(arr[i].id) && !ids.has(arr[i+1].id)){
+        [arr[i],arr[i+1]]=[arr[i+1],arr[i]];
+      }
+    }
+  }
+  if(state.cartSelectMode) state.cartDraftSelected=arr;
+  else { state.selected=arr; autoSave(); }
+  renderMain();
+}
+function deleteCheckedCartDraft(){
+  const ids=state.cartChecked;
+  if(!ids || ids.size===0) return;
+  if(!confirm(ids.size+'개를 편집 목록에서 삭제하시겠습니까? 저장을 눌러야 최종 반영됩니다.')) return;
+  const arr=cartWorkingList().filter(x=>!ids.has(x.id));
+  state.cartDraftSelected=arr;
+  state.cartChecked=new Set();
+  renderMain();
+}
+
+
 function tabCart(){
   const sel=state.cartSelectMode;
   const chk=state.cartChecked;
-  const allChecked=state.selected.length>0&&state.selected.every(x=>chk.has(x.id));
+  const list=cartWorkingList();
+  const listMinutes=list.reduce((s,x)=>s+(Number(x.durationMin)||0),0);
+  const allChecked=list.length>0&&list.every(x=>chk.has(x.id));
 
   return `<div class="anim-fadeup space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="font-bold text-slate-800">🧺 담은 운동</h2>
       <div class="flex items-center gap-2">
-        <span class="rounded-full bg-blue-50 text-blue-700 text-sm font-bold px-3 py-1 border border-blue-100">${state.selected.length}개 · 약 ${totalMinutes()}분</span>
+        <span class="rounded-full bg-blue-50 text-blue-700 text-sm font-bold px-3 py-1 border border-blue-100">${list.length}개 · 약 ${listMinutes}분</span>
         ${state.selected.length>0&&!sel?`
-          <button onclick="state.cartSelectMode=true;state.cartChecked=new Set();renderMain()" class="rounded-xl border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1.5 hover:bg-slate-50 transition-colors">선택 삭제</button>
+          <button onclick="enterCartEditMode()" class="rounded-xl border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1.5 hover:bg-slate-50 transition-colors">선택/이동</button>
           <button onclick="if(confirm('담은 운동을 전체 삭제하시겠습니까?')){state.selected=[];autoSave();renderMain();}" class="rounded-xl bg-red-50 text-red-500 border border-red-200 text-xs font-bold px-3 py-1.5 hover:bg-red-100 transition-colors">전체 삭제</button>
         `:""}
         ${sel?`
-          <button onclick="
-            const ids=state.cartChecked;
-            if(ids.size===0){state.cartSelectMode=false;renderMain();return;}
-            if(!confirm(ids.size+'개를 삭제하시겠습니까?'))return;
-            state.selected=state.selected.filter(x=>!ids.has(x.id));
-            state.cartSelectMode=false;state.cartChecked=new Set();autoSave();renderMain();"
+          <button onclick="saveCartEditMode()" class="rounded-xl bg-blue-600 text-white text-xs font-bold px-3 py-1.5 hover:bg-blue-700 transition-colors">저장</button>
+          <button onclick="deleteCheckedCartDraft()"
             class="rounded-xl text-white text-xs font-bold px-3 py-1.5 transition-colors ${chk.size>0?'bg-red-500 hover:bg-red-600':'bg-slate-300 cursor-not-allowed'}">
             ${chk.size>0?chk.size+'개 삭제':'선택 없음'}
           </button>
-          <button onclick="state.cartSelectMode=false;state.cartChecked=new Set();renderMain()" class="rounded-xl border border-slate-200 text-slate-500 text-xs font-bold px-3 py-1.5 hover:bg-slate-50 transition-colors">취소</button>
+          <button onclick="cancelCartEditMode()" class="rounded-xl border border-slate-200 text-slate-500 text-xs font-bold px-3 py-1.5 hover:bg-slate-50 transition-colors">취소</button>
         `:""}
       </div>
     </div>
 
     ${sel?`
-    <div class="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-2.5">
-      <label class="flex items-center gap-2 cursor-pointer select-none">
-        <input type="checkbox" ${allChecked?"checked":""} onchange="
-          if(this.checked) state.selected.forEach(x=>state.cartChecked.add(x.id));
-          else state.cartChecked.clear();
-          renderMain();" class="w-4 h-4 accent-blue-600">
-        <span class="text-xs font-bold text-blue-700">전체 선택</span>
-      </label>
-      <span class="text-xs text-blue-500">${chk.size}개 선택됨</span>
+    <div class="flex flex-col gap-2 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+      <div class="flex items-center gap-3 flex-wrap">
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+          <input type="checkbox" ${allChecked?"checked":""} onchange="
+            if(this.checked) cartWorkingList().forEach(x=>state.cartChecked.add(x.id));
+            else state.cartChecked.clear();
+            renderMain();" class="w-4 h-4 accent-blue-600">
+          <span class="text-xs font-bold text-blue-700">전체 선택</span>
+        </label>
+        <span class="text-xs text-blue-500">${chk.size}개 선택됨 · 저장 전까지 임시 편집</span>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-[11px] font-bold text-blue-700 mr-1">선택 위치 이동</span>
+        <button onclick="moveCheckedCart('top')" class="rounded-lg bg-white border border-blue-200 text-blue-700 text-xs font-bold px-2.5 py-1 hover:bg-blue-100">맨 위</button>
+        <button onclick="moveCheckedCart('up')" class="rounded-lg bg-white border border-blue-200 text-blue-700 text-xs font-bold px-2.5 py-1 hover:bg-blue-100">위로</button>
+        <button onclick="moveCheckedCart('down')" class="rounded-lg bg-white border border-blue-200 text-blue-700 text-xs font-bold px-2.5 py-1 hover:bg-blue-100">아래로</button>
+        <button onclick="moveCheckedCart('bottom')" class="rounded-lg bg-white border border-blue-200 text-blue-700 text-xs font-bold px-2.5 py-1 hover:bg-blue-100">맨 아래</button>
+      </div>
+    </div>`:""}
+
+    ${state.selected.length>1&&!sel?`
+    <div class="flex items-center gap-2 flex-wrap bg-white rounded-xl border border-slate-200 px-4 py-2.5">
+      <span class="text-[11px] font-bold text-slate-500 mr-1">정렬</span>
+      <button onclick="sortCart('difficulty')" class="rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold px-3 py-1.5 hover:bg-slate-100">난이도순</button>
+      <button onclick="sortCart('posture')" class="rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold px-3 py-1.5 hover:bg-slate-100">자세/레벨순</button>
+      <button onclick="sortCart('ai')" class="rounded-lg bg-blue-600 text-white text-xs font-bold px-3 py-1.5 hover:bg-blue-700">AI 자동정렬</button>
+      <span class="text-[11px] text-slate-400">PROM → 침상 → 앉기 → 서기 → 보행 → 유산소 흐름</span>
     </div>`:""}
 
     ${state.selected.length>0&&!sel?`<div class="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs font-semibold text-amber-800">⚠ ${safetyBanner(state.selected)}</div>`:""}
 
-    ${state.selected.length===0
+    ${list.length===0
       ?`<div class="bg-white rounded-2xl border border-dashed border-slate-200 p-12 text-center text-sm text-slate-400">
           운동 선택 탭에서 운동을 담아주세요.<br>
           <button onclick="state.tab=1;render()" class="mt-3 inline-block text-blue-600 font-semibold hover:underline">→ 운동 선택하러 가기</button>
         </div>`
       :`<div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        ${state.selected.map((item,idx)=>{
+        ${list.map((item,idx)=>{
           const catCls=CAT_CLASS[item.category]||"bg-slate-100 text-slate-600";
           const catBar=CAT_BAR[item.category]||"";
           const checked=chk.has(item.id);
