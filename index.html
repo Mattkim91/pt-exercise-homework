@@ -315,7 +315,7 @@ const EXERCISES = [
   {"id": 74, "category": "AROM", "level": "Lv2 앉은자세", "title": "햄스트링 스트레칭", "target": "무릎 뒤쪽 유연성 및 보행 준비", "reps": 30, "sets": 3, "durationMin": 4, "side": "좌/우 선택", "image": "🦵", "description": "의자에 앉아 한쪽 다리를 앞으로 펴고 발끝을 가볍게 당깁니다. 허리를 세운 상태에서 몸을 천천히 앞으로 기울여 허벅지 뒤쪽이 당기는 느낌을 유지합니다.", "caution": "허리를 과하게 굽히거나 반동을 주지 마세요. 저림이나 통증이 있으면 중단하세요.", "imageKey": "hamstring-stretch"}
 ];
 
-const VERSION      = "v2.51";
+const VERSION      = "v2.52";
 const VERSION_DATE = "2026-06-07";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
@@ -1568,6 +1568,7 @@ const presets = [
 let state = {
   tab: 0,
   query:"", category:"전체", level:"전체", bodyFilter:"전체", purposeFilter:"전체", tagFilter:"전체", showFavoritesOnly:false, bbsScore:"", bbsMode:false, activePreset:null,
+  aiProfile:{diagnosis:"stroke", functionLevel:"moderate", goal:"balance", bbs:"", note:""}, aiResultIds:[], aiText:"", aiPrompt:"", adminExerciseId:1, libraryKeyword:"",
   patientQuery:"",
   selected:[], patient:newPatientData(),
   savedPatients:loadSavedPatients(),
@@ -1680,6 +1681,125 @@ function addBbsRecommended(){
 }
 function setQuickFilter(type,value){
   state[type]=value; state.activePreset=null; state.bbsMode=false; renderMain();
+}
+
+
+/* ── AI 보조 기능: 로컬 규칙 기반 추천/문구/프롬프트 ───────────────────────────
+   외부 API 없이 동작하는 "AI 보조 모드"입니다. 실제 LLM API를 붙이기 전에도
+   진단/기능/목표/메타데이터를 이용해 추천과 설명 초안을 생성합니다.
+────────────────────────────────────────── */
+function exerciseById(id){return exercises.find(e=>e.id===Number(id));}
+function uniqueIds(ids){return [...new Set(ids.map(Number).filter(Boolean))];}
+function labelFromList(list,value){return (list.find(x=>x.value===value)||{}).label||value;}
+function currentAiProfile(){return state.aiProfile||{diagnosis:"stroke",functionLevel:"moderate",goal:"balance",bbs:"",note:""};}
+function setAiProfile(k,v){state.aiProfile={...currentAiProfile(),[k]:v};}
+function scoreExerciseForProfile(e,profile){
+  let score=0;
+  const tags=e.diagnosisTags||[];
+  const purposes=e.purposeTags||[];
+  const level=e.level||"";
+  if(tags.includes(profile.diagnosis)) score+=5;
+  if(profile.diagnosis==="fall" && (tags.includes("fall")||purposes.includes("balance")||purposes.includes("gait"))) score+=5;
+  if(profile.diagnosis==="tka" && (e.bodyRegion==="knee"||e.bodyRegion==="hip"||purposes.includes("strength")||purposes.includes("ROM"))) score+=3;
+  if(profile.diagnosis==="stroke" && (purposes.includes("balance")||purposes.includes("gait")||purposes.includes("ADL")||e.bodyRegion==="hand"||e.bodyRegion==="shoulder")) score+=2;
+  if(profile.diagnosis==="sci" && (purposes.includes("ROM")||purposes.includes("strength")||purposes.includes("ADL")||e.bodyRegion==="trunk")) score+=2;
+  if(profile.diagnosis==="cancer" && (purposes.includes("endurance")||purposes.includes("strength")||level.includes("침상")||level.includes("앉"))) score+=2;
+  if(profile.goal && purposes.includes(profile.goal)) score+=4;
+  if(profile.goal==="gait" && e.bodyRegion==="gait") score+=3;
+  if(profile.goal==="balance" && e.bodyRegion==="balance") score+=3;
+  if(profile.goal==="strength" && purposes.includes("strength")) score+=3;
+  if(profile.goal==="ROM" && (purposes.includes("ROM")||purposes.includes("PROM"))) score+=3;
+  if(profile.functionLevel==="bed") {
+    if(level.includes("Lv0")||level.includes("Lv1")) score+=5;
+    if(level.includes("Lv4")||level.includes("Lv5")) score-=6;
+  } else if(profile.functionLevel==="sitting") {
+    if(level.includes("Lv1")||level.includes("Lv2")) score+=4;
+    if(level.includes("Lv4")||level.includes("Lv5")) score-=4;
+  } else if(profile.functionLevel==="standing") {
+    if(level.includes("Lv2")||level.includes("Lv3")) score+=4;
+    if(level.includes("Lv0")) score-=3;
+  } else if(profile.functionLevel==="walking") {
+    if(level.includes("Lv3")||level.includes("Lv4")||level.includes("Lv5")) score+=4;
+    if(level.includes("Lv0")) score-=4;
+  }
+  const bbs=Number(profile.bbs);
+  if(!Number.isNaN(bbs)&&profile.bbs!==""){
+    if(bbs<=20 && (level.includes("Lv0")||level.includes("Lv1")||level.includes("Lv2"))) score+=3;
+    if(bbs>20&&bbs<=40 && (level.includes("Lv2")||level.includes("Lv3"))) score+=3;
+    if(bbs>40 && (level.includes("Lv3")||level.includes("Lv4"))) score+=3;
+  }
+  if((e.imagePriority||"")==="A") score+=0.5;
+  return score;
+}
+function recommendAiExercises(){
+  const profile=currentAiProfile();
+  const scored=exercises.map(e=>({e,score:scoreExerciseForProfile(e,profile)}))
+    .filter(x=>x.score>0)
+    .sort((a,b)=>b.score-a.score || a.e.id-b.e.id);
+  let ids=scored.slice(0,12).map(x=>x.e.id);
+  // 안전한 기본 조합 보정
+  if(profile.functionLevel==="bed") ids=uniqueIds([1,2,3,4,5,6,16,17,...ids]).slice(0,12);
+  if(profile.functionLevel==="sitting") ids=uniqueIds([23,24,25,28,29,...ids]).slice(0,12);
+  if(profile.functionLevel==="standing") ids=uniqueIds([38,40,42,45,46,50,...ids]).slice(0,12);
+  if(profile.functionLevel==="walking") ids=uniqueIds([56,59,60,61,62,67,69,...ids]).slice(0,12);
+  state.aiResultIds=ids;
+  const dxLabel=labelFromList(TAG_FILTERS,profile.diagnosis);
+  const goalLabel=labelFromList(PURPOSE_FILTERS,profile.goal);
+  state.aiText=`${dxLabel} / ${goalLabel} 목표 / ${profile.functionLevel} 수준을 기준으로 ${ids.length}개 운동을 추천했습니다. 실제 처방 전 통증, 어지러움, 낙상위험, 수술/금기사항을 확인하세요.`;
+  renderMain();
+}
+function addAiRecommended(){
+  state.aiResultIds.forEach(id=>{const ex=exerciseById(id); if(ex&&!state.selected.some(x=>x.id===id)) state.selected.push({...ex});});
+  autoSave();
+  showMessage("AI 추천 운동을 담았습니다.");
+}
+function buildAiLeaflet(){
+  if(state.aiResultIds.length===0) recommendAiExercises();
+  const ids=state.aiResultIds.length?state.aiResultIds:[];
+  state.selected=ids.map(id=>exerciseById(id)).filter(Boolean).map(e=>({...e}));
+  const profile=currentAiProfile();
+  const dxLabel=labelFromList(TAG_FILTERS,profile.diagnosis);
+  state.patient.memo=`${dxLabel} 환자 맞춤 운동 과제입니다. 통증, 어지러움, 호흡곤란, 심한 피로가 있으면 즉시 중단하고 보호자 또는 치료사에게 알려주세요. 모든 운동은 안전한 범위에서 천천히 시행합니다.`;
+  state.patient.note=profile.note||state.patient.note;
+  state.tab=3;
+  autoSave();
+  render();
+}
+function generateAiExplanation(kind="patient"){
+  const list=state.selected.length?state.selected:state.aiResultIds.map(id=>exerciseById(id)).filter(Boolean);
+  if(list.length===0){state.aiText="먼저 운동을 담거나 AI 추천을 실행해주세요.";renderMain();return;}
+  const names=list.slice(0,8).map(e=>e.title).join(", ");
+  if(kind==="caregiver"){
+    state.aiText=`보호자 교육 초안:\n선택된 운동(${names})은 환자가 안전하게 움직임을 회복하도록 돕기 위한 과제입니다. 운동 중 얼굴색 변화, 어지러움, 호흡곤란, 통증 증가, 균형 흔들림이 있으면 즉시 중단해주세요. PROM이나 보조 운동은 관절을 억지로 끝까지 밀지 말고, 부드럽고 천천히 시행합니다.`;
+  } else {
+    state.aiText=`환자용 설명 초안:\n오늘의 운동은 ${names} 입니다. 각 운동은 천천히, 통증이 없는 범위에서 시행하세요. 숨을 참지 말고 편안하게 호흡합니다. 힘들거나 어지러우면 쉬었다가 다시 시작하고, 통증이 계속되면 치료사에게 알려주세요.`;
+  }
+  renderMain();
+}
+function imagePromptForExercise(ex){
+  if(!ex) return "";
+  return `Create a single rehabilitation exercise illustration for ${ex.imageKey}.\nExercise: ${ex.title}.\nDescription: ${ex.description}\nStyle: semi-realistic medical vector illustration similar to Physiotec / HEP2Go. White background. No text, no labels, no watermark. One large movement only. Use large blue motion arrows that remain visible in black-and-white print. Crop type: ${ex.cropType||"movement-focused"}. Arrow type: ${ex.arrowType||"clear movement arrow"}. Body region: ${ex.bodyRegion||"relevant body part"}. The image must be readable when printed very small in a 1-column horizontal leaflet image area, about 25mm by 21mm. Focus on movement clarity rather than artistic detail.`;
+}
+function generateImagePrompt(){
+  const ex=exerciseById(state.adminExerciseId)||exercises[0];
+  state.aiPrompt=imagePromptForExercise(ex);
+  renderMain();
+}
+function copyText(id){
+  const el=document.getElementById(id);
+  const txt=el?el.value||el.textContent:"";
+  if(navigator.clipboard) navigator.clipboard.writeText(txt);
+  showMessage("복사했습니다.");
+}
+function exportLibraryJson(){
+  const data=exercises.map(e=>({id:e.id,category:e.category,level:e.level,title:e.title,target:e.target,reps:e.reps,sets:e.sets,durationMin:e.durationMin,side:e.side,imageKey:e.imageKey,cropType:e.cropType,arrowType:e.arrowType,bodyRegion:e.bodyRegion,purposeTags:e.purposeTags,diagnosisTags:e.diagnosisTags,imagePriority:e.imagePriority,description:e.description,caution:e.caution}));
+  state.aiText=JSON.stringify(data,null,2);
+  renderMain();
+}
+function libraryCompleteness(){
+  const missing=exercises.filter(e=>!e.imageKey||!e.cropType||!e.arrowType||!e.bodyRegion);
+  const imageReady=exercises.filter(e=>!!EXERCISE_IMAGES[e.imageKey]).length;
+  return {total:exercises.length,missing:missing.length,imageReady};
 }
 
 
@@ -2027,7 +2147,7 @@ function render(){
       <!-- 데스크탑 탭 바 -->
       <div class="mx-auto max-w-5xl px-3 no-print hidden sm:block">
         <div class="flex border-b border-transparent gap-1">
-          ${["👤 환자 정보","🔎 운동 선택","🧺 담은 운동","⚙️ 출력 옵션"].map((t,i)=>`
+          ${["👤 환자 정보","🔎 운동 선택","🧺 담은 운동","⚙️ 출력 옵션","🤖 AI/관리"].map((t,i)=>`
             <button onclick="state.tab=${i};render()" class="px-3 py-2 text-sm font-semibold transition-colors border-b-2 ${state.tab===i?"tab-active":"tab-inactive hover:text-slate-600"}">
               ${t}${i===2&&state.selected.length>0?`<span class="ml-1.5 rounded-full bg-blue-600 text-white text-xs px-1.5 py-0.5">${state.selected.length}</span>`:""}
             </button>`).join("")}
@@ -2041,6 +2161,7 @@ function render(){
       ${state.tab===1?tabExercise():""}
       ${state.tab===2?tabCart():""}
       ${state.tab===3?tabPrint():""}
+      ${state.tab===4?tabAiAdmin():""}
     </main>
 
     <!-- ① 하단 모바일 탭 (개선) -->
@@ -2049,7 +2170,8 @@ function render(){
         {icon:"👤",label:"환자",i:0},
         {icon:"🔎",label:"운동선택",i:1},
         {icon:"🧺",label:"담은운동",i:2},
-        {icon:"⚙️",label:"출력",i:3}
+        {icon:"⚙️",label:"출력",i:3},
+        {icon:"🤖",label:"AI",i:4}
       ].map(({icon,label,i})=>`
         <button onclick="state.tab=${i};render()" class="btab-wrap ${state.tab===i?"btab-active":"btab-inactive"}">
           <div class="btab-icon-wrap">
@@ -2082,7 +2204,8 @@ function renderMain(){
   if(state.tab===0) html=tabPatient();
   else if(state.tab===1) html=tabExercise();
   else if(state.tab===2) html=tabCart();
-  else html=tabPrint();
+  else if(state.tab===3) html=tabPrint();
+  else html=tabAiAdmin();
   main.innerHTML=html;
   // 하단 모바일 탭 뱃지 + 플로팅 FAB 도 동기화
   syncBottomNav();
@@ -2352,14 +2475,14 @@ function tabExercise(){
           const fullLv=idx===0?"전체":LEVELS_FULL[idx];
           const pillClass=LV_PILL_CLASS[fullLv]||"lvpill-all";
           const isActive=state.level===lv;
-          return `<button onclick="state.level='${lv}';state.activePreset=null;state.bbsMode=false;renderMain()" class="px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${pillClass} ${isActive?"lvpill-active":"lvpill-inactive"}">${lv}</button>`;
+          return `<button onclick="state.level='${lv}';state.activePreset=null;state.bbsMode=false;renderExerciseResults()" class="px-3 py-1.5 rounded-full text-xs font-bold border-2 transition-all ${pillClass} ${isActive?"lvpill-active":"lvpill-inactive"}">${lv}</button>`;
         }).join("")}
       </div>
       <div class="flex flex-wrap gap-1.5 mb-3">
         ${categories().map(c=>{
           const catCls=CAT_CLASS[c]||"";
           const isActive=state.category===c;
-          return `<button onclick="state.category='${c}';state.activePreset=null;state.bbsMode=false;renderMain()" class="px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${isActive?`${catCls} border-current`:"bg-white text-slate-500 border-slate-200 hover:border-slate-400"}">${c}</button>`;
+          return `<button onclick="state.category='${c}';state.activePreset=null;state.bbsMode=false;renderExerciseResults()" class="px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${isActive?`${catCls} border-current`:"bg-white text-slate-500 border-slate-200 hover:border-slate-400"}">${c}</button>`;
         }).join("")}
       </div>
       <div class="rounded-xl bg-slate-50 border border-slate-100 p-3 space-y-2">
@@ -2762,6 +2885,114 @@ function tabPrint(){
           </div>`).join("")}
       </div>
     </section>`:""}
+  </div>`;
+}
+
+
+/* ══════════════════════════════════════════
+   탭 5 — AI/관리
+══════════════════════════════════════════ */
+function tabAiAdmin(){
+  const profile=currentAiProfile();
+  const resultExercises=state.aiResultIds.map(id=>exerciseById(id)).filter(Boolean);
+  const comp=libraryCompleteness();
+  const selectedAdmin=exerciseById(state.adminExerciseId)||exercises[0];
+  const dxOptions=["stroke","sci","tka","fall","elderly","sarcopenia","cancer","bedridden","cardiac","respiratory","ataxia"];
+  const goalOptions=["ROM","strength","balance","gait","endurance","ADL","stretch"];
+  return `<div class="space-y-4 anim-fadeup">
+    <section class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl border border-indigo-100 p-5">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div>
+          <h2 class="text-xl font-black text-slate-800">🤖 AI 보조 작업실</h2>
+          <p class="text-sm text-slate-500 mt-1">외부 API 없이 로컬 규칙 기반으로 추천·문구·리플릿·이미지 프롬프트·라이브러리 관리를 지원합니다.</p>
+        </div>
+        <div class="text-xs text-slate-500 bg-white/70 rounded-xl px-3 py-2 border border-white">v${VERSION.replace('v','')} · 운동 ${exercises.length}개 · 이미지 ${comp.imageReady}개</div>
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-2 gap-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <h3 class="font-black text-slate-800 mb-3">31. AI 운동 추천</h3>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <label class="text-xs font-bold text-slate-500">진단/대상
+            <select onchange="setAiProfile('diagnosis',this.value)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm">
+              ${dxOptions.map(v=>`<option value="${v}" ${profile.diagnosis===v?"selected":""}>${esc(labelFromList(TAG_FILTERS,v))}</option>`).join("")}
+            </select>
+          </label>
+          <label class="text-xs font-bold text-slate-500">기능 수준
+            <select onchange="setAiProfile('functionLevel',this.value)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm">
+              ${[["bed","침상/와상"],["sitting","앉기 가능"],["standing","기립 가능"],["walking","보행 가능"]].map(([v,l])=>`<option value="${v}" ${profile.functionLevel===v?"selected":""}>${l}</option>`).join("")}
+            </select>
+          </label>
+          <label class="text-xs font-bold text-slate-500">주요 목표
+            <select onchange="setAiProfile('goal',this.value)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm">
+              ${goalOptions.map(v=>`<option value="${v}" ${profile.goal===v?"selected":""}>${esc(labelFromList(PURPOSE_FILTERS,v))}</option>`).join("")}
+            </select>
+          </label>
+          <label class="text-xs font-bold text-slate-500">BBS 점수 <span class="text-slate-300">선택</span>
+            <input type="number" min="0" max="56" value="${esc(profile.bbs)}" oninput="setAiProfile('bbs',this.value)" placeholder="0~56" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/>
+          </label>
+        </div>
+        <label class="block text-xs font-bold text-slate-500 mt-3">메모/주의사항 <span class="text-slate-300">선택</span>
+          <textarea oninput="setAiProfile('note',this.value)" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm h-20" placeholder="예: 낙상위험 높음, 무릎통증, 보호자 동행">${esc(profile.note)}</textarea>
+        </label>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <button onclick="recommendAiExercises()" class="rounded-xl bg-indigo-600 text-white font-bold px-4 py-2.5 text-sm hover:bg-indigo-700">추천 실행</button>
+          <button onclick="addAiRecommended()" ${resultExercises.length===0?"disabled":""} class="rounded-xl border border-indigo-200 text-indigo-700 font-bold px-4 py-2.5 text-sm hover:bg-indigo-50 disabled:opacity-40">추천 담기</button>
+          <button onclick="buildAiLeaflet()" ${resultExercises.length===0?"disabled":""} class="rounded-xl bg-slate-800 text-white font-bold px-4 py-2.5 text-sm hover:bg-slate-700 disabled:opacity-40">맞춤 리플릿 구성</button>
+        </div>
+        ${resultExercises.length?`<div class="mt-4 rounded-xl bg-slate-50 border border-slate-100 p-3"><p class="text-xs font-bold text-slate-500 mb-2">추천 결과 ${resultExercises.length}개</p><div class="flex flex-wrap gap-1.5">${resultExercises.map(e=>`<span class="text-xs rounded-full bg-white border border-slate-200 px-2 py-1">${esc(e.title)}</span>`).join("")}</div></div>`:""}
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <h3 class="font-black text-slate-800 mb-3">32·33. 설명 생성 / 맞춤 리플릿</h3>
+        <p class="text-sm text-slate-500 leading-6">담은 운동 또는 추천 운동을 기준으로 환자용·보호자용 설명 초안을 만들고, 추천 운동을 바로 출력 리플릿에 반영합니다.</p>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <button onclick="generateAiExplanation('patient')" class="rounded-xl bg-blue-600 text-white font-bold px-4 py-2.5 text-sm hover:bg-blue-700">환자용 설명 생성</button>
+          <button onclick="generateAiExplanation('caregiver')" class="rounded-xl bg-emerald-600 text-white font-bold px-4 py-2.5 text-sm hover:bg-emerald-700">보호자용 설명 생성</button>
+          <button onclick="copyText('ai-text-output')" class="rounded-xl border border-slate-200 text-slate-600 font-bold px-4 py-2.5 text-sm hover:bg-slate-50">복사</button>
+        </div>
+        <textarea id="ai-text-output" readonly class="mt-3 w-full h-44 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm leading-6">${esc(state.aiText)}</textarea>
+      </div>
+    </section>
+
+    <section class="grid lg:grid-cols-2 gap-4">
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <h3 class="font-black text-slate-800 mb-3">34. 운동 이미지 자동 생성 프롬프트</h3>
+        <label class="text-xs font-bold text-slate-500">운동 선택
+          <select onchange="state.adminExerciseId=Number(this.value);generateImagePrompt()" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm">
+            ${exercises.map(e=>`<option value="${e.id}" ${selectedAdmin.id===e.id?"selected":""}>${e.id}. ${esc(e.title)} (${esc(e.imageKey)})</option>`).join("")}
+          </select>
+        </label>
+        <div class="grid grid-cols-3 gap-2 mt-3 text-[11px]">
+          <div class="rounded-lg bg-slate-50 border border-slate-100 p-2"><b>crop</b><br>${esc(selectedAdmin.cropType||"-")}</div>
+          <div class="rounded-lg bg-slate-50 border border-slate-100 p-2"><b>arrow</b><br>${esc(selectedAdmin.arrowType||"-")}</div>
+          <div class="rounded-lg bg-slate-50 border border-slate-100 p-2"><b>priority</b><br>${esc(selectedAdmin.imagePriority||"-")}</div>
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button onclick="generateImagePrompt()" class="rounded-xl bg-purple-600 text-white font-bold px-4 py-2.5 text-sm hover:bg-purple-700">프롬프트 생성</button>
+          <button onclick="copyText('image-prompt-output')" class="rounded-xl border border-slate-200 text-slate-600 font-bold px-4 py-2.5 text-sm hover:bg-slate-50">복사</button>
+        </div>
+        <textarea id="image-prompt-output" readonly class="mt-3 w-full h-52 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs leading-5">${esc(state.aiPrompt||imagePromptForExercise(selectedAdmin))}</textarea>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+        <h3 class="font-black text-slate-800 mb-3">35. 운동 라이브러리 관리자</h3>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="rounded-xl bg-blue-50 border border-blue-100 p-3"><p class="text-2xl font-black text-blue-700">${comp.total}</p><p class="text-xs text-blue-500 font-bold">총 운동</p></div>
+          <div class="rounded-xl bg-emerald-50 border border-emerald-100 p-3"><p class="text-2xl font-black text-emerald-700">${comp.imageReady}</p><p class="text-xs text-emerald-500 font-bold">임베드 이미지</p></div>
+          <div class="rounded-xl ${comp.missing?"bg-amber-50 border-amber-100":"bg-slate-50 border-slate-100"} border p-3"><p class="text-2xl font-black ${comp.missing?"text-amber-700":"text-slate-700"}">${comp.missing}</p><p class="text-xs text-slate-500 font-bold">메타 누락</p></div>
+        </div>
+        <input value="${esc(state.libraryKeyword)}" oninput="state.libraryKeyword=this.value;renderMain()" placeholder="운동명/imageKey 검색" class="mt-3 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/>
+        <div class="mt-3 max-h-44 overflow-auto rounded-xl border border-slate-100 divide-y divide-slate-100">
+          ${exercises.filter(e=>!state.libraryKeyword||[e.title,e.imageKey,e.category,e.level].join(' ').toLowerCase().includes(state.libraryKeyword.toLowerCase())).slice(0,40).map(e=>`<button onclick="state.adminExerciseId=${e.id};generateImagePrompt()" class="w-full text-left px-3 py-2 text-xs hover:bg-slate-50 flex justify-between gap-2"><span>${e.id}. ${esc(e.title)}</span><span class="text-slate-400">${esc(e.imageKey)}</span></button>`).join("")}
+        </div>
+        <div class="flex flex-wrap gap-2 mt-3">
+          <button onclick="exportLibraryJson()" class="rounded-xl bg-slate-800 text-white font-bold px-4 py-2.5 text-sm hover:bg-slate-700">JSON 내보내기</button>
+          <button onclick="state.aiText=JSON.stringify(exerciseById(state.adminExerciseId),null,2);renderMain()" class="rounded-xl border border-slate-200 text-slate-600 font-bold px-4 py-2.5 text-sm hover:bg-slate-50">선택 운동 JSON</button>
+        </div>
+      </div>
+    </section>
   </div>`;
 }
 
