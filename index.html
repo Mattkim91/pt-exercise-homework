@@ -29,6 +29,14 @@
     .leaflet-compact { break-inside:avoid; page-break-inside:avoid; word-break:keep-all; overflow-wrap:break-word; }
     .leaflet-compact-img { width:14mm; height:12mm; }
     .leaflet-compact h2, .leaflet-compact p, .leaflet-dose { word-break:keep-all; overflow-wrap:break-word; white-space:normal; }
+    @media screen and (max-width:700px) {
+      .leaflet-wide-card { flex-direction:column !important; align-items:stretch !important; }
+      .leaflet-wide-card .shrink-0.text-right { text-align:left; }
+    }
+    @media (min-width:640px) {
+      .cart-row { flex-direction:row; align-items:center; gap:.75rem; }
+      .cart-video { width:11rem; }
+    }
 
     /* ── 인쇄 ─────────────────────────── */
     @media print {
@@ -1383,6 +1391,7 @@ function render(){
     <!-- 인쇄용 숨김 섹션 -->
     <section class="print-area hidden mx-auto max-w-4xl bg-white p-8">${leafletHTML()}</section>
   </div>`;
+  syncBottomNav();
 }
 
 /* 탭 콘텐츠(main)만 업데이트 — 헤더를 건드리지 않아 깜빡임 없음 */
@@ -1422,19 +1431,21 @@ function syncBottomNav(){
     mBadge.remove();
   }
 
-  // ── 플로팅 FAB ──
-  let fab = document.getElementById("cart-fab");
+  // ── 플로팅 FAB. 운동 선택 탭에서만 두고, 다른 탭에 남은 복제 버튼은 지운다. ──
+  const fabs = [...document.querySelectorAll("#cart-fab")];
   if(state.tab===1 && cnt > 0){
+    let fab = fabs.find(el => el.closest("#app")) || fabs[0];
+    fabs.forEach(el => { if(el!==fab) el.remove(); });
     if(!fab){
       fab = document.createElement("div");
       fab.id = "cart-fab";
       fab.className = "no-print sm:hidden fixed bottom-20 right-4 z-30 flex items-center gap-2 rounded-2xl bg-blue-600 text-white px-4 py-3 text-sm font-bold cursor-pointer anim-pop";
       fab.onclick = ()=>{ state.tab=2; render(); };
-      document.body.appendChild(fab);
+      (document.getElementById("app")||document.body).appendChild(fab);
     }
     fab.innerHTML = `🧺 <span>${cnt}개 담음</span><span class="text-blue-200">·</span><span class="text-blue-100"><span data-live-minutes>${totalMinutes()}</span>분</span>`;
-  } else if(fab){
-    fab.remove();
+  } else {
+    fabs.forEach(el => el.remove());
   }
 
   // ── 헤더 환자 뱃지 운동 개수 ──
@@ -2098,7 +2109,7 @@ function tabCart(){
           const catBar=CAT_BAR[item.category]||"";
           const checked=chk.has(item.id);
           return `
-          <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-100 last:border-0 ${catBar} ${sel&&checked?"bg-red-50":"hover:bg-slate-50"} transition-colors
+          <div class="cart-row flex flex-col gap-2 px-4 py-3 border-b border-slate-100 last:border-0 ${catBar} ${sel&&checked?"bg-red-50":"hover:bg-slate-50"} transition-colors
                [&.drag-over-top]:border-t-2 [&.drag-over-top]:border-t-blue-400
                [&.drag-over-bot]:border-b-2 [&.drag-over-bot]:border-b-blue-400"
             ${!sel?`draggable="true" ondragstart="onDragStart(event,${item.id})" ondragend="onDragEnd(event)" ondragover="onDragOver(event,${item.id})" ondrop="onDrop(event,${item.id})"`:""}>
@@ -2120,22 +2131,22 @@ function tabCart(){
               <span class="text-[10px] font-black text-slate-400 leading-none">${idx+1}</span>
             </div>`}
 
-            <div class="flex-1 min-w-0">
+            <div class="min-w-0 w-full flex-1 keep-ko">
               <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="font-bold text-sm ${sel&&checked?"text-red-600":"text-slate-800"}">${esc(item.title)}</span>
+                <span class="font-bold text-sm keep-ko ${sel&&checked?"text-red-600":"text-slate-800"}">${esc(item.title)}</span>
                 <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${catCls}">${esc(item.category)}</span>
               </div>
               <p class="text-xs text-slate-400 mt-0.5">${esc(item.level)}</p>
               ${sel?"":`<div class="mt-1 flex items-center gap-1 flex-wrap">
                 <input type="url" value="${esc(item.videoUrl||"")}" placeholder="영상 주소 https://"
                   onchange="setExerciseVideo(${item.id}, this.value)"
-                  class="w-44 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs focus:border-blue-400">
+                  class="cart-video w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs focus:border-blue-400">
                 ${loadVideoDefaults()[String(item.id)]?`<button type="button" onclick="clearVideoDefault(${item.id})" class="rounded-lg border border-slate-200 px-2 py-1 text-[10px] font-bold text-slate-500 hover:bg-slate-50">기본 주소 지우기</button>`:""}
               </div>`}
             </div>
 
             ${sel?"":` 
-            <div class="flex items-center gap-2 shrink-0">
+            <div class="flex items-center gap-2 flex-wrap">
               ${item.isTimeBased?`
               <div class="flex flex-col items-center gap-0.5">
                 <span class="text-[9px] text-slate-400 font-semibold">시간(분)</span>
