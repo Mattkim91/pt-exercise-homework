@@ -917,8 +917,12 @@ function saveEditPatient(id){
   const noEl=document.getElementById("edit-no-"+id);
   if(!nameEl)return;
   const newName=nameEl.value.trim();
+  const newNo=noEl?noEl.value.trim():"";
   if(!newName){alert("이름을 입력해주세요.");return;}
-  state.savedPatients=state.savedPatients.map(r=>r.id===id?{...r,name:newName,patientNo:noEl?noEl.value.trim():""}:r);
+  state.savedPatients=state.savedPatients.map(r=>r.id===id?{...r,name:newName,patientNo:newNo}:r);
+  if(state.patient.id===id){
+    state.patient={...state.patient, name:newName, patientNo:newNo};
+  }
   persist();
   state.editingPatientId=null;
   showMessage("수정 완료 ✓");
@@ -1011,8 +1015,9 @@ function loadPatient(id){
 function duplicatePatient(id){
   flushAutoSave();
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
-  state.patient={id:"patient-"+Date.now(),name:(r.name||"이름 없는 환자")+" 복사본",
-    date:new Date().toISOString().slice(0,10),memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:r.patientNo||""};
+  const base=(r.name||"이름 없는 환자").trim();
+  state.patient={id:"patient-"+Date.now(),name:base+" 복사본",
+    date:new Date().toISOString().slice(0,10),memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:""};
   state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
   state.isNewPatient=true; // 복사본은 신규로 취급
