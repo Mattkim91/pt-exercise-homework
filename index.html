@@ -1191,7 +1191,29 @@ function deletePatient(id){
   state.savedPatients=state.savedPatients.filter(x=>x.id!==id);persist();
   showMessage("삭제했습니다.");
 }
+function cssQuote(s){
+  return String(s??"").replace(/\\/g,"\\\\").replace(/"/g,"\\\"").replace(/[\n\r]/g," ");
+}
+function printPageStyle(){
+  const name=state.patient.name||"";
+  const date=state.patient.date||localDateString();
+  const left=cssQuote([name, date].filter(Boolean).join("  ·  "));
+  return `@page{size:A4;margin:16mm 12mm 14mm;
+    @top-left{content:"${left}";font-size:9pt;font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#334155;}
+    @top-right{content:counter(page) " / " counter(pages);font-size:9pt;font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#334155;}
+  }`;
+}
+function syncPrintPageStyle(){
+  let el=document.getElementById("print-page-style");
+  if(!el){
+    el=document.createElement("style");
+    el.id="print-page-style";
+    document.head.appendChild(el);
+  }
+  el.textContent=printPageStyle();
+}
 function downloadPdf(){
+  syncPrintPageStyle();
   const name = state.patient.name || "환자";
   const date = state.patient.date || localDateString();
   const title = `개인별 맞춤 운동 과제 — ${name} (${date})`;
@@ -1211,7 +1233,7 @@ function downloadPdf(){
   <style>
     ${pageCss}
     * { font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
-    @page { size: A4; margin: 10mm 12mm; }
+    ${printPageStyle()}
     @media print {
       .no-print { display: none !important; }
       body { background: white; }
@@ -1255,6 +1277,7 @@ function downloadPdf(){
    RENDER
 ══════════════════════════════════════════ */
 function render(){
+  syncPrintPageStyle();
   const app=document.getElementById("app");
   app.innerHTML=`
   <div class="min-h-screen flex flex-col bg-slate-100">
