@@ -1542,15 +1542,105 @@ let state = {
   cartSelectMode:false, cartChecked:new Set(), cartDraftSelected:null
 };
 let msgTimer=null;
+let storageError="";
 
 function newPatientData(){
   return {id:"patient-"+Date.now(),name:"",date:new Date().toISOString().slice(0,10),memo:DEFAULT_MEMO,note:"",patientNo:""};
 }
+
+/* 저장 기록에는 운동 id와 환자별 설정만 둔다.
+   그림 주소와 운동 문구는 현재 라이브러리에서 다시 읽는다.
+   예전 기록의 방법·주의사항이 라이브러리와 다르면 그 문구만 덮어쓰기로 남긴다. */
+function slimSelectedItem(raw){
+  if(!raw||raw.id==null) return null;
+  const id=Number(raw.id);
+  if(!Number.isFinite(id)) return null;
+  const lib=exerciseById(id);
+  const item={id};
+  if(raw.reps!=null&&raw.reps!=="") item.reps=Number(raw.reps);
+  if(raw.sets!=null&&raw.sets!=="") item.sets=Number(raw.sets);
+  if(raw.durationMin!=null&&raw.durationMin!=="") item.durationMin=Number(raw.durationMin);
+  if(typeof raw.side==="string") item.side=raw.side;
+  if(typeof raw.videoUrl==="string"&&raw.videoUrl&&!String(raw.videoUrl).startsWith("data:")) item.videoUrl=raw.videoUrl;
+  const desc=typeof raw.description==="string"?raw.description:"";
+  const caut=typeof raw.caution==="string"?raw.caution:"";
+  if(lib){
+    if(desc&&desc!==lib.description) item.description=desc;
+    if(caut&&caut!==lib.caution) item.caution=caut;
+  }else{
+    if(desc) item.description=desc;
+    if(caut) item.caution=caut;
+    if(typeof raw.title==="string"&&raw.title) item.title=raw.title;
+  }
+  return item;
+}
+function serializeSelected(list){
+  return (Array.isArray(list)?list:[]).map(slimSelectedItem).filter(Boolean);
+}
+function hydrateSelected(list){
+  return serializeSelected(list).map(slim=>{
+    const lib=exerciseById(slim.id);
+    if(!lib){
+      return {id:slim.id,title:slim.title||("목록에 없는 운동 #"+slim.id),category:"",level:"",target:"",
+        description:slim.description||"",caution:slim.caution||"",reps:slim.reps??0,sets:slim.sets??0,
+        durationMin:slim.durationMin??0,side:slim.side||"",videoUrl:slim.videoUrl||"",image:"",imageUrl:"",imageKey:"",isTimeBased:false};
+    }
+    return {...lib,
+      reps:slim.reps!=null?slim.reps:lib.reps,
+      sets:slim.sets!=null?slim.sets:lib.sets,
+      durationMin:slim.durationMin!=null?slim.durationMin:lib.durationMin,
+      side:slim.side!=null?slim.side:lib.side,
+      videoUrl:slim.videoUrl||"",
+      description:slim.description!=null?slim.description:lib.description,
+      caution:slim.caution!=null?slim.caution:lib.caution
+    };
+  });
+}
+function migratePatientRecord(rec){
+  if(!rec||typeof rec!=="object") return {record:rec,changed:false};
+  const selected=serializeSelected(rec.selected);
+  let changed=JSON.stringify(rec.selected||[])!==JSON.stringify(selected);
+  const record={...rec,selected};
+  if(typeof record.imageUrl==="string"){ delete record.imageUrl; changed=true; }
+  return {record,changed};
+}
+function reportStorageError(err){
+  const name=err&&err.name?err.name:"";
+  storageError="이 브라우저에 기록을 저장하지 못했습니다. 저장 공간이 가득 찼거나 저장이 차단되었을 수 있습니다."+(name?" ("+name+")":"");
+  const el=document.getElementById("storage-error-banner");
+  if(el){
+    el.textContent=storageError;
+    el.classList.remove("hidden");
+  }
+}
+function clearStorageError(){
+  storageError="";
+  const el=document.getElementById("storage-error-banner");
+  if(el) el.classList.add("hidden");
+}
 function loadSavedPatients(){
-  try{const r=localStorage.getItem(STORAGE_KEY);const p=r?JSON.parse(r):[];return Array.isArray(p)?p:[];}catch(e){return[];}
+  try{
+    const r=localStorage.getItem(STORAGE_KEY);
+    const p=r?JSON.parse(r):[];
+    if(!Array.isArray(p)) return [];
+    let changed=false;
+    const next=p.map(rec=>{
+      const m=migratePatientRecord(rec);
+      if(m.changed) changed=true;
+      return m.record;
+    });
+    if(changed){
+      try{localStorage.setItem(STORAGE_KEY,JSON.stringify(next));}
+      catch(e){reportStorageError(e);}
+    }
+    return next;
+  }catch(e){return [];}
 }
 function persist(){
-  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state.savedPatients));}catch(e){}
+  try{
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(state.savedPatients));
+    clearStorageError();
+  }catch(e){reportStorageError(e);}
 }
 
 /* ── 자동저장 ──────────────────────────────
@@ -1577,7 +1667,7 @@ function autoSave(){
   const record = {
     ...state.patient,
     savedAt: new Date().toISOString(),
-    selected: state.selected,
+    selected: serializeSelected(state.selected),
     therapistName: state.therapistName || "",
     settings:{
       layoutMode:state.layoutMode, showQr:state.showQr,
@@ -1616,14 +1706,14 @@ function loadRecent(){
   try{return JSON.parse(localStorage.getItem(RECENT_KEY)||"[]");}catch(e){return[];}
 }
 function saveRecent(ids){
-  try{localStorage.setItem(RECENT_KEY,JSON.stringify(ids.slice(0,8)));}catch(e){}
+  try{localStorage.setItem(RECENT_KEY,JSON.stringify(ids.slice(0,8)));}catch(e){reportStorageError(e);}
 }
 
 function loadFavorites(){
   try{return JSON.parse(localStorage.getItem(FAVORITE_KEY)||"[]");}catch(e){return[];}
 }
 function saveFavorites(ids){
-  try{localStorage.setItem(FAVORITE_KEY,JSON.stringify(ids));}catch(e){}
+  try{localStorage.setItem(FAVORITE_KEY,JSON.stringify(ids));}catch(e){reportStorageError(e);}
 }
 function isFavorite(id){return loadFavorites().includes(id);}
 function toggleFavorite(id){
@@ -1977,7 +2067,7 @@ function loadPatient(id){
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
   state.patient={id:r.id,name:r.name||"",date:r.date||new Date().toISOString().slice(0,10),
     memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:r.patientNo||""};
-  state.selected=Array.isArray(r.selected)?r.selected:[];
+  state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
   if(r.settings){state.layoutMode=r.settings.layoutMode??"1단 가로형";state.showQr=r.settings.showQr??false;
     state.showChecklist=r.settings.showChecklist??false;state.showPainLog=r.settings.showPainLog??false;
@@ -1993,7 +2083,7 @@ function duplicatePatient(id){
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
   state.patient={id:"patient-"+Date.now(),name:(r.name||"이름 없는 환자")+" 복사본",
     date:new Date().toISOString().slice(0,10),memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:r.patientNo||""};
-  state.selected=Array.isArray(r.selected)?r.selected.map(x=>({...x})):[];
+  state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
   state.isNewPatient=true; // 복사본은 신규로 취급
   state.tab=0;
@@ -2072,6 +2162,7 @@ function render(){
   const app=document.getElementById("app");
   app.innerHTML=`
   <div class="min-h-screen flex flex-col bg-slate-100">
+    <div id="storage-error-banner" class="no-print bg-red-600 text-white text-sm font-bold px-4 py-3 ${storageError?"":"hidden"}">${esc(storageError)}</div>
 
     ${state.preview?previewOverlay():""}
 
