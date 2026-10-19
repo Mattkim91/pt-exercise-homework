@@ -22,6 +22,9 @@
   <style>
     * { font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
 
+    /* 한글은 글자 단위로 끊지 않고, 칸이 부족하면 어절 경계에서 넘긴다 */
+    .keep-ko { word-break: keep-all; overflow-wrap: break-word; }
+
     /* ── 인쇄 ─────────────────────────── */
     @media print {
       .no-print { display:none !important; }
@@ -2207,19 +2210,19 @@ function leafletHTML(){
   function articleHTML(item, i){
     // ── 1단 가로형: 낮고 가로로 긴 카드 ──────────────────────
     if(isWide){
-      return `<article class="page-break rounded-xl border border-slate-300 p-3 flex items-center gap-4">
+      return `<article class="page-break leaflet-wide-card rounded-xl border border-slate-300 p-3 flex items-start gap-4">
         ${state.showImage
           ? `<div class="flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 ring-1 ring-slate-100 h-20 w-24 text-3xl">${imgTag(item)}</div>`
           : ""}
-        <div class="flex-1 min-w-0">
+        <div class="flex-1 min-w-0 keep-ko">
           <div class="flex items-baseline gap-2 flex-wrap">
             <span class="text-xs text-slate-400 font-bold shrink-0">운동 ${i+1}</span>
             <h2 class="text-base font-black leading-tight">${esc(item.title)}</h2>
             <span class="text-xs text-slate-500 shrink-0">· ${esc(item.level)}</span>
           </div>
-          <p class="text-xs text-slate-500 mt-0.5 line-clamp-2">방법: ${esc(item.description)}</p>
+          <p class="text-xs text-slate-500 mt-0.5" style="white-space:normal;overflow:visible;">방법: ${esc(item.description)}</p>
           ${state.showCaution && item.caution
-            ? `<p class="text-xs text-amber-700 mt-0.5 truncate">⚠ ${esc(item.caution)}</p>`
+            ? `<p class="text-xs text-amber-700 mt-0.5" style="white-space:normal;overflow:visible;">⚠ ${esc(item.caution)}</p>`
             : ""}
         </div>
         <div class="shrink-0 text-right space-y-1">
