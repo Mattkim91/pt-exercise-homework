@@ -293,9 +293,11 @@ function doseUnitOf(item){
 }
 function doseText(item){
   if(!item) return "";
-  if(item.isTimeBased) return `${item.durationMin}분`;
-  if(doseUnitOf(item)==="sec") return `${item.reps}초 유지 × ${item.sets}세트`;
-  return `${item.reps}회 × ${item.sets}세트`;
+  if(item.isTimeBased) return `${positiveInt(item.durationMin,1)}분`;
+  const sets=positiveInt(item.sets,1);
+  const n=positiveInt(item.reps,1);
+  if(doseUnitOf(item)==="sec") return `${n}초 유지 × ${sets}세트`;
+  return `${n}회 × ${sets}세트`;
 }
 const exercises = EXERCISES.map(e=>({
   ...e,
@@ -327,8 +329,20 @@ let state = {
 let msgTimer=null;
 let storageError="";
 
+function localDateString(d=new Date()){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function positiveInt(value, fallback){
+  const n=Math.trunc(Number(value));
+  if(Number.isFinite(n)&&n>=1) return n;
+  const f=Math.trunc(Number(fallback));
+  return Number.isFinite(f)&&f>=1 ? f : 1;
+}
 function newPatientData(){
-  return {id:"patient-"+Date.now(),name:"",date:new Date().toISOString().slice(0,10),memo:DEFAULT_MEMO,note:"",patientNo:""};
+  return {id:"patient-"+Date.now(),name:"",date:localDateString(),memo:DEFAULT_MEMO,note:"",patientNo:""};
 }
 
 /* 저장 기록에는 운동 id와 환자별 설정만 둔다.
@@ -340,9 +354,10 @@ function slimSelectedItem(raw){
   if(!Number.isFinite(id)) return null;
   const lib=exerciseById(id);
   const item={id};
-  if(raw.reps!=null&&raw.reps!=="") item.reps=Number(raw.reps);
-  if(raw.sets!=null&&raw.sets!=="") item.sets=Number(raw.sets);
-  if(raw.durationMin!=null&&raw.durationMin!=="") item.durationMin=Number(raw.durationMin);
+  const libForCount=exerciseById(id);
+  if(raw.reps!=null&&raw.reps!=="") item.reps=positiveInt(raw.reps, libForCount?libForCount.reps:1);
+  if(raw.sets!=null&&raw.sets!=="") item.sets=positiveInt(raw.sets, libForCount?libForCount.sets:1);
+  if(raw.durationMin!=null&&raw.durationMin!=="") item.durationMin=positiveInt(raw.durationMin, libForCount?libForCount.durationMin:1);
   if(typeof raw.side==="string") item.side=normalizeSide(raw.side);
   if(raw.unit==="sec"||raw.unit==="reps") item.unit=raw.unit;
   if(typeof raw.videoUrl==="string"&&isHttpUrl(raw.videoUrl)) item.videoUrl=String(raw.videoUrl).trim();
@@ -366,14 +381,14 @@ function hydrateSelected(list){
     const lib=exerciseById(slim.id);
     if(!lib){
       return {id:slim.id,title:slim.title||("목록에 없는 운동 #"+slim.id),category:"",level:"",target:"",
-        description:slim.description||"",caution:slim.caution||"",reps:slim.reps??0,sets:slim.sets??0,
-        durationMin:slim.durationMin??0,side:slim.side||"",unit:slim.unit==="sec"||slim.unit==="reps"?slim.unit:defaultDoseUnit(slim.id),
+        description:slim.description||"",caution:slim.caution||"",reps:positiveInt(slim.reps,1),sets:positiveInt(slim.sets,1),
+        durationMin:positiveInt(slim.durationMin,1),side:slim.side||"",unit:slim.unit==="sec"||slim.unit==="reps"?slim.unit:defaultDoseUnit(slim.id),
         videoUrl:slim.videoUrl||"",image:"",imageUrl:"",imageKey:"",isTimeBased:false};
     }
     return {...lib,
-      reps:slim.reps!=null?slim.reps:lib.reps,
-      sets:slim.sets!=null?slim.sets:lib.sets,
-      durationMin:slim.durationMin!=null?slim.durationMin:lib.durationMin,
+      reps:positiveInt(slim.reps!=null?slim.reps:lib.reps, lib.reps),
+      sets:positiveInt(slim.sets!=null?slim.sets:lib.sets, lib.sets),
+      durationMin:positiveInt(slim.durationMin!=null?slim.durationMin:lib.durationMin, lib.durationMin),
       side:slim.side!=null?slim.side:lib.side,
       unit:slim.unit==="sec"||slim.unit==="reps"?slim.unit:defaultDoseUnit(slim.id),
       videoUrl:slim.videoUrl||"",
@@ -959,7 +974,28 @@ function updateSelectedSideSilent(id,value){
 }
 // 숫자 입력 전용 — state만 업데이트 (깜빡임 없음)
 function updateSelectedSilent(id,field,value){
-  state.selected=state.selected.map(x=>x.id===id?{...x,[field]:Number(value)}:x);
+  const raw=String(value??"").trim();
+  if(!/^\d+$/.test(raw)||Number(raw)<1) return;
+  const n=Math.trunc(Number(raw));
+  state.selected=state.selected.map(x=>x.id===id?{...x,[field]:n}:x);
+  if(Array.isArray(state.cartDraftSelected)){
+    state.cartDraftSelected=state.cartDraftSelected.map(x=>x.id===id?{...x,[field]:n}:x);
+  }
+  autoSaveDebounced();
+}
+function commitSelectedCount(id,field,input){
+  const item=state.selected.find(x=>x.id===id);
+  if(!item) return;
+  const lib=exerciseById(id);
+  const raw=String(input&&input.value!=null?input.value:"").trim();
+  if(/^\d+$/.test(raw)&&Number(raw)>=1){
+    updateSelectedSilent(id,field,raw);
+    if(input) input.value=String(Math.trunc(Number(raw)));
+    return;
+  }
+  const restored=positiveInt(item[field], lib?lib[field]:1);
+  state.selected=state.selected.map(x=>x.id===id?{...x,[field]:restored}:x);
+  if(input) input.value=String(restored);
   autoSaveDebounced();
 }
 function applyPreset(name){
@@ -999,7 +1035,7 @@ function newPatient(){
 function loadPatient(id){
   flushAutoSave();
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
-  state.patient={id:r.id,name:r.name||"",date:r.date||new Date().toISOString().slice(0,10),
+  state.patient={id:r.id,name:r.name||"",date:r.date||localDateString(),
     memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:r.patientNo||""};
   state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
@@ -1017,7 +1053,7 @@ function duplicatePatient(id){
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
   const base=(r.name||"이름 없는 환자").trim();
   state.patient={id:"patient-"+Date.now(),name:base+" 복사본",
-    date:new Date().toISOString().slice(0,10),memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:""};
+    date:localDateString(),memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:""};
   state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
   state.isNewPatient=true; // 복사본은 신규로 취급
@@ -1036,7 +1072,7 @@ function exportPatients(){
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
-  a.download=`pt-patients-${new Date().toISOString().slice(0,10)}.json`;
+  a.download=`pt-patients-${localDateString()}.json`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -1112,7 +1148,7 @@ function deletePatient(id){
 }
 function downloadPdf(){
   const name = state.patient.name || "환자";
-  const date = state.patient.date || new Date().toISOString().slice(0,10);
+  const date = state.patient.date || localDateString();
   const title = `개인별 맞춤 운동 과제 — ${name} (${date})`;
 
   const pw = window.open("", "_blank", "width=1000,height=800");
@@ -2035,17 +2071,17 @@ function tabCart(){
               ${item.isTimeBased?`
               <div class="flex flex-col items-center gap-0.5">
                 <span class="text-[9px] text-slate-400 font-semibold">시간(분)</span>
-                <input type="number" value="${item.durationMin}"
+                <input type="number" min="1" step="1" inputmode="numeric" value="${positiveInt(item.durationMin,1)}"
                   oninput="updateSelectedSilent(${item.id},'durationMin',this.value)"
-                  onchange="updateSelectedSilent(${item.id},'durationMin',this.value)"
+                  onchange="commitSelectedCount(${item.id},'durationMin',this)"
                   class="w-16 rounded-lg border border-slate-200 bg-white px-1 py-1.5 text-center text-sm font-bold focus:border-blue-400 transition-colors">
               </div>
               `:`
               <div class="flex flex-col items-center gap-0.5">
                 <span class="text-[9px] text-slate-400 font-semibold">${doseUnitOf(item)==="sec"?"초":"횟수"}</span>
-                <input type="number" value="${item.reps}"
+                <input type="number" min="1" step="1" inputmode="numeric" value="${positiveInt(item.reps,1)}"
                   oninput="updateSelectedSilent(${item.id},'reps',this.value)"
-                  onchange="updateSelectedSilent(${item.id},'reps',this.value)"
+                  onchange="commitSelectedCount(${item.id},'reps',this)"
                   class="w-14 rounded-lg border border-slate-200 bg-white px-1 py-1.5 text-center text-sm font-bold focus:border-blue-400 transition-colors">
               </div>
               <div class="flex flex-col items-center gap-0.5">
@@ -2059,9 +2095,9 @@ function tabCart(){
               <span class="text-slate-300 text-sm font-bold mt-3">×</span>
               <div class="flex flex-col items-center gap-0.5">
                 <span class="text-[9px] text-slate-400 font-semibold">세트</span>
-                <input type="number" value="${item.sets}"
+                <input type="number" min="1" step="1" inputmode="numeric" value="${positiveInt(item.sets,1)}"
                   oninput="updateSelectedSilent(${item.id},'sets',this.value)"
-                  onchange="updateSelectedSilent(${item.id},'sets',this.value)"
+                  onchange="commitSelectedCount(${item.id},'sets',this)"
                   class="w-14 rounded-lg border border-slate-200 bg-white px-1 py-1.5 text-center text-sm font-bold focus:border-blue-400 transition-colors">
               </div>
               `}
