@@ -22,6 +22,22 @@
   <style>
     * { font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
 
+    /* 한글은 글자 단위로 끊지 않고, 칸이 부족하면 어절 경계에서 넘긴다 */
+    .keep-ko { word-break: keep-all; overflow-wrap: break-word; }
+    .leaflet-qr { width: 18mm !important; height: 18mm !important; min-width: 18mm; min-height: 18mm; }
+    .leaflet-grid { display:grid; grid-template-columns:1fr 1fr; gap:2mm; align-items:start; }
+    .leaflet-compact { break-inside:avoid; page-break-inside:avoid; word-break:keep-all; overflow-wrap:break-word; }
+    .leaflet-compact-img { width:14mm; height:12mm; }
+    .leaflet-compact h2, .leaflet-compact p, .leaflet-dose { word-break:keep-all; overflow-wrap:break-word; white-space:normal; }
+    @media screen and (max-width:700px) {
+      .leaflet-wide-card { flex-direction:column !important; align-items:stretch !important; }
+      .leaflet-wide-card .shrink-0.text-right { text-align:left; }
+    }
+    @media (min-width:640px) {
+      .cart-row { flex-direction:row; align-items:center; gap:.75rem; }
+      .cart-video { width:11rem; }
+    }
+
     /* ── 인쇄 ─────────────────────────── */
     @media print {
       .no-print { display:none !important; }
@@ -201,13 +217,26 @@ const EXERCISE_IMAGES = {};
 ─────────────────────────────────────────── */
 
 
-const VERSION      = "v2.61";
+const VERSION      = "v2.62";
 const VERSION_DATE = "2026-10-19";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
 const FAVORITE_KEY = "exercise-homework-favorites-v1";
 const DEFAULT_MEMO = "통증이나 어지럼증 등의 증상 발생 시 잠시 중단하고 충분한 휴식을 취해주세요.";
 const SIDE_OPTIONS = ["","좌측","우측","양측","환측","건측"];
+const SIDE_UNSELECTED = new Set(["","좌/우 선택","해당 없음"]);
+function normalizeSide(side){
+  const s = typeof side==="string" ? side.trim() : "";
+  return SIDE_UNSELECTED.has(s) ? "" : s;
+}
+function sideSelectOptions(current){
+  const cur = normalizeSide(current);
+  return SIDE_OPTIONS.map(s=>`<option value="${esc(s)}" ${cur===s?"selected":""}>${s?esc(s):"미선택"}</option>`).join("");
+}
+function sidePrintPrefix(side){
+  const s = normalizeSide(side);
+  return s ? esc(s)+" · " : "";
+}
 const LEVELS       = ["전체","Lv0 PROM","Lv1 침상","Lv2 앉기","Lv3 서기","Lv4 보행","Lv5 유산소"];
 const LEVELS_FULL  = ["전체","Lv0 PROM/보호자","Lv1 침상운동","Lv2 앉은자세","Lv3 선자세","Lv4 보행훈련","Lv5 유산소운동"];
 const LAYOUTS      = ["1단 가로형","2단 압축형","큰 사진형","큰 글씨형"];
@@ -267,6 +296,22 @@ const TAG_FILTERS = [
 
 
 const TIME_BASED_IDS = new Set([56,57,58,59,60,61,62,63,67,69,70,71,72]); // 걷기/자전거 운동 (id 기준)
+/* 숫자 자체가 유지 시간인 운동. 기본 단위만 바꾸고, 운동 이름·방법·주의 문구는 그대로 둔다. */
+const HOLD_UNIT_IDS = new Set([23,42,43,44,73,74]);
+function defaultDoseUnit(id){return HOLD_UNIT_IDS.has(Number(id))?"sec":"reps";}
+function doseUnitOf(item){
+  if(!item||item.isTimeBased) return "min";
+  if(item.unit==="sec"||item.unit==="reps") return item.unit;
+  return defaultDoseUnit(item.id);
+}
+function doseText(item){
+  if(!item) return "";
+  if(item.isTimeBased) return `${positiveInt(item.durationMin,1)}분`;
+  const sets=positiveInt(item.sets,1);
+  const n=positiveInt(item.reps,1);
+  if(doseUnitOf(item)==="sec") return `${n}초 유지 × ${sets}세트`;
+  return `${n}회 × ${sets}세트`;
+}
 const exercises = EXERCISES.map(e=>({
   ...e,
   ...(IMAGE_META[e.imageKey] || {}),
@@ -281,7 +326,7 @@ const exercises = EXERCISES.map(e=>({
 let state = {
   tab: 0,
   query:"", category:"전체", level:"전체", bodyFilter:"전체", purposeFilter:"전체", tagFilter:"전체", showFavoritesOnly:false, bbsScore:"", bbsMode:false, activePreset:null,
-  aiProfile:{diagnosis:"stroke", functionLevel:"moderate", goal:"balance", bbs:"", note:""}, aiResultIds:[], aiText:"", aiPrompt:"", adminExerciseId:1, libraryKeyword:"",
+  aiProfile:{diagnosis:"stroke", functionLevel:"bed", goal:"balance", bbs:"", note:""}, aiResultIds:[], aiText:"", aiPrompt:"", adminExerciseId:1, libraryKeyword:"",
   patientQuery:"",
   selected:[], patient:newPatientData(),
   savedPatients:loadSavedPatients(),
@@ -291,13 +336,26 @@ let state = {
   importPreview:null,
   isNewPatient:true,
   mobileFiltersOpen:false,
-  cartSelectMode:false, cartChecked:new Set(), cartDraftSelected:null
+  cartSelectMode:false, cartChecked:new Set(), cartDraftSelected:null,
+  choiceDialog:null
 };
 let msgTimer=null;
 let storageError="";
 
+function localDateString(d=new Date()){
+  const y=d.getFullYear();
+  const m=String(d.getMonth()+1).padStart(2,"0");
+  const day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function positiveInt(value, fallback){
+  const n=Math.trunc(Number(value));
+  if(Number.isFinite(n)&&n>=1) return n;
+  const f=Math.trunc(Number(fallback));
+  return Number.isFinite(f)&&f>=1 ? f : 1;
+}
 function newPatientData(){
-  return {id:"patient-"+Date.now(),name:"",date:new Date().toISOString().slice(0,10),memo:DEFAULT_MEMO,note:"",patientNo:""};
+  return {id:"patient-"+Date.now(),name:"",date:localDateString(),memo:DEFAULT_MEMO,note:"",patientNo:""};
 }
 
 /* 저장 기록에는 운동 id와 환자별 설정만 둔다.
@@ -309,10 +367,12 @@ function slimSelectedItem(raw){
   if(!Number.isFinite(id)) return null;
   const lib=exerciseById(id);
   const item={id};
-  if(raw.reps!=null&&raw.reps!=="") item.reps=Number(raw.reps);
-  if(raw.sets!=null&&raw.sets!=="") item.sets=Number(raw.sets);
-  if(raw.durationMin!=null&&raw.durationMin!=="") item.durationMin=Number(raw.durationMin);
-  if(typeof raw.side==="string") item.side=raw.side;
+  const libForCount=exerciseById(id);
+  if(raw.reps!=null&&raw.reps!=="") item.reps=positiveInt(raw.reps, libForCount?libForCount.reps:1);
+  if(raw.sets!=null&&raw.sets!=="") item.sets=positiveInt(raw.sets, libForCount?libForCount.sets:1);
+  if(raw.durationMin!=null&&raw.durationMin!=="") item.durationMin=positiveInt(raw.durationMin, libForCount?libForCount.durationMin:1);
+  if(typeof raw.side==="string") item.side=normalizeSide(raw.side);
+  if(raw.unit==="sec"||raw.unit==="reps") item.unit=raw.unit;
   if(typeof raw.videoUrl==="string"&&isHttpUrl(raw.videoUrl)) item.videoUrl=String(raw.videoUrl).trim();
   const desc=typeof raw.description==="string"?raw.description:"";
   const caut=typeof raw.caution==="string"?raw.caution:"";
@@ -334,14 +394,16 @@ function hydrateSelected(list){
     const lib=exerciseById(slim.id);
     if(!lib){
       return {id:slim.id,title:slim.title||("목록에 없는 운동 #"+slim.id),category:"",level:"",target:"",
-        description:slim.description||"",caution:slim.caution||"",reps:slim.reps??0,sets:slim.sets??0,
-        durationMin:slim.durationMin??0,side:slim.side||"",videoUrl:slim.videoUrl||"",image:"",imageUrl:"",imageKey:"",isTimeBased:false};
+        description:slim.description||"",caution:slim.caution||"",reps:positiveInt(slim.reps,1),sets:positiveInt(slim.sets,1),
+        durationMin:positiveInt(slim.durationMin,1),side:slim.side||"",unit:slim.unit==="sec"||slim.unit==="reps"?slim.unit:defaultDoseUnit(slim.id),
+        videoUrl:slim.videoUrl||"",image:"",imageUrl:"",imageKey:"",isTimeBased:false};
     }
     return {...lib,
-      reps:slim.reps!=null?slim.reps:lib.reps,
-      sets:slim.sets!=null?slim.sets:lib.sets,
-      durationMin:slim.durationMin!=null?slim.durationMin:lib.durationMin,
+      reps:positiveInt(slim.reps!=null?slim.reps:lib.reps, lib.reps),
+      sets:positiveInt(slim.sets!=null?slim.sets:lib.sets, lib.sets),
+      durationMin:positiveInt(slim.durationMin!=null?slim.durationMin:lib.durationMin, lib.durationMin),
       side:slim.side!=null?slim.side:lib.side,
+      unit:slim.unit==="sec"||slim.unit==="reps"?slim.unit:defaultDoseUnit(slim.id),
       videoUrl:slim.videoUrl||"",
       description:slim.description!=null?slim.description:lib.description,
       caution:slim.caution!=null?slim.caution:lib.caution
@@ -514,7 +576,7 @@ function setQuickFilter(type,value){
 function exerciseById(id){return exercises.find(e=>e.id===Number(id));}
 function uniqueIds(ids){return [...new Set(ids.map(Number).filter(Boolean))];}
 function labelFromList(list,value){return (list.find(x=>x.value===value)||{}).label||value;}
-function currentAiProfile(){return state.aiProfile||{diagnosis:"stroke",functionLevel:"moderate",goal:"balance",bbs:"",note:""};}
+function currentAiProfile(){return state.aiProfile||{diagnosis:"stroke",functionLevel:"bed",goal:"balance",bbs:"",note:""};}
 function setAiProfile(k,v){state.aiProfile={...currentAiProfile(),[k]:v};}
 function scoreExerciseForProfile(e,profile){
   let score=0;
@@ -576,14 +638,92 @@ function addAiRecommended(){
   autoSave();
   showMessage("AI 추천 운동을 담았습니다.");
 }
-function buildAiLeaflet(){
-  if(state.aiResultIds.length===0) recommendAiExercises();
-  const ids=state.aiResultIds.length?state.aiResultIds:[];
-  state.selected=ids.map(id=>exerciseById(id)).filter(Boolean).map(selectedFromLibrary);
-  const profile=currentAiProfile();
+function aiLeafletMemo(profile){
   const dxLabel=labelFromList(TAG_FILTERS,profile.diagnosis);
-  state.patient.memo=`${dxLabel} 환자 맞춤 운동 과제입니다. 통증, 어지러움, 호흡곤란, 심한 피로가 있으면 즉시 중단하고 보호자 또는 치료사에게 알려주세요. 모든 운동은 안전한 범위에서 천천히 시행합니다.`;
-  state.patient.note=profile.note||state.patient.note;
+  return `${dxLabel} 환자 맞춤 운동 과제입니다. 통증, 어지러움, 호흡곤란, 심한 피로가 있으면 즉시 중단하고 보호자 또는 치료사에게 알려주세요. 모든 운동은 안전한 범위에서 천천히 시행합니다.`;
+}
+function choiceDialogHTML(){
+  const d=state.choiceDialog;
+  if(!d) return "";
+  return `<div id="choice-dialog" class="no-print fixed inset-0 z-[80] flex items-center justify-center bg-black/50 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl" role="dialog" aria-modal="true">
+      <h3 class="text-lg font-black text-slate-800">${esc(d.title)}</h3>
+      <p class="mt-2 text-sm leading-6 text-slate-600" style="white-space:pre-wrap">${esc(d.message)}</p>
+      ${d.memoConsent?`<label class="mt-3 flex items-start gap-2 text-sm text-slate-700">
+        <input id="ai-memo-consent" type="checkbox" class="mt-1">
+        <span>이미 적은 공통 주의사항을 추천 문구로 바꿉니다. 체크하지 않으면 그대로 둡니다.</span>
+      </label>`:""}
+      <div class="mt-4 flex flex-wrap justify-end gap-2">
+        ${d.choices.map(c=>`<button type="button" onclick="resolveChoice('${esc(c.id)}')" class="rounded-xl px-4 py-2 text-sm font-bold ${c.primary?"bg-slate-800 text-white hover:bg-slate-700":"border border-slate-200 text-slate-600 hover:bg-slate-50"}">${esc(c.label)}</button>`).join("")}
+      </div>
+    </div>
+  </div>`;
+}
+let choiceResolver=null;
+function openChoiceDialog(dialog){
+  return new Promise(resolve=>{
+    choiceResolver=resolve;
+    state.choiceDialog=dialog;
+    render();
+  });
+}
+function resolveChoice(id){
+  const memoEl=document.getElementById("ai-memo-consent");
+  const replaceMemo=!!(memoEl&&memoEl.checked);
+  const fn=choiceResolver;
+  choiceResolver=null;
+  state.choiceDialog=null;
+  const dialog=document.getElementById("choice-dialog");
+  if(dialog) dialog.remove();
+  if(fn) fn({id, replaceMemo});
+  else render();
+}
+async function buildAiLeaflet(){
+  if(state.aiResultIds.length===0) recommendAiExercises();
+  const ids=state.aiResultIds.slice();
+  if(!ids.length){ showMessage("추천할 운동이 없습니다."); return; }
+  const profile=currentAiProfile();
+  const generated=aiLeafletMemo(profile);
+  const memo=(state.patient.memo||"").trim();
+  const memoIsCustom=memo.length>0;
+  const hasSelected=state.selected.length>0;
+  let mode="replace";
+  let replaceMemo=!memoIsCustom;
+  if(hasSelected||memoIsCustom){
+    const lines=[];
+    if(hasSelected){
+      lines.push(`담아 둔 운동 ${state.selected.length}개가 있습니다. 추천 운동은 ${ids.length}개입니다.`);
+      lines.push("바꾸기: 담은 운동을 추천 운동으로 교체합니다.");
+      lines.push("뒤에 추가: 아직 없는 운동만 이어서 담습니다.");
+      lines.push("취소: 운동과 공통 주의사항을 그대로 둡니다.");
+    }else{
+      lines.push("담은 운동은 없습니다. 추천 운동으로 리플릿을 만듭니다.");
+      lines.push("취소하면 공통 주의사항도 바꾸지 않습니다.");
+    }
+    const choice=await openChoiceDialog({
+      title:"맞춤 리플릿 구성",
+      message:lines.join("\n"),
+      memoConsent:memoIsCustom,
+      choices:[
+        {id:"replace", label:"바꾸기", primary:true},
+        ...(hasSelected?[{id:"append", label:"뒤에 추가"}]:[]),
+        {id:"cancel", label:"취소"}
+      ]
+    });
+    if(!choice||choice.id==="cancel"){ render(); return; }
+    mode=choice.id==="append"?"append":"replace";
+    if(memoIsCustom) replaceMemo=!!choice.replaceMemo;
+  }
+  if(mode==="append"){
+    ids.forEach(id=>{
+      const ex=exerciseById(id);
+      if(ex&&!state.selected.some(x=>x.id===id)) state.selected.push(selectedFromLibrary(ex));
+    });
+  }else{
+    state.selected=ids.map(id=>exerciseById(id)).filter(Boolean).map(selectedFromLibrary);
+  }
+  if(replaceMemo) state.patient.memo=generated;
+  if(!String(state.patient.note||"").trim()&&profile.note) state.patient.note=profile.note;
   state.tab=3;
   autoSave();
   render();
@@ -665,7 +805,16 @@ function qrDataUrl(url){
 }
 function selectedFromLibrary(ex){
   const remembered=loadVideoDefaults()[String(ex.id)]||"";
-  return {...ex,videoUrl:isHttpUrl(remembered)?remembered:""};
+  return {...ex,unit:defaultDoseUnit(ex.id),videoUrl:isHttpUrl(remembered)?remembered:""};
+}
+function updateSelectedUnit(id,value){
+  const unit=value==="sec"?"sec":"reps";
+  state.selected=state.selected.map(x=>x.id===id?{...x,unit}:x);
+  if(Array.isArray(state.cartDraftSelected)){
+    state.cartDraftSelected=state.cartDraftSelected.map(x=>x.id===id?{...x,unit}:x);
+  }
+  autoSave();
+  renderMain();
 }
 function setExerciseVideo(id,value){
   const url=String(value||"").trim();
@@ -682,7 +831,26 @@ function setExerciseVideo(id,value){
   autoSave();
   renderMain();
 }
-function totalMinutes(){return state.selected.reduce((s,x)=>s+(Number(x.durationMin)||0),0);}
+function exerciseMinutes(item){
+  if(!item) return 0;
+  const lib=exerciseById(item.id);
+  if(item.isTimeBased) return positiveInt(item.durationMin, lib?lib.durationMin:1);
+  const reps=positiveInt(item.reps, lib?lib.reps:1);
+  const sets=positiveInt(item.sets, lib?lib.sets:1);
+  if(doseUnitOf(item)==="sec") return Math.max(1, Math.ceil((reps*sets)/60));
+  const baseReps=positiveInt(lib?lib.reps:reps, reps);
+  const baseSets=positiveInt(lib?lib.sets:sets, sets);
+  const baseDur=positiveInt(lib?lib.durationMin:item.durationMin, 1);
+  return Math.max(1, Math.round(baseDur*(reps/baseReps)*(sets/baseSets)));
+}
+function totalMinutes(list){
+  const arr=Array.isArray(list)?list:state.selected;
+  return arr.reduce((s,x)=>s+exerciseMinutes(x),0);
+}
+function refreshTimeDisplays(){
+  const mins=String(totalMinutes());
+  document.querySelectorAll("[data-live-minutes]").forEach(el=>{ el.textContent=mins; });
+}
 function categories(){
   const ORDER=["전체","PROM","AROM","Strengthening","Balance","Gait","Endurance","ADL"];
   const present=new Set(exercises.map(e=>e.category));
@@ -717,9 +885,26 @@ function filtered(){
   });
 }
 
-/* 현재 필터 결과 전체 넣기 */
-function addAllFiltered(){
-  filtered().forEach(e=>{
+/* 현재 필터 결과 전체 넣기. 12개 또는 45분을 넘으면 개수와 시간을 보여주고 확인한다. */
+async function addAllFiltered(){
+  const adding=filtered().filter(e=>!state.selected.some(x=>x.id===e.id));
+  if(!adding.length){ renderExerciseResults(); return; }
+  const next=state.selected.concat(adding.map(selectedFromLibrary));
+  const count=next.length;
+  const mins=totalMinutes(next);
+  if(count>12 || mins>45){
+    const choice=await openChoiceDialog({
+      title:"운동을 많이 담게 됩니다",
+      message:`전체 넣기 후에는 운동 ${count}개, 예상 ${mins}분입니다.\n12개 또는 45분을 넘습니다. 막지는 않으니, 그대로 담을지 고르세요.`,
+      memoConsent:false,
+      choices:[
+        {id:"ok", label:"그대로 담기", primary:true},
+        {id:"cancel", label:"취소"}
+      ]
+    });
+    if(!choice||choice.id!=="ok"){ render(); return; }
+  }
+  adding.forEach(e=>{
     if(!state.selected.some(x=>x.id===e.id)) state.selected.push(selectedFromLibrary(e));
   });
   autoSave();
@@ -798,8 +983,12 @@ function saveEditPatient(id){
   const noEl=document.getElementById("edit-no-"+id);
   if(!nameEl)return;
   const newName=nameEl.value.trim();
+  const newNo=noEl?noEl.value.trim():"";
   if(!newName){alert("이름을 입력해주세요.");return;}
-  state.savedPatients=state.savedPatients.map(r=>r.id===id?{...r,name:newName,patientNo:noEl?noEl.value.trim():""}:r);
+  state.savedPatients=state.savedPatients.map(r=>r.id===id?{...r,name:newName,patientNo:newNo}:r);
+  if(state.patient.id===id){
+    state.patient={...state.patient, name:newName, patientNo:newNo};
+  }
   persist();
   state.editingPatientId=null;
   showMessage("수정 완료 ✓");
@@ -830,13 +1019,37 @@ function removeExerciseSilent(id){
 }
 // side select 전용 — state만 업데이트 (깜빡임 없음)
 function updateSelectedSideSilent(id,value){
-  state.selected=state.selected.map(x=>x.id===id?{...x,side:value}:x);
+  const side=normalizeSide(value);
+  state.selected=state.selected.map(x=>x.id===id?{...x,side}:x);
   autoSaveDebounced();
 }
 // 숫자 입력 전용 — state만 업데이트 (깜빡임 없음)
 function updateSelectedSilent(id,field,value){
-  state.selected=state.selected.map(x=>x.id===id?{...x,[field]:Number(value)}:x);
+  const raw=String(value??"").trim();
+  if(!/^\d+$/.test(raw)||Number(raw)<1) return;
+  const n=Math.trunc(Number(raw));
+  state.selected=state.selected.map(x=>x.id===id?{...x,[field]:n}:x);
+  if(Array.isArray(state.cartDraftSelected)){
+    state.cartDraftSelected=state.cartDraftSelected.map(x=>x.id===id?{...x,[field]:n}:x);
+  }
   autoSaveDebounced();
+  refreshTimeDisplays();
+}
+function commitSelectedCount(id,field,input){
+  const item=state.selected.find(x=>x.id===id);
+  if(!item) return;
+  const lib=exerciseById(id);
+  const raw=String(input&&input.value!=null?input.value:"").trim();
+  if(/^\d+$/.test(raw)&&Number(raw)>=1){
+    updateSelectedSilent(id,field,raw);
+    if(input) input.value=String(Math.trunc(Number(raw)));
+    return;
+  }
+  const restored=positiveInt(item[field], lib?lib[field]:1);
+  state.selected=state.selected.map(x=>x.id===id?{...x,[field]:restored}:x);
+  if(input) input.value=String(restored);
+  autoSaveDebounced();
+  refreshTimeDisplays();
 }
 function applyPreset(name){
   if(state.activePreset===name){ state.activePreset=null; }
@@ -875,7 +1088,7 @@ function newPatient(){
 function loadPatient(id){
   flushAutoSave();
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
-  state.patient={id:r.id,name:r.name||"",date:r.date||new Date().toISOString().slice(0,10),
+  state.patient={id:r.id,name:r.name||"",date:r.date||localDateString(),
     memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:r.patientNo||""};
   state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
@@ -891,8 +1104,9 @@ function loadPatient(id){
 function duplicatePatient(id){
   flushAutoSave();
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
-  state.patient={id:"patient-"+Date.now(),name:(r.name||"이름 없는 환자")+" 복사본",
-    date:new Date().toISOString().slice(0,10),memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:r.patientNo||""};
+  const base=(r.name||"이름 없는 환자").trim();
+  state.patient={id:"patient-"+Date.now(),name:base+" 복사본",
+    date:localDateString(),memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:""};
   state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
   state.isNewPatient=true; // 복사본은 신규로 취급
@@ -911,7 +1125,7 @@ function exportPatients(){
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
-  a.download=`pt-patients-${new Date().toISOString().slice(0,10)}.json`;
+  a.download=`pt-patients-${localDateString()}.json`;
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -985,9 +1199,31 @@ function deletePatient(id){
   state.savedPatients=state.savedPatients.filter(x=>x.id!==id);persist();
   showMessage("삭제했습니다.");
 }
+function cssQuote(s){
+  return String(s??"").replace(/\\/g,"\\\\").replace(/"/g,"\\\"").replace(/[\n\r]/g," ");
+}
+function printPageStyle(){
+  const name=state.patient.name||"";
+  const date=state.patient.date||localDateString();
+  const left=cssQuote([name, date].filter(Boolean).join("  ·  "));
+  return `@page{size:A4;margin:16mm 12mm 14mm;
+    @top-left{content:"${left}";font-size:9pt;font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#334155;}
+    @top-right{content:counter(page) " / " counter(pages);font-size:9pt;font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#334155;}
+  }`;
+}
+function syncPrintPageStyle(){
+  let el=document.getElementById("print-page-style");
+  if(!el){
+    el=document.createElement("style");
+    el.id="print-page-style";
+    document.head.appendChild(el);
+  }
+  el.textContent=printPageStyle();
+}
 function downloadPdf(){
+  syncPrintPageStyle();
   const name = state.patient.name || "환자";
-  const date = state.patient.date || new Date().toISOString().slice(0,10);
+  const date = state.patient.date || localDateString();
   const title = `개인별 맞춤 운동 과제 — ${name} (${date})`;
 
   const pw = window.open("", "_blank", "width=1000,height=800");
@@ -1005,7 +1241,7 @@ function downloadPdf(){
   <style>
     ${pageCss}
     * { font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
-    @page { size: A4; margin: 10mm 12mm; }
+    ${printPageStyle()}
     @media print {
       .no-print { display: none !important; }
       body { background: white; }
@@ -1049,12 +1285,14 @@ function downloadPdf(){
    RENDER
 ══════════════════════════════════════════ */
 function render(){
+  syncPrintPageStyle();
   const app=document.getElementById("app");
   app.innerHTML=`
   <div class="min-h-screen flex flex-col bg-slate-100">
     <div id="storage-error-banner" class="no-print bg-red-600 text-white text-sm font-bold px-4 py-3 ${storageError?"":"hidden"}">${esc(storageError)}</div>
 
     ${state.preview?previewOverlay():""}
+    ${choiceDialogHTML()}
 
     <!-- ── 헤더 ── -->
     <header class="no-print sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
@@ -1146,13 +1384,14 @@ function render(){
       <div id="cart-fab" onclick="state.tab=2;render()" class="no-print sm:hidden fixed bottom-20 right-4 z-30 flex items-center gap-2 rounded-2xl bg-blue-600 text-white px-4 py-3 text-sm font-bold cursor-pointer anim-pop">
         🧺 <span>${state.selected.length}개 담음</span>
         <span class="text-blue-200">·</span>
-        <span class="text-blue-100">${totalMinutes()}분</span>
+        <span class="text-blue-100"><span data-live-minutes>${totalMinutes()}</span>분</span>
         <svg class="w-4 h-4 ml-1 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
       </div>`:""}
 
     <!-- 인쇄용 숨김 섹션 -->
     <section class="print-area hidden mx-auto max-w-4xl bg-white p-8">${leafletHTML()}</section>
   </div>`;
+  syncBottomNav();
 }
 
 /* 탭 콘텐츠(main)만 업데이트 — 헤더를 건드리지 않아 깜빡임 없음 */
@@ -1192,19 +1431,21 @@ function syncBottomNav(){
     mBadge.remove();
   }
 
-  // ── 플로팅 FAB ──
-  let fab = document.getElementById("cart-fab");
+  // ── 플로팅 FAB. 운동 선택 탭에서만 두고, 다른 탭에 남은 복제 버튼은 지운다. ──
+  const fabs = [...document.querySelectorAll("#cart-fab")];
   if(state.tab===1 && cnt > 0){
+    let fab = fabs.find(el => el.closest("#app")) || fabs[0];
+    fabs.forEach(el => { if(el!==fab) el.remove(); });
     if(!fab){
       fab = document.createElement("div");
       fab.id = "cart-fab";
       fab.className = "no-print sm:hidden fixed bottom-20 right-4 z-30 flex items-center gap-2 rounded-2xl bg-blue-600 text-white px-4 py-3 text-sm font-bold cursor-pointer anim-pop";
       fab.onclick = ()=>{ state.tab=2; render(); };
-      document.body.appendChild(fab);
+      (document.getElementById("app")||document.body).appendChild(fab);
     }
-    fab.innerHTML = `🧺 <span>${cnt}개 담음</span><span class="text-blue-200">·</span><span class="text-blue-100">${totalMinutes()}분</span>`;
-  } else if(fab){
-    fab.remove();
+    fab.innerHTML = `🧺 <span>${cnt}개 담음</span><span class="text-blue-200">·</span><span class="text-blue-100"><span data-live-minutes>${totalMinutes()}</span>분</span>`;
+  } else {
+    fabs.forEach(el => el.remove());
   }
 
   // ── 헤더 환자 뱃지 운동 개수 ──
@@ -1802,14 +2043,14 @@ function tabCart(){
   const sel=state.cartSelectMode;
   const chk=state.cartChecked;
   const list=cartWorkingList();
-  const listMinutes=list.reduce((s,x)=>s+(Number(x.durationMin)||0),0);
+  const listMinutes=totalMinutes(list);
   const allChecked=list.length>0&&list.every(x=>chk.has(x.id));
 
   return `<div class="anim-fadeup space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="font-bold text-slate-800">🧺 담은 운동</h2>
       <div class="flex items-center gap-2">
-        <span class="rounded-full bg-blue-50 text-blue-700 text-sm font-bold px-3 py-1 border border-blue-100">${list.length}개 · 약 ${listMinutes}분</span>
+        <span class="rounded-full bg-blue-50 text-blue-700 text-sm font-bold px-3 py-1 border border-blue-100">${list.length}개 · 약 <span data-live-minutes>${listMinutes}</span>분</span>
         ${state.selected.length>0&&!sel?`
           <button onclick="enterCartEditMode()" class="rounded-xl border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1.5 hover:bg-slate-50 transition-colors">선택/이동</button>
           <button onclick="if(confirm('담은 운동을 전체 삭제하시겠습니까?')){state.selected=[];autoSave();renderMain();}" class="rounded-xl bg-red-50 text-red-500 border border-red-200 text-xs font-bold px-3 py-1.5 hover:bg-red-100 transition-colors">전체 삭제</button>
@@ -1868,7 +2109,7 @@ function tabCart(){
           const catBar=CAT_BAR[item.category]||"";
           const checked=chk.has(item.id);
           return `
-          <div class="flex items-center gap-3 px-4 py-3 border-b border-slate-100 last:border-0 ${catBar} ${sel&&checked?"bg-red-50":"hover:bg-slate-50"} transition-colors
+          <div class="cart-row flex flex-col gap-2 px-4 py-3 border-b border-slate-100 last:border-0 ${catBar} ${sel&&checked?"bg-red-50":"hover:bg-slate-50"} transition-colors
                [&.drag-over-top]:border-t-2 [&.drag-over-top]:border-t-blue-400
                [&.drag-over-bot]:border-b-2 [&.drag-over-bot]:border-b-blue-400"
             ${!sel?`draggable="true" ondragstart="onDragStart(event,${item.id})" ondragend="onDragEnd(event)" ondragover="onDragOver(event,${item.id})" ondrop="onDrop(event,${item.id})"`:""}>
@@ -1890,44 +2131,52 @@ function tabCart(){
               <span class="text-[10px] font-black text-slate-400 leading-none">${idx+1}</span>
             </div>`}
 
-            <div class="flex-1 min-w-0">
+            <div class="min-w-0 w-full flex-1 keep-ko">
               <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="font-bold text-sm ${sel&&checked?"text-red-600":"text-slate-800"}">${esc(item.title)}</span>
+                <span class="font-bold text-sm keep-ko ${sel&&checked?"text-red-600":"text-slate-800"}">${esc(item.title)}</span>
                 <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${catCls}">${esc(item.category)}</span>
               </div>
               <p class="text-xs text-slate-400 mt-0.5">${esc(item.level)}</p>
               ${sel?"":`<div class="mt-1 flex items-center gap-1 flex-wrap">
                 <input type="url" value="${esc(item.videoUrl||"")}" placeholder="영상 주소 https://"
                   onchange="setExerciseVideo(${item.id}, this.value)"
-                  class="w-44 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs focus:border-blue-400">
+                  class="cart-video w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs focus:border-blue-400">
                 ${loadVideoDefaults()[String(item.id)]?`<button type="button" onclick="clearVideoDefault(${item.id})" class="rounded-lg border border-slate-200 px-2 py-1 text-[10px] font-bold text-slate-500 hover:bg-slate-50">기본 주소 지우기</button>`:""}
               </div>`}
             </div>
 
             ${sel?"":` 
-            <div class="flex items-center gap-2 shrink-0">
+            <div class="flex items-center gap-2 flex-wrap">
               ${item.isTimeBased?`
               <div class="flex flex-col items-center gap-0.5">
                 <span class="text-[9px] text-slate-400 font-semibold">시간(분)</span>
-                <input type="number" value="${item.durationMin}"
+                <input type="number" min="1" step="1" inputmode="numeric" value="${positiveInt(item.durationMin,1)}"
                   oninput="updateSelectedSilent(${item.id},'durationMin',this.value)"
-                  onchange="updateSelectedSilent(${item.id},'durationMin',this.value)"
+                  onchange="commitSelectedCount(${item.id},'durationMin',this)"
                   class="w-16 rounded-lg border border-slate-200 bg-white px-1 py-1.5 text-center text-sm font-bold focus:border-blue-400 transition-colors">
               </div>
               `:`
               <div class="flex flex-col items-center gap-0.5">
-                <span class="text-[9px] text-slate-400 font-semibold">횟수</span>
-                <input type="number" value="${item.reps}"
+                <span class="text-[9px] text-slate-400 font-semibold">${doseUnitOf(item)==="sec"?"초":"횟수"}</span>
+                <input type="number" min="1" step="1" inputmode="numeric" value="${positiveInt(item.reps,1)}"
                   oninput="updateSelectedSilent(${item.id},'reps',this.value)"
-                  onchange="updateSelectedSilent(${item.id},'reps',this.value)"
+                  onchange="commitSelectedCount(${item.id},'reps',this)"
                   class="w-14 rounded-lg border border-slate-200 bg-white px-1 py-1.5 text-center text-sm font-bold focus:border-blue-400 transition-colors">
+              </div>
+              <div class="flex flex-col items-center gap-0.5">
+                <span class="text-[9px] text-slate-400 font-semibold">단위</span>
+                <select onchange="updateSelectedUnit(${item.id}, this.value)"
+                  class="w-20 rounded-lg border border-slate-200 bg-white px-1 py-1.5 text-xs font-bold focus:border-blue-400 transition-colors">
+                  <option value="reps" ${doseUnitOf(item)==="reps"?"selected":""}>회</option>
+                  <option value="sec" ${doseUnitOf(item)==="sec"?"selected":""}>초 유지</option>
+                </select>
               </div>
               <span class="text-slate-300 text-sm font-bold mt-3">×</span>
               <div class="flex flex-col items-center gap-0.5">
                 <span class="text-[9px] text-slate-400 font-semibold">세트</span>
-                <input type="number" value="${item.sets}"
+                <input type="number" min="1" step="1" inputmode="numeric" value="${positiveInt(item.sets,1)}"
                   oninput="updateSelectedSilent(${item.id},'sets',this.value)"
-                  onchange="updateSelectedSilent(${item.id},'sets',this.value)"
+                  onchange="commitSelectedCount(${item.id},'sets',this)"
                   class="w-14 rounded-lg border border-slate-200 bg-white px-1 py-1.5 text-center text-sm font-bold focus:border-blue-400 transition-colors">
               </div>
               `}
@@ -1935,7 +2184,7 @@ function tabCart(){
                 <span class="text-[9px] text-slate-400 font-semibold">좌/우</span>
                 <select onchange="updateSelectedSideSilent(${item.id},this.value)"
                   class="w-20 rounded-lg border border-slate-200 bg-white px-1 py-1.5 text-xs font-bold focus:border-blue-400 transition-colors">
-                  ${SIDE_OPTIONS.map(s=>`<option ${item.side===s?"selected":""}>${s}</option>`).join("")}
+                  ${sideSelectOptions(item.side)}
                 </select>
               </div>
             </div>
@@ -2015,7 +2264,7 @@ function tabPrint(){
           </div>
           <div class="flex justify-between py-2 border-b border-slate-100">
             <span class="text-slate-500">예상 소요시간</span>
-            <span class="font-semibold">약 ${totalMinutes()}분</span>
+            <span class="font-semibold">약 <span data-live-minutes>${totalMinutes()}</span>분</span>
           </div>
           <div class="flex justify-between py-2">
             <span class="text-slate-500">레이아웃</span>
@@ -2037,8 +2286,8 @@ function tabPrint(){
           <div class="flex items-center gap-2 py-1.5 border-b border-slate-100 last:border-0">
             <span class="text-xs font-bold text-slate-400 w-5 text-center">${i+1}</span>
             <span class="text-sm font-semibold text-slate-700">${esc(item.title)}</span>
-            <span class="text-xs text-slate-400">${item.isTimeBased?`${item.durationMin}분`:`${item.reps}회×${item.sets}세트`}</span>
-            <span class="ml-auto text-xs text-slate-400">${item.side&&item.side!=="해당 없음"?esc(item.side):""}</span>
+            <span class="text-xs text-slate-400">${esc(doseText(item))}</span>
+            <span class="ml-auto text-xs text-slate-400">${esc(normalizeSide(item.side))}</span>
           </div>`).join("")}
       </div>
     </section>`:""}
@@ -2193,31 +2442,52 @@ function leafletHTML(){
   function articleHTML(item, i){
     // ── 1단 가로형: 낮고 가로로 긴 카드 ──────────────────────
     if(isWide){
-      return `<article class="page-break rounded-xl border border-slate-300 p-3 flex items-center gap-4">
+      return `<article class="page-break leaflet-wide-card rounded-xl border border-slate-300 p-3 flex items-start gap-4">
         ${state.showImage
           ? `<div class="flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 ring-1 ring-slate-100 h-20 w-24 text-3xl">${imgTag(item)}</div>`
           : ""}
-        <div class="flex-1 min-w-0">
+        <div class="flex-1 min-w-0 keep-ko">
           <div class="flex items-baseline gap-2 flex-wrap">
             <span class="text-xs text-slate-400 font-bold shrink-0">운동 ${i+1}</span>
             <h2 class="text-base font-black leading-tight">${esc(item.title)}</h2>
             <span class="text-xs text-slate-500 shrink-0">· ${esc(item.level)}</span>
           </div>
-          <p class="text-xs text-slate-500 mt-0.5 line-clamp-2">방법: ${esc(item.description)}</p>
+          <p class="text-xs text-slate-500 mt-0.5" style="white-space:normal;overflow:visible;">방법: ${esc(item.description)}</p>
           ${state.showCaution && item.caution
-            ? `<p class="text-xs text-amber-700 mt-0.5 truncate">⚠ ${esc(item.caution)}</p>`
+            ? `<p class="text-xs text-amber-700 mt-0.5" style="white-space:normal;overflow:visible;">⚠ ${esc(item.caution)}</p>`
             : ""}
         </div>
         <div class="shrink-0 text-right space-y-1">
-          <div class="inline-flex rounded-lg border-2 border-slate-900 px-2.5 py-1 text-sm font-black whitespace-nowrap">${item.side&&item.side!=="해당 없음"&&item.side!==""?esc(item.side)+" · ":""}${item.isTimeBased ? `${item.durationMin}분` : `${item.reps}회 × ${item.sets}세트`}</div>
+          <div class="inline-flex rounded-lg border-2 border-slate-900 px-2.5 py-1 text-sm font-black whitespace-nowrap">${sidePrintPrefix(item.side)}${esc(doseText(item))}</div>
           ${state.showQr && isValidVideoUrl(item.videoUrl)
-            ? `<div class="flex items-center gap-1 justify-end"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="h-10 w-10"><span class="text-xs text-slate-400">영상</span></div>`
+            ? `<div class="flex items-center gap-1 justify-end"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr shrink-0" style="width:18mm;height:18mm"><span class="text-xs text-slate-400">영상</span></div>`
             : ""}
         </div>
       </article>`;
     }
 
-    // ── 2단·큰사진·큰글씨·기본 카드 ──────────────────────────
+    if(isGrid){
+      return `<article class="leaflet-compact keep-ko" style="border:1px solid #cbd5e1;border-radius:6px;padding:1.5mm;">
+        <div style="display:flex;align-items:flex-start;gap:1.5mm;">
+          ${state.showImage
+            ? `<div class="leaflet-compact-img" style="display:flex;flex:none;align-items:center;justify-content:center;overflow:hidden;border-radius:4px;background:#f8fafc;">${imgTag(item,"h-full w-full object-contain")}</div>`
+            : ""}
+          <div style="min-width:0;flex:1;">
+            <h2 style="font-size:11px;font-weight:800;line-height:1.35;"><span style="color:#94a3b8;font-weight:700;">${i+1}. </span>${esc(item.title)}</h2>
+            <p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#475569;">${esc(item.description)}</p>
+            ${state.showCaution && item.caution
+              ? `<p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#92400e;">⚠ ${esc(item.caution)}</p>`
+              : ""}
+            <div class="leaflet-dose" style="margin-top:1mm;display:inline-block;border:1.5px solid #0f172a;border-radius:4px;padding:0.4mm 1.4mm;font-size:11px;font-weight:800;line-height:1.3;">${sidePrintPrefix(item.side)}${esc(doseText(item))}</div>
+            ${state.showQr && isValidVideoUrl(item.videoUrl)
+              ? `<div style="margin-top:1mm;"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr" style="width:18mm;height:18mm"></div>`
+              : ""}
+          </div>
+        </div>
+      </article>`;
+    }
+
+    // ── 큰사진·큰글씨 카드 ──────────────────────────
     const imageClass = (isBig || isLarge) ? "h-44 w-56 text-6xl" : "h-36 w-44 text-5xl";
     return `<article class="page-break rounded-2xl border border-slate-300 p-4">
       <div class="grid ${state.showImage ? "grid-cols-[auto_1fr]" : "grid-cols-1"} gap-4">
@@ -2228,15 +2498,15 @@ function leafletHTML(){
           <div class="text-xs font-bold text-slate-400 mb-1">운동 ${i+1} · ${esc(item.level)}</div>
           <h2 class="${isLarge ? "text-2xl" : "text-xl"} font-black">${esc(item.title)}</h2>
           <p class="mt-1 text-xs font-semibold text-slate-500">목표: ${esc(item.target)}</p>
-          <div class="mt-2 inline-flex rounded-xl border-2 border-slate-900 px-3 py-1.5 ${isLarge ? "text-lg" : "text-base"} font-black">${item.side&&item.side!=="해당 없음"&&item.side!==""?esc(item.side)+" · ":""}${item.isTimeBased ? `${item.durationMin}분` : `${item.reps}회 × ${item.sets}세트`}</div>
+          <div class="mt-2 inline-flex rounded-xl border-2 border-slate-900 px-3 py-1.5 ${isLarge ? "text-2xl" : "text-base"} font-black">${sidePrintPrefix(item.side)}${esc(doseText(item))}</div>
         </div>
       </div>
       <div class="mt-3 rounded-xl bg-slate-50 p-3 ${textClass}"><b>방법: </b>${esc(item.description)}</div>
       ${state.showCaution && item.caution
-        ? `<div class="mt-2 rounded-xl bg-amber-50 p-3 text-sm leading-6"><b>주의: </b>${esc(item.caution)}</div>`
+        ? `<div class="mt-2 rounded-xl bg-amber-50 p-3 ${isLarge ? "text-xl leading-9" : "text-sm leading-6"}"><b>주의: </b>${esc(item.caution)}</div>`
         : ""}
       ${state.showQr && isValidVideoUrl(item.videoUrl)
-        ? `<div class="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 p-2"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="h-16 w-16"><div class="text-xs leading-5">📱 QR코드를 촬영하면 운동 영상을 확인할 수 있습니다.</div></div>`
+        ? `<div class="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 p-2"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr shrink-0" style="width:18mm;height:18mm"><div class="text-xs leading-5">📱 QR코드를 촬영하면 운동 영상을 확인할 수 있습니다.</div></div>`
         : ""}
     </article>`;
   }
@@ -2247,17 +2517,17 @@ function leafletHTML(){
       <div class="text-right text-sm leading-7 shrink-0">
         <p><b>환자명</b> ${esc(state.patient.name||"____________")}${state.patient.patientNo?` (${esc(state.patient.patientNo)})`:""}</p>
         <p><b>작성일</b> ${esc(state.patient.date)}</p>
-        <p><b>예상시간</b> 약 ${totalMinutes()}분</p>
+        <p><b>예상시간</b> 약 <span data-live-minutes>${totalMinutes()}</span>분</p>
         ${state.therapistName?`<p><b>담당치료사</b> ${esc(state.therapistName)}</p>`:""}
       </div>
     </div>
     ${state.showFallWarning&&state.selected.length>0?`<div class="mb-5 rounded-2xl border-2 border-amber-400 bg-amber-50 p-4 font-bold text-amber-900 text-sm leading-6">⚠ ${safetyBanner(state.selected)}</div>`:""}
     ${state.selected.length===0
       ?`<div class="rounded-xl border border-slate-300 p-8 text-center text-slate-400">선택된 운동이 없습니다.</div>`
-      :`<div class="${isGrid?"grid grid-cols-2 gap-4":isWide?"space-y-2":"space-y-4"}">${state.selected.map((item,i)=>articleHTML(item,i)).join("")}</div>`}
+      :`<div class="${isGrid?"leaflet-grid":isWide?"space-y-2":"space-y-4"}">${state.selected.map((item,i)=>articleHTML(item,i)).join("")}</div>`}
     ${state.showChecklist&&state.selected.length>0?checklistHTML():""}
     ${state.showPainLog&&state.selected.length>0?painHTML():""}
-    <div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-2 font-black">공통 주의사항</h3><p class="leading-7 text-sm">${esc(state.patient.memo)}</p></div>
+    <div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-2 font-black ${isLarge?"text-2xl":""}">공통 주의사항</h3><p class="${isLarge?"text-xl leading-9":"leading-7 text-sm"}">${esc(state.patient.memo)}</p></div>
   </div>`;
 }
 
