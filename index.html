@@ -312,10 +312,61 @@ function doseText(item){
   if(doseUnitOf(item)==="sec") return `${n}초 유지 × ${sets}세트`;
   return `${n}회 × ${sets}세트`;
 }
+/* 하루 횟수. 없거나 1 미만이면 저장하지 않고 유인물에도 적지 않는다. */
+function normalizeDailyFreq(value){
+  if(value==null||value===""||typeof value==="boolean") return null;
+  const n=Number(typeof value==="string"?value.trim():value);
+  if(!Number.isFinite(n)||n<1||Math.trunc(n)!==n) return null;
+  return n;
+}
+function validDailyFreq(value){
+  if(value==null) return true;
+  return normalizeDailyFreq(value)!=null;
+}
+function dailyFreqText(value){
+  const n=normalizeDailyFreq(value);
+  return n?`하루 ${n}회`:"";
+}
+function printedDoseText(item){
+  const base=doseText(item);
+  if(!state.showDailyFreq||!item) return base;
+  const n=normalizeDailyFreq(item.dailyFreq);
+  if(!n) return base;
+  return `${base} · ${dailyFreqText(n)}`;
+}
+function dailyFreqMode(current, targetKey){
+  const n=normalizeDailyFreq(current);
+  if(state.freqCustomTarget===targetKey||(n!=null&&n!==1&&n!==2&&n!==3)) return "custom";
+  return n==null?"":String(n);
+}
+function dailyFreqFields(kind, item){
+  const isPatient=kind==="patient";
+  const current=isPatient?state.patient.dailyFreq:(item&&item.dailyFreq);
+  const targetKey=isPatient?"patient":item.id;
+  const mode=dailyFreqMode(current, targetKey);
+  const n=normalizeDailyFreq(current);
+  const onchange=isPatient?"setPatientDailyFreq(this.value)":`setExerciseDailyFreq(${item.id}, this.value)`;
+  const numInput=isPatient?"setPatientDailyFreqNumber(this.value, false)":`setExerciseDailyFreqNumber(${item.id}, this.value, false)`;
+  const numChange=isPatient?"setPatientDailyFreqNumber(this.value, true)":`setExerciseDailyFreqNumber(${item.id}, this.value, true)`;
+  const selectCls=isPatient
+    ?"rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-400 transition-colors"
+    :"w-24 rounded-lg border border-slate-200 bg-white px-1 py-1.5 text-xs font-bold focus:border-blue-400 transition-colors";
+  const inputCls=isPatient
+    ?"w-24 rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-400"
+    :"w-16 rounded-lg border border-slate-200 bg-white px-1 py-1.5 text-center text-sm font-bold focus:border-blue-400";
+  return `<select onchange="${onchange}" aria-label="${isPatient?"하루 횟수":"이 운동의 하루 횟수"}" class="${selectCls}">
+      <option value="" ${mode===""?"selected":""}>${isPatient?"선택 안 함":"기본"}</option>
+      <option value="1" ${mode==="1"?"selected":""}>하루 1회</option>
+      <option value="2" ${mode==="2"?"selected":""}>하루 2회</option>
+      <option value="3" ${mode==="3"?"selected":""}>하루 3회</option>
+      <option value="custom" ${mode==="custom"?"selected":""}>직접 입력</option>
+    </select>
+    ${mode==="custom"?`<input type="number" min="1" step="1" inputmode="numeric" value="${n==null?"":n}" aria-label="하루 횟수 직접 입력" oninput="${numInput}" onchange="${numChange}" class="${inputCls}">`:""}`;
+}
 const exercises = EXERCISES.map(e=>({
   ...e,
   ...(IMAGE_META[e.imageKey] || {}),
-  imageUrl: EXERCISE_IMAGES[e.imageKey] || `./exercise-images/${e.imageKey}.webp`,
+  imageUrl: e.imagePending ? "" : (EXERCISE_IMAGES[e.imageKey] || `./exercise-images/${e.imageKey}.webp`),
   videoUrl: "",
   isTimeBased: TIME_BASED_IDS.has(e.id)
 }));
@@ -330,7 +381,7 @@ let state = {
   patientQuery:"",
   selected:[], patient:newPatientData(),
   savedPatients:loadSavedPatients(),
-  layoutMode:"1단 가로형", showQr:false, showChecklist:false, showPainLog:false, showFallWarning:false, showCaution:true, showImage:true, checklistWeeks:2,
+  layoutMode:"1단 가로형", showQr:false, showChecklist:false, showPainLog:false, showFallWarning:false, showCaution:true, showImage:true, showDailyFreq:true, checklistWeeks:2, freqCustomTarget:null,
   preview:false, message:"", expandedId:null, therapistName:"",
   editingPatientId:null,
   importPreview:null,
@@ -373,6 +424,8 @@ function slimSelectedItem(raw){
   if(raw.durationMin!=null&&raw.durationMin!=="") item.durationMin=positiveInt(raw.durationMin, libForCount?libForCount.durationMin:1);
   if(typeof raw.side==="string") item.side=normalizeSide(raw.side);
   if(raw.unit==="sec"||raw.unit==="reps") item.unit=raw.unit;
+  const freq=normalizeDailyFreq(raw.dailyFreq);
+  if(freq) item.dailyFreq=freq;
   if(typeof raw.videoUrl==="string"&&isHttpUrl(raw.videoUrl)) item.videoUrl=String(raw.videoUrl).trim();
   const desc=typeof raw.description==="string"?raw.description:"";
   const caut=typeof raw.caution==="string"?raw.caution:"";
@@ -393,12 +446,15 @@ function hydrateSelected(list){
   return serializeSelected(list).map(slim=>{
     const lib=exerciseById(slim.id);
     if(!lib){
-      return {id:slim.id,title:slim.title||("목록에 없는 운동 #"+slim.id),category:"",level:"",target:"",
+      const missing={id:slim.id,title:slim.title||("목록에 없는 운동 #"+slim.id),category:"",level:"",target:"",
         description:slim.description||"",caution:slim.caution||"",reps:positiveInt(slim.reps,1),sets:positiveInt(slim.sets,1),
         durationMin:positiveInt(slim.durationMin,1),side:slim.side||"",unit:slim.unit==="sec"||slim.unit==="reps"?slim.unit:defaultDoseUnit(slim.id),
         videoUrl:slim.videoUrl||"",image:"",imageUrl:"",imageKey:"",isTimeBased:false};
+      const missingFreq=normalizeDailyFreq(slim.dailyFreq);
+      if(missingFreq) missing.dailyFreq=missingFreq;
+      return missing;
     }
-    return {...lib,
+    const hydrated={...lib,
       reps:positiveInt(slim.reps!=null?slim.reps:lib.reps, lib.reps),
       sets:positiveInt(slim.sets!=null?slim.sets:lib.sets, lib.sets),
       durationMin:positiveInt(slim.durationMin!=null?slim.durationMin:lib.durationMin, lib.durationMin),
@@ -408,6 +464,9 @@ function hydrateSelected(list){
       description:slim.description!=null?slim.description:lib.description,
       caution:slim.caution!=null?slim.caution:lib.caution
     };
+    const keptFreq=normalizeDailyFreq(slim.dailyFreq);
+    if(keptFreq) hydrated.dailyFreq=keptFreq;
+    return hydrated;
   });
 }
 function migratePatientRecord(rec){
@@ -487,8 +546,12 @@ function autoSave(){
     state.isNewPatient = false;
   }
 
+  const patient={...state.patient};
+  const patientFreq=normalizeDailyFreq(patient.dailyFreq);
+  if(patientFreq) patient.dailyFreq=patientFreq;
+  else delete patient.dailyFreq;
   const record = {
-    ...state.patient,
+    ...patient,
     savedAt: new Date().toISOString(),
     selected: serializeSelected(state.selected),
     therapistName: state.therapistName || "",
@@ -496,7 +559,8 @@ function autoSave(){
       layoutMode:state.layoutMode, showQr:state.showQr,
       showChecklist:state.showChecklist, showPainLog:state.showPainLog,
       showFallWarning:state.showFallWarning, showCaution:state.showCaution,
-      showImage:state.showImage, checklistWeeks:state.checklistWeeks,
+      showImage:state.showImage, showDailyFreq:state.showDailyFreq!==false,
+      checklistWeeks:state.checklistWeeks,
       printDefaultsMigrated:true
     }
   };
@@ -761,7 +825,7 @@ function exportLibraryJson(){
 }
 function libraryCompleteness(){
   const missing=exercises.filter(e=>!e.imageKey||!e.cropType||!e.arrowType||!e.bodyRegion);
-  const imageReady=exercises.filter(e=>!!e.imageKey).length;
+  const imageReady=exercises.filter(e=>!!e.imageKey&&!e.imagePending).length;
   return {total:exercises.length,missing:missing.length,imageReady};
 }
 
@@ -769,6 +833,9 @@ function libraryCompleteness(){
 /* ── Helpers ─────────────────────────── */
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
 function imgTag(ex,cls="h-full w-full object-contain"){
+  if(ex&&ex.imagePending){
+    return `<span class="flex h-full w-full items-center justify-center text-4xl">${esc(ex.image||"")}</span>`;
+  }
   return `<img src="${esc(ex.imageUrl)}" alt="${esc(ex.title)}" class="${cls}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
   <span class="hidden h-full w-full items-center justify-center text-4xl">${esc(ex.image)}</span>`;
 }
@@ -847,9 +914,25 @@ function totalMinutes(list){
   const arr=Array.isArray(list)?list:state.selected;
   return arr.reduce((s,x)=>s+exerciseMinutes(x),0);
 }
+function sessionTimeText(list){
+  const arr=Array.isArray(list)?list:state.selected;
+  let text=`약 ${totalMinutes(arr)}분 (1회 기준)`;
+  if(state.showDailyFreq===false) return text;
+  const patientFreq=normalizeDailyFreq(state.patient&&state.patient.dailyFreq);
+  let daily=0;
+  let any=false;
+  arr.forEach(item=>{
+    const freq=normalizeDailyFreq(item&&item.dailyFreq)||patientFreq;
+    if(!freq) return;
+    any=true;
+    daily+=exerciseMinutes(item)*freq;
+  });
+  if(any) text+=` · 하루 약 ${daily}분`;
+  return text;
+}
 function refreshTimeDisplays(){
-  const mins=String(totalMinutes());
-  document.querySelectorAll("[data-live-minutes]").forEach(el=>{ el.textContent=mins; });
+  const text=sessionTimeText();
+  document.querySelectorAll("[data-session-time]").forEach(el=>{ el.textContent=text; });
 }
 function categories(){
   const ORDER=["전체","PROM","AROM","Strengthening","Balance","Gait","Endurance","ADL"];
@@ -945,7 +1028,7 @@ function setField(k,v){
   state[k]=v;
   if(["level","category","query","bodyFilter","purposeFilter","tagFilter"].includes(k)) { state.activePreset=null; state.bbsMode=false; }
   // 출력 설정 관련 토글/셀렉트는 자동저장
-  const saveKeys=new Set(["layoutMode","showQr","showChecklist","showPainLog","showFallWarning","showCaution","showImage","checklistWeeks"]);
+  const saveKeys=new Set(["layoutMode","showQr","showChecklist","showPainLog","showFallWarning","showCaution","showImage","showDailyFreq","checklistWeeks"]);
   if(saveKeys.has(k)) autoSave();
   if((state.tab===1||state.tab===2) && k!=="tab") renderMain();
   else render();
@@ -1051,6 +1134,63 @@ function commitSelectedCount(id,field,input){
   autoSaveDebounced();
   refreshTimeDisplays();
 }
+function withDailyFreq(item, n){
+  const next={...item};
+  if(n) next.dailyFreq=n;
+  else delete next.dailyFreq;
+  return next;
+}
+function setPatientDailyFreq(value){
+  if(value==="custom"){
+    state.freqCustomTarget="patient";
+    render();
+    return;
+  }
+  state.freqCustomTarget=null;
+  const n=normalizeDailyFreq(value);
+  if(n) state.patient.dailyFreq=n;
+  else delete state.patient.dailyFreq;
+  autoSave();
+  render();
+}
+function setPatientDailyFreqNumber(value, commit){
+  const n=normalizeDailyFreq(value);
+  if(n){
+    state.patient.dailyFreq=n;
+    state.freqCustomTarget="patient";
+    autoSave();
+    refreshTimeDisplays();
+  }
+  if(commit) render();
+}
+function setExerciseDailyFreq(id, value){
+  if(value==="custom"){
+    state.freqCustomTarget=id;
+    render();
+    return;
+  }
+  if(state.freqCustomTarget===id) state.freqCustomTarget=null;
+  const n=normalizeDailyFreq(value);
+  state.selected=state.selected.map(x=>x.id===id?withDailyFreq(x,n):x);
+  if(Array.isArray(state.cartDraftSelected)){
+    state.cartDraftSelected=state.cartDraftSelected.map(x=>x.id===id?withDailyFreq(x,n):x);
+  }
+  autoSave();
+  render();
+}
+function setExerciseDailyFreqNumber(id, value, commit){
+  const n=normalizeDailyFreq(value);
+  if(n){
+    state.freqCustomTarget=id;
+    state.selected=state.selected.map(x=>x.id===id?withDailyFreq(x,n):x);
+    if(Array.isArray(state.cartDraftSelected)){
+      state.cartDraftSelected=state.cartDraftSelected.map(x=>x.id===id?withDailyFreq(x,n):x);
+    }
+    autoSave();
+    refreshTimeDisplays();
+  }
+  if(commit) render();
+}
 function applyPreset(name){
   if(state.activePreset===name){ state.activePreset=null; }
   else { state.activePreset=name; state.level="전체"; state.category="전체"; state.bodyFilter="전체"; state.purposeFilter="전체"; state.tagFilter="전체"; state.showFavoritesOnly=false; state.bbsMode=false; state.query=""; }
@@ -1079,6 +1219,7 @@ function saveCurrentPatient(){
 function newPatient(){
   flushAutoSave();
   state.patient=newPatientData();
+  state.freqCustomTarget=null;
   state.selected=[];
   state.preview=false;
   state.isNewPatient=true;
@@ -1088,13 +1229,18 @@ function newPatient(){
 function loadPatient(id){
   flushAutoSave();
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
-  state.patient={id:r.id,name:r.name||"",date:r.date||localDateString(),
+  const loaded={id:r.id,name:r.name||"",date:r.date||localDateString(),
     memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:r.patientNo||""};
+  const loadedFreq=normalizeDailyFreq(r.dailyFreq);
+  if(loadedFreq) loaded.dailyFreq=loadedFreq;
+  state.patient=loaded;
+  state.freqCustomTarget=null;
   state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
   if(r.settings){state.layoutMode=r.settings.layoutMode??"1단 가로형";state.showQr=r.settings.showQr??false;
     state.showChecklist=r.settings.showChecklist??false;state.showPainLog=r.settings.showPainLog??false;
     state.showFallWarning=r.settings.showFallWarning??false;state.showCaution=r.settings.showCaution??true;state.showImage=r.settings.showImage??true;
+    state.showDailyFreq=r.settings.showDailyFreq??true;
     state.checklistWeeks=r.settings.checklistWeeks??2;}
   state.isNewPatient=false;
   // 탭 이동 없이 환자정보 탭 폼에만 반영 (tab=0 유지)
@@ -1105,8 +1251,12 @@ function duplicatePatient(id){
   flushAutoSave();
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
   const base=(r.name||"이름 없는 환자").trim();
-  state.patient={id:"patient-"+Date.now(),name:base+" 복사본",
+  const copied={id:"patient-"+Date.now(),name:base+" 복사본",
     date:localDateString(),memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:""};
+  const copiedFreq=normalizeDailyFreq(r.dailyFreq);
+  if(copiedFreq) copied.dailyFreq=copiedFreq;
+  state.patient=copied;
+  state.freqCustomTarget=null;
   state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
   state.isNewPatient=true; // 복사본은 신규로 취급
@@ -1138,13 +1288,16 @@ function validateBackup(data){
     if(!p||typeof p!=="object"||Array.isArray(p)) return "환자 기록 형식이 올바르지 않습니다.";
     if(typeof p.id!=="string"||!p.id.trim()) return "id가 없는 환자 기록이 있습니다.";
     if(p.name!=null&&typeof p.name!=="string") return "환자 이름 형식이 올바르지 않습니다.";
+    if(!validDailyFreq(p.dailyFreq)) return "하루 횟수는 1 이상의 정수여야 합니다.";
     if(p.selected!=null&&!Array.isArray(p.selected)) return "운동 목록 형식이 올바르지 않습니다.";
     if(Array.isArray(p.selected)){
       for(const s of p.selected){
         if(!s||typeof s!=="object"||!Number.isFinite(Number(s.id))) return "운동 id가 올바르지 않은 항목이 있습니다.";
+        if(!validDailyFreq(s.dailyFreq)) return "운동별 하루 횟수는 1 이상의 정수여야 합니다.";
       }
     }
     if(p.settings!=null&&(typeof p.settings!=="object"||Array.isArray(p.settings))) return "출력 설정 형식이 올바르지 않습니다.";
+    if(p.settings&&Object.prototype.hasOwnProperty.call(p.settings,"showDailyFreq")&&typeof p.settings.showDailyFreq!=="boolean") return "하루 횟수 출력 설정 형식이 올바르지 않습니다.";
   }
   const idsOk=arr=>arr==null||(Array.isArray(arr)&&arr.every(x=>Number.isFinite(Number(x))));
   if(!idsOk(data.favorites)) return "즐겨찾기 형식이 올바르지 않습니다.";
@@ -1384,7 +1537,7 @@ function render(){
       <div id="cart-fab" onclick="state.tab=2;render()" class="no-print sm:hidden fixed bottom-20 right-4 z-30 flex items-center gap-2 rounded-2xl bg-blue-600 text-white px-4 py-3 text-sm font-bold cursor-pointer anim-pop">
         🧺 <span>${state.selected.length}개 담음</span>
         <span class="text-blue-200">·</span>
-        <span class="text-blue-100"><span data-live-minutes>${totalMinutes()}</span>분</span>
+        <span class="text-blue-100" data-session-time>${esc(sessionTimeText())}</span>
         <svg class="w-4 h-4 ml-1 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
       </div>`:""}
 
@@ -1443,7 +1596,7 @@ function syncBottomNav(){
       fab.onclick = ()=>{ state.tab=2; render(); };
       (document.getElementById("app")||document.body).appendChild(fab);
     }
-    fab.innerHTML = `🧺 <span>${cnt}개 담음</span><span class="text-blue-200">·</span><span class="text-blue-100"><span data-live-minutes>${totalMinutes()}</span>분</span>`;
+    fab.innerHTML = `🧺 <span>${cnt}개 담음</span><span class="text-blue-200">·</span><span class="text-blue-100" data-session-time>${esc(sessionTimeText())}</span>`;
   } else {
     fabs.forEach(el => el.remove());
   }
@@ -1586,6 +1739,11 @@ function tabPatient(){
               placeholder="Stroke, TKA 등"
               class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-400 transition-colors"/>
           </div>
+        </div>
+        <div>
+          <label class="text-xs font-semibold text-slate-500 mb-1 block">하루 횟수 <span class="text-slate-300 font-normal">(선택, 유인물 기본)</span></label>
+          <div class="flex items-center gap-2 flex-wrap">${dailyFreqFields("patient")}</div>
+          <p class="mt-1 text-[11px] leading-4 text-slate-400">비워 두면 유인물에 하루 횟수를 적지 않습니다. 담은 운동에서 따로 정하면 그 운동에만 적습니다.</p>
         </div>
         <div>
           <label class="text-xs font-semibold text-slate-500 mb-1 block">공통 주의사항</label>
@@ -2043,14 +2201,13 @@ function tabCart(){
   const sel=state.cartSelectMode;
   const chk=state.cartChecked;
   const list=cartWorkingList();
-  const listMinutes=totalMinutes(list);
   const allChecked=list.length>0&&list.every(x=>chk.has(x.id));
 
   return `<div class="anim-fadeup space-y-4">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-2 flex-wrap">
       <h2 class="font-bold text-slate-800">🧺 담은 운동</h2>
-      <div class="flex items-center gap-2">
-        <span class="rounded-full bg-blue-50 text-blue-700 text-sm font-bold px-3 py-1 border border-blue-100">${list.length}개 · 약 <span data-live-minutes>${listMinutes}</span>분</span>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="rounded-full bg-blue-50 text-blue-700 text-sm font-bold px-3 py-1 border border-blue-100">${list.length}개 · <span data-session-time>${esc(sessionTimeText(list))}</span></span>
         ${state.selected.length>0&&!sel?`
           <button onclick="enterCartEditMode()" class="rounded-xl border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1.5 hover:bg-slate-50 transition-colors">선택/이동</button>
           <button onclick="if(confirm('담은 운동을 전체 삭제하시겠습니까?')){state.selected=[];autoSave();renderMain();}" class="rounded-xl bg-red-50 text-red-500 border border-red-200 text-xs font-bold px-3 py-1.5 hover:bg-red-100 transition-colors">전체 삭제</button>
@@ -2187,6 +2344,10 @@ function tabCart(){
                   ${sideSelectOptions(item.side)}
                 </select>
               </div>
+              <div class="flex flex-col items-center gap-0.5">
+                <span class="text-[9px] text-slate-400 font-semibold">하루</span>
+                <div class="flex items-center gap-1">${dailyFreqFields("exercise", item)}</div>
+              </div>
             </div>
             <button onclick="removeExercise(${item.id})" class="shrink-0 p-1.5 rounded-lg text-slate-300 hover:bg-red-50 hover:text-red-400 transition-colors" title="삭제">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2221,6 +2382,7 @@ function tabPrint(){
             ["showPainLog","통증기록 포함","운동 전후 NRS·피로도 기록"],
             ["showCaution","개별 주의사항 표시","각 운동 카드의 주의사항 문구 출력"],
             ["showImage","운동 사진 표시","각 운동 카드의 이미지/이모지 출력"],
+            ["showDailyFreq","하루 횟수 표시","유인물 머리글과, 운동마다 따로 정한 하루 횟수를 출력"],
             ["showQr","QR 코드 포함","영상 주소가 있는 운동만 출력물에 QR이 표시됩니다."]
           ].map(([key,label,desc])=>`
             <label class="toggle-wrap flex items-center justify-between py-2 border-b border-slate-100 last:border-0 w-full">
@@ -2258,13 +2420,17 @@ function tabPrint(){
             <span class="text-slate-500">작성일</span>
             <span class="font-semibold">${esc(state.patient.date)}</span>
           </div>
+          <div class="flex justify-between py-2 border-b border-slate-100 gap-3">
+            <span class="text-slate-500">하루 횟수</span>
+            <span class="font-semibold text-right">${esc(normalizeDailyFreq(state.patient.dailyFreq)?dailyFreqText(state.patient.dailyFreq):"선택 안 함")}</span>
+          </div>
           <div class="flex justify-between py-2 border-b border-slate-100">
             <span class="text-slate-500">선택 운동</span>
             <span class="font-semibold">${state.selected.length}개</span>
           </div>
-          <div class="flex justify-between py-2 border-b border-slate-100">
-            <span class="text-slate-500">예상 소요시간</span>
-            <span class="font-semibold">약 <span data-live-minutes>${totalMinutes()}</span>분</span>
+          <div class="flex justify-between py-2 border-b border-slate-100 gap-3">
+            <span class="text-slate-500 shrink-0">예상 소요시간</span>
+            <span class="font-semibold text-right" data-session-time>${esc(sessionTimeText())}</span>
           </div>
           <div class="flex justify-between py-2">
             <span class="text-slate-500">레이아웃</span>
@@ -2286,7 +2452,7 @@ function tabPrint(){
           <div class="flex items-center gap-2 py-1.5 border-b border-slate-100 last:border-0">
             <span class="text-xs font-bold text-slate-400 w-5 text-center">${i+1}</span>
             <span class="text-sm font-semibold text-slate-700">${esc(item.title)}</span>
-            <span class="text-xs text-slate-400">${esc(doseText(item))}</span>
+            <span class="text-xs text-slate-400">${esc(printedDoseText(item))}</span>
             <span class="ml-auto text-xs text-slate-400">${esc(normalizeSide(item.side))}</span>
           </div>`).join("")}
       </div>
@@ -2458,7 +2624,7 @@ function leafletHTML(){
             : ""}
         </div>
         <div class="shrink-0 text-right space-y-1">
-          <div class="inline-flex rounded-lg border-2 border-slate-900 px-2.5 py-1 text-sm font-black whitespace-nowrap">${sidePrintPrefix(item.side)}${esc(doseText(item))}</div>
+          <div class="inline-block rounded-lg border-2 border-slate-900 px-2.5 py-1 text-sm font-black keep-ko" style="white-space:normal;max-width:12rem;line-height:1.35;">${sidePrintPrefix(item.side)}${esc(printedDoseText(item))}</div>
           ${state.showQr && isValidVideoUrl(item.videoUrl)
             ? `<div class="flex items-center gap-1 justify-end"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr shrink-0" style="width:18mm;height:18mm"><span class="text-xs text-slate-400">영상</span></div>`
             : ""}
@@ -2478,7 +2644,7 @@ function leafletHTML(){
             ${state.showCaution && item.caution
               ? `<p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#92400e;">⚠ ${esc(item.caution)}</p>`
               : ""}
-            <div class="leaflet-dose" style="margin-top:1mm;display:inline-block;border:1.5px solid #0f172a;border-radius:4px;padding:0.4mm 1.4mm;font-size:11px;font-weight:800;line-height:1.3;">${sidePrintPrefix(item.side)}${esc(doseText(item))}</div>
+            <div class="leaflet-dose" style="margin-top:1mm;display:inline-block;border:1.5px solid #0f172a;border-radius:4px;padding:0.4mm 1.4mm;font-size:11px;font-weight:800;line-height:1.35;white-space:normal;">${sidePrintPrefix(item.side)}${esc(printedDoseText(item))}</div>
             ${state.showQr && isValidVideoUrl(item.videoUrl)
               ? `<div style="margin-top:1mm;"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr" style="width:18mm;height:18mm"></div>`
               : ""}
@@ -2498,7 +2664,7 @@ function leafletHTML(){
           <div class="text-xs font-bold text-slate-400 mb-1">운동 ${i+1} · ${esc(item.level)}</div>
           <h2 class="${isLarge ? "text-2xl" : "text-xl"} font-black">${esc(item.title)}</h2>
           <p class="mt-1 text-xs font-semibold text-slate-500">목표: ${esc(item.target)}</p>
-          <div class="mt-2 inline-flex rounded-xl border-2 border-slate-900 px-3 py-1.5 ${isLarge ? "text-2xl" : "text-base"} font-black">${sidePrintPrefix(item.side)}${esc(doseText(item))}</div>
+          <div class="mt-2 inline-block rounded-xl border-2 border-slate-900 px-3 py-1.5 ${isLarge ? "text-2xl" : "text-base"} font-black keep-ko" style="white-space:normal;line-height:1.35;">${sidePrintPrefix(item.side)}${esc(printedDoseText(item))}</div>
         </div>
       </div>
       <div class="mt-3 rounded-xl bg-slate-50 p-3 ${textClass}"><b>방법: </b>${esc(item.description)}</div>
@@ -2514,10 +2680,11 @@ function leafletHTML(){
   return `<div class="mx-auto max-w-4xl bg-white">
     <div class="mb-5 border-b-2 border-slate-900 pb-4 flex items-end justify-between gap-4">
       <div><h1 class="text-3xl font-black">개인별 맞춤 운동 과제</h1><p class="mt-1 text-slate-600 text-sm">안전한 범위에서 천천히 시행해주세요.</p></div>
-      <div class="text-right text-sm leading-7 shrink-0">
+      <div class="text-right text-sm leading-7 min-w-0" style="max-width:18rem;">
         <p><b>환자명</b> ${esc(state.patient.name||"____________")}${state.patient.patientNo?` (${esc(state.patient.patientNo)})`:""}</p>
         <p><b>작성일</b> ${esc(state.patient.date)}</p>
-        <p><b>예상시간</b> 약 <span data-live-minutes>${totalMinutes()}</span>분</p>
+        ${state.showDailyFreq&&normalizeDailyFreq(state.patient.dailyFreq)?`<p><b>하루 횟수</b> ${esc(dailyFreqText(state.patient.dailyFreq))}</p>`:""}
+        <p><b>예상시간</b> <span data-session-time>${esc(sessionTimeText())}</span></p>
         ${state.therapistName?`<p><b>담당치료사</b> ${esc(state.therapistName)}</p>`:""}
       </div>
     </div>
