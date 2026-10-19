@@ -660,6 +660,8 @@ function resolveChoice(id){
   const fn=choiceResolver;
   choiceResolver=null;
   state.choiceDialog=null;
+  const dialog=document.getElementById("choice-dialog");
+  if(dialog) dialog.remove();
   if(fn) fn({id, replaceMemo});
   else render();
 }
@@ -870,9 +872,26 @@ function filtered(){
   });
 }
 
-/* 현재 필터 결과 전체 넣기 */
-function addAllFiltered(){
-  filtered().forEach(e=>{
+/* 현재 필터 결과 전체 넣기. 12개 또는 45분을 넘으면 개수와 시간을 보여주고 확인한다. */
+async function addAllFiltered(){
+  const adding=filtered().filter(e=>!state.selected.some(x=>x.id===e.id));
+  if(!adding.length){ renderExerciseResults(); return; }
+  const next=state.selected.concat(adding.map(selectedFromLibrary));
+  const count=next.length;
+  const mins=totalMinutes(next);
+  if(count>12 || mins>45){
+    const choice=await openChoiceDialog({
+      title:"운동을 많이 담게 됩니다",
+      message:`전체 넣기 후에는 운동 ${count}개, 예상 ${mins}분입니다.\n12개 또는 45분을 넘습니다. 막지는 않으니, 그대로 담을지 고르세요.`,
+      memoConsent:false,
+      choices:[
+        {id:"ok", label:"그대로 담기", primary:true},
+        {id:"cancel", label:"취소"}
+      ]
+    });
+    if(!choice||choice.id!=="ok"){ render(); return; }
+  }
+  adding.forEach(e=>{
     if(!state.selected.some(x=>x.id===e.id)) state.selected.push(selectedFromLibrary(e));
   });
   autoSave();
