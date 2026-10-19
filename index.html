@@ -321,7 +321,8 @@ let state = {
   importPreview:null,
   isNewPatient:true,
   mobileFiltersOpen:false,
-  cartSelectMode:false, cartChecked:new Set(), cartDraftSelected:null
+  cartSelectMode:false, cartChecked:new Set(), cartDraftSelected:null,
+  choiceDialog:null
 };
 let msgTimer=null;
 let storageError="";
@@ -609,14 +610,90 @@ function addAiRecommended(){
   autoSave();
   showMessage("AI 추천 운동을 담았습니다.");
 }
-function buildAiLeaflet(){
-  if(state.aiResultIds.length===0) recommendAiExercises();
-  const ids=state.aiResultIds.length?state.aiResultIds:[];
-  state.selected=ids.map(id=>exerciseById(id)).filter(Boolean).map(selectedFromLibrary);
-  const profile=currentAiProfile();
+function aiLeafletMemo(profile){
   const dxLabel=labelFromList(TAG_FILTERS,profile.diagnosis);
-  state.patient.memo=`${dxLabel} 환자 맞춤 운동 과제입니다. 통증, 어지러움, 호흡곤란, 심한 피로가 있으면 즉시 중단하고 보호자 또는 치료사에게 알려주세요. 모든 운동은 안전한 범위에서 천천히 시행합니다.`;
-  state.patient.note=profile.note||state.patient.note;
+  return `${dxLabel} 환자 맞춤 운동 과제입니다. 통증, 어지러움, 호흡곤란, 심한 피로가 있으면 즉시 중단하고 보호자 또는 치료사에게 알려주세요. 모든 운동은 안전한 범위에서 천천히 시행합니다.`;
+}
+function choiceDialogHTML(){
+  const d=state.choiceDialog;
+  if(!d) return "";
+  return `<div id="choice-dialog" class="no-print fixed inset-0 z-[80] flex items-center justify-center bg-black/50 px-4">
+    <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl" role="dialog" aria-modal="true">
+      <h3 class="text-lg font-black text-slate-800">${esc(d.title)}</h3>
+      <p class="mt-2 text-sm leading-6 text-slate-600" style="white-space:pre-wrap">${esc(d.message)}</p>
+      ${d.memoConsent?`<label class="mt-3 flex items-start gap-2 text-sm text-slate-700">
+        <input id="ai-memo-consent" type="checkbox" class="mt-1">
+        <span>이미 적은 공통 주의사항을 추천 문구로 바꿉니다. 체크하지 않으면 그대로 둡니다.</span>
+      </label>`:""}
+      <div class="mt-4 flex flex-wrap justify-end gap-2">
+        ${d.choices.map(c=>`<button type="button" onclick="resolveChoice('${esc(c.id)}')" class="rounded-xl px-4 py-2 text-sm font-bold ${c.primary?"bg-slate-800 text-white hover:bg-slate-700":"border border-slate-200 text-slate-600 hover:bg-slate-50"}">${esc(c.label)}</button>`).join("")}
+      </div>
+    </div>
+  </div>`;
+}
+let choiceResolver=null;
+function openChoiceDialog(dialog){
+  return new Promise(resolve=>{
+    choiceResolver=resolve;
+    state.choiceDialog=dialog;
+    render();
+  });
+}
+function resolveChoice(id){
+  const memoEl=document.getElementById("ai-memo-consent");
+  const replaceMemo=!!(memoEl&&memoEl.checked);
+  const fn=choiceResolver;
+  choiceResolver=null;
+  state.choiceDialog=null;
+  if(fn) fn({id, replaceMemo});
+  else render();
+}
+async function buildAiLeaflet(){
+  if(state.aiResultIds.length===0) recommendAiExercises();
+  const ids=state.aiResultIds.slice();
+  if(!ids.length){ showMessage("추천할 운동이 없습니다."); return; }
+  const profile=currentAiProfile();
+  const generated=aiLeafletMemo(profile);
+  const memo=(state.patient.memo||"").trim();
+  const memoIsCustom=memo.length>0;
+  const hasSelected=state.selected.length>0;
+  let mode="replace";
+  let replaceMemo=!memoIsCustom;
+  if(hasSelected||memoIsCustom){
+    const lines=[];
+    if(hasSelected){
+      lines.push(`담아 둔 운동 ${state.selected.length}개가 있습니다. 추천 운동은 ${ids.length}개입니다.`);
+      lines.push("바꾸기: 담은 운동을 추천 운동으로 교체합니다.");
+      lines.push("뒤에 추가: 아직 없는 운동만 이어서 담습니다.");
+      lines.push("취소: 운동과 공통 주의사항을 그대로 둡니다.");
+    }else{
+      lines.push("담은 운동은 없습니다. 추천 운동으로 리플릿을 만듭니다.");
+      lines.push("취소하면 공통 주의사항도 바꾸지 않습니다.");
+    }
+    const choice=await openChoiceDialog({
+      title:"맞춤 리플릿 구성",
+      message:lines.join("\n"),
+      memoConsent:memoIsCustom,
+      choices:[
+        {id:"replace", label:"바꾸기", primary:true},
+        ...(hasSelected?[{id:"append", label:"뒤에 추가"}]:[]),
+        {id:"cancel", label:"취소"}
+      ]
+    });
+    if(!choice||choice.id==="cancel"){ render(); return; }
+    mode=choice.id==="append"?"append":"replace";
+    if(memoIsCustom) replaceMemo=!!choice.replaceMemo;
+  }
+  if(mode==="append"){
+    ids.forEach(id=>{
+      const ex=exerciseById(id);
+      if(ex&&!state.selected.some(x=>x.id===id)) state.selected.push(selectedFromLibrary(ex));
+    });
+  }else{
+    state.selected=ids.map(id=>exerciseById(id)).filter(Boolean).map(selectedFromLibrary);
+  }
+  if(replaceMemo) state.patient.memo=generated;
+  if(!String(state.patient.note||"").trim()&&profile.note) state.patient.note=profile.note;
   state.tab=3;
   autoSave();
   render();
@@ -1098,6 +1175,7 @@ function render(){
     <div id="storage-error-banner" class="no-print bg-red-600 text-white text-sm font-bold px-4 py-3 ${storageError?"":"hidden"}">${esc(storageError)}</div>
 
     ${state.preview?previewOverlay():""}
+    ${choiceDialogHTML()}
 
     <!-- ── 헤더 ── -->
     <header class="no-print sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
