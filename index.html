@@ -186,6 +186,7 @@
 <section class="print-area hidden" id="print-section"></section>
 
 <script src="exercises.js"></script>
+<script src="vendor/qrcode.js"></script>
 <script>
 /* ══════════════════════════════════════════
    데이터
@@ -312,7 +313,7 @@ function slimSelectedItem(raw){
   if(raw.sets!=null&&raw.sets!=="") item.sets=Number(raw.sets);
   if(raw.durationMin!=null&&raw.durationMin!=="") item.durationMin=Number(raw.durationMin);
   if(typeof raw.side==="string") item.side=raw.side;
-  if(typeof raw.videoUrl==="string"&&raw.videoUrl&&!String(raw.videoUrl).startsWith("data:")) item.videoUrl=raw.videoUrl;
+  if(typeof raw.videoUrl==="string"&&isHttpUrl(raw.videoUrl)) item.videoUrl=String(raw.videoUrl).trim();
   const desc=typeof raw.description==="string"?raw.description:"";
   const caut=typeof raw.caution==="string"?raw.caution:"";
   if(lib){
@@ -498,7 +499,7 @@ function clearBbsMode(){state.bbsMode=false; renderMain();}
 function addBbsRecommended(){
   const rec=activeBbsRecommendation();
   if(!rec){alert("BBS 점수를 0~56점 사이로 입력해주세요.");return;}
-  rec.ids.forEach(id=>{const ex=exercises.find(e=>e.id===id); if(ex&&!state.selected.some(x=>x.id===id)) state.selected.push({...ex});});
+  rec.ids.forEach(id=>{const ex=exercises.find(e=>e.id===id); if(ex&&!state.selected.some(x=>x.id===id)) state.selected.push(selectedFromLibrary(ex));});
   autoSave(); renderMain();
 }
 function setQuickFilter(type,value){
@@ -571,14 +572,14 @@ function recommendAiExercises(){
   renderMain();
 }
 function addAiRecommended(){
-  state.aiResultIds.forEach(id=>{const ex=exerciseById(id); if(ex&&!state.selected.some(x=>x.id===id)) state.selected.push({...ex});});
+  state.aiResultIds.forEach(id=>{const ex=exerciseById(id); if(ex&&!state.selected.some(x=>x.id===id)) state.selected.push(selectedFromLibrary(ex));});
   autoSave();
   showMessage("AI 추천 운동을 담았습니다.");
 }
 function buildAiLeaflet(){
   if(state.aiResultIds.length===0) recommendAiExercises();
   const ids=state.aiResultIds.length?state.aiResultIds:[];
-  state.selected=ids.map(id=>exerciseById(id)).filter(Boolean).map(e=>({...e}));
+  state.selected=ids.map(id=>exerciseById(id)).filter(Boolean).map(selectedFromLibrary);
   const profile=currentAiProfile();
   const dxLabel=labelFromList(TAG_FILTERS,profile.diagnosis);
   state.patient.memo=`${dxLabel} 환자 맞춤 운동 과제입니다. 통증, 어지러움, 호흡곤란, 심한 피로가 있으면 즉시 중단하고 보호자 또는 치료사에게 알려주세요. 모든 운동은 안전한 범위에서 천천히 시행합니다.`;
@@ -631,8 +632,56 @@ function imgTag(ex,cls="h-full w-full object-contain"){
   return `<img src="${esc(ex.imageUrl)}" alt="${esc(ex.title)}" class="${cls}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
   <span class="hidden h-full w-full items-center justify-center text-4xl">${esc(ex.image)}</span>`;
 }
-function qrUrl(url){return `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(url)}`;}
-function isValidVideoUrl(url){return url&&url.trim()!==""&&!url.includes("example.com");}
+const VIDEO_DEFAULT_KEY = "exercise-homework-video-defaults-v1";
+function loadVideoDefaults(){
+  try{
+    const v=JSON.parse(localStorage.getItem(VIDEO_DEFAULT_KEY)||"{}");
+    return v&&typeof v==="object"&&!Array.isArray(v)?v:{};
+  }catch(e){return {};}
+}
+function saveVideoDefault(id,url){
+  const all=loadVideoDefaults();
+  if(url) all[String(id)]=url; else delete all[String(id)];
+  try{localStorage.setItem(VIDEO_DEFAULT_KEY,JSON.stringify(all));}
+  catch(e){reportStorageError(e);}
+}
+function clearVideoDefault(id){
+  saveVideoDefault(id,"");
+  showMessage("이 운동의 기본 영상 주소를 지웠습니다.");
+}
+function isHttpUrl(url){
+  try{
+    const u=new URL(String(url||"").trim());
+    return u.protocol==="http:"||u.protocol==="https:";
+  }catch(e){return false;}
+}
+function isValidVideoUrl(url){return isHttpUrl(url);}
+function qrDataUrl(url){
+  if(!isHttpUrl(url)||typeof qrcode!=="function") return "";
+  const qr=qrcode(0,"M");
+  qr.addData(String(url).trim());
+  qr.make();
+  return qr.createDataURL(4,0);
+}
+function selectedFromLibrary(ex){
+  const remembered=loadVideoDefaults()[String(ex.id)]||"";
+  return {...ex,videoUrl:isHttpUrl(remembered)?remembered:""};
+}
+function setExerciseVideo(id,value){
+  const url=String(value||"").trim();
+  if(url&&!isHttpUrl(url)){
+    showMessage("영상 주소는 http 또는 https 로 시작해야 합니다.");
+    renderMain();
+    return;
+  }
+  state.selected=state.selected.map(x=>x.id===id?{...x,videoUrl:url}:x);
+  if(Array.isArray(state.cartDraftSelected)){
+    state.cartDraftSelected=state.cartDraftSelected.map(x=>x.id===id?{...x,videoUrl:url}:x);
+  }
+  if(url) saveVideoDefault(id,url);
+  autoSave();
+  renderMain();
+}
 function totalMinutes(){return state.selected.reduce((s,x)=>s+(Number(x.durationMin)||0),0);}
 function categories(){
   const ORDER=["전체","PROM","AROM","Strengthening","Balance","Gait","Endurance","ADL"];
@@ -671,7 +720,7 @@ function filtered(){
 /* 현재 필터 결과 전체 넣기 */
 function addAllFiltered(){
   filtered().forEach(e=>{
-    if(!state.selected.some(x=>x.id===e.id)) state.selected.push({...e});
+    if(!state.selected.some(x=>x.id===e.id)) state.selected.push(selectedFromLibrary(e));
   });
   autoSave();
   renderExerciseResults();
@@ -760,7 +809,7 @@ function addExercise(id){
   if(state.selected.some(x=>x.id===id))return;
   const ex=exercises.find(e=>e.id===id);
   if(!ex)return;
-  state.selected.push({...ex});
+  state.selected.push(selectedFromLibrary(ex));
   const recent=loadRecent().filter(x=>x!==id);
   saveRecent([id,...recent]);
   autoSave();
@@ -1847,6 +1896,12 @@ function tabCart(){
                 <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${catCls}">${esc(item.category)}</span>
               </div>
               <p class="text-xs text-slate-400 mt-0.5">${esc(item.level)}</p>
+              ${sel?"":`<div class="mt-1 flex items-center gap-1 flex-wrap">
+                <input type="url" value="${esc(item.videoUrl||"")}" placeholder="영상 주소 https://"
+                  onchange="setExerciseVideo(${item.id}, this.value)"
+                  class="w-44 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs focus:border-blue-400">
+                ${loadVideoDefaults()[String(item.id)]?`<button type="button" onclick="clearVideoDefault(${item.id})" class="rounded-lg border border-slate-200 px-2 py-1 text-[10px] font-bold text-slate-500 hover:bg-slate-50">기본 주소 지우기</button>`:""}
+              </div>`}
             </div>
 
             ${sel?"":` 
@@ -1916,7 +1971,8 @@ function tabPrint(){
             ["showFallWarning","낙상 고위험군 주의멘트","출력물 상단 안전 주의사항 표시"],
             ["showPainLog","통증기록 포함","운동 전후 NRS·피로도 기록"],
             ["showCaution","개별 주의사항 표시","각 운동 카드의 주의사항 문구 출력"],
-            ["showImage","운동 사진 표시","각 운동 카드의 이미지/이모지 출력"]
+            ["showImage","운동 사진 표시","각 운동 카드의 이미지/이모지 출력"],
+            ["showQr","QR 코드 포함","영상 주소가 있는 운동만 출력물에 QR이 표시됩니다."]
           ].map(([key,label,desc])=>`
             <label class="toggle-wrap flex items-center justify-between py-2 border-b border-slate-100 last:border-0 w-full">
               <div>
@@ -1926,16 +1982,6 @@ function tabPrint(){
               <input type="checkbox" ${state[key]?"checked":""} onchange="setField('${key}',this.checked)">
               <div class="toggle-track shrink-0"><div class="toggle-thumb"></div></div>
             </label>`).join("")}
-          <div class="flex items-center justify-between gap-3 py-2 opacity-60">
-            <div>
-              <p class="text-sm font-semibold text-slate-500">QR 코드 포함</p>
-              <p class="text-xs text-slate-400">운동 영상 주소를 입력하는 칸이 아직 없어 사용할 수 없습니다.</p>
-            </div>
-            <label class="toggle-wrap shrink-0 cursor-not-allowed">
-              <input type="checkbox" disabled>
-              <div class="toggle-track"><div class="toggle-thumb"></div></div>
-            </label>
-          </div>
         </div>
         ${state.showChecklist?`
         <label class="block text-xs font-semibold text-slate-500 mt-1">체크표 주차 수
@@ -2165,7 +2211,7 @@ function leafletHTML(){
         <div class="shrink-0 text-right space-y-1">
           <div class="inline-flex rounded-lg border-2 border-slate-900 px-2.5 py-1 text-sm font-black whitespace-nowrap">${item.side&&item.side!=="해당 없음"&&item.side!==""?esc(item.side)+" · ":""}${item.isTimeBased ? `${item.durationMin}분` : `${item.reps}회 × ${item.sets}세트`}</div>
           ${state.showQr && isValidVideoUrl(item.videoUrl)
-            ? `<div class="flex items-center gap-1 justify-end"><img src="${qrUrl(item.videoUrl)}" class="h-10 w-10"><span class="text-xs text-slate-400">영상</span></div>`
+            ? `<div class="flex items-center gap-1 justify-end"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="h-10 w-10"><span class="text-xs text-slate-400">영상</span></div>`
             : ""}
         </div>
       </article>`;
@@ -2190,7 +2236,7 @@ function leafletHTML(){
         ? `<div class="mt-2 rounded-xl bg-amber-50 p-3 text-sm leading-6"><b>주의: </b>${esc(item.caution)}</div>`
         : ""}
       ${state.showQr && isValidVideoUrl(item.videoUrl)
-        ? `<div class="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 p-2"><img src="${qrUrl(item.videoUrl)}" class="h-16 w-16"><div class="text-xs leading-5">📱 QR코드를 촬영하면 운동 영상을 확인할 수 있습니다.</div></div>`
+        ? `<div class="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 p-2"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="h-16 w-16"><div class="text-xs leading-5">📱 QR코드를 촬영하면 운동 영상을 확인할 수 있습니다.</div></div>`
         : ""}
     </article>`;
   }
