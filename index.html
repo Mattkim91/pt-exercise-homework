@@ -167,6 +167,19 @@
 
     /* ── 스텝바 레이블 모바일 ───────────── */
     @media(max-width:400px){ .step-label { display:none; } }
+
+    /* 운동 선택: 데스크톱은 좌우 분할, 좁은 화면은 필터를 접고 페이지가 스크롤 */
+    .exercise-layout { display:flex; flex-direction:column; gap:1rem; }
+    @media (max-width:639px) {
+      .exercise-layout #filter-panel.is-collapsed { display:none; }
+    }
+    @media (min-width:640px) {
+      .exercise-layout { flex-direction:row; gap:1.25rem; height:calc(100vh - 160px); }
+      .exercise-layout #filter-panel,
+      .exercise-layout #exercise-results-wrap {
+        overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
@@ -243,8 +256,8 @@ const EXERCISES = [
   {"id": 2, "category": "PROM", "level": "Lv0 PROM/보호자", "title": "무릎·고관절 수동관절운동", "target": "하지 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦵", "description": "치료사 또는 보호자가 무릎을 천천히 굽혔다 펴고, 고관절을 부드럽게 굽혀줍니다. 환자는 힘을 빼고 편안하게 유지합니다.", "caution": "관절 이상음이나 통증이 있으면 즉시 중단하세요. 골절·수술 부위는 특히 주의하세요.", "imageKey": "lower-limb-prom"},
   {"id": 3, "category": "PROM", "level": "Lv0 PROM/보호자", "title": "어깨 수동관절운동", "target": "어깨 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🙆", "description": "치료사 또는 보호자가 팔을 부드럽게 앞으로 들어 올리고, 옆으로 벌려줍니다. 환자는 힘을 빼고 편안하게 유지합니다.", "caution": "어깨 탈구 병력이 있으면 치료사에게 먼저 알려주세요. 통증 없는 범위에서만 시행하세요.", "imageKey": "shoulder-prom"},
   {"id": 4, "category": "PROM", "level": "Lv0 PROM/보호자", "title": "손목·손가락 수동관절운동", "target": "손목·손가락 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "✋", "description": "치료사 또는 보호자가 손목을 위아래로 움직이고 손가락을 부드럽게 펴줍니다. 환자는 힘을 빼고 편안하게 유지합니다.", "caution": "손가락 경직이 심하면 무리하게 펴지 말고 가능한 범위에서만 시행하세요.", "imageKey": "wrist-hand-prom"},
-  {"id": 5, "category": "AROM", "level": "Lv1 침상운동", "title": "발목 펌프 운동", "target": "발목 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦶", "description": "치료사 또는 보조자가 환자의 발목을 부드럽게 위아래로 움직여줍니다. 환자는 힘을 빼고 편안하게 유지합니다.", "caution": "통증이 있으면 즉시 중단하고 치료사에게 알려주세요. 저항 없이 부드럽게 시행하세요.", "imageKey": "ankle-pump"},
-  {"id": 6, "category": "AROM", "level": "Lv1 침상운동", "title": "무릎 굽혔다 펴기", "target": "하지 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦵", "description": "치료사 또는 보조자가 무릎을 천천히 굽혔다 펴고, 고관절을 부드럽게 굽혀줍니다. 환자는 힘을 빼고 편안하게 유지합니다.", "caution": "관절 이상음이나 통증이 있으면 즉시 중단하세요. 골절·수술 부위 주의.", "imageKey": "heel-slide"},
+  {"id": 5, "category": "AROM", "level": "Lv1 침상운동", "title": "발목 펌프 운동", "target": "발목 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦶", "description": "누운 자세에서 발목을 스스로 천천히 위아래로 움직입니다. 발끝을 몸쪽으로 당겼다가 아래로 미는 동작을 반복합니다.", "caution": "통증이 있으면 즉시 중단하고 치료사에게 알려주세요. 반동 없이 천천히 시행하세요.", "imageKey": "ankle-pump"},
+  {"id": 6, "category": "AROM", "level": "Lv1 침상운동", "title": "무릎 굽혔다 펴기", "target": "하지 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦵", "description": "누운 자세에서 발뒤꿈치를 바닥에 대고 천천히 몸쪽으로 끌어 무릎을 굽힌 뒤, 다시 천천히 펴서 내립니다.", "caution": "무릎에서 이상음이나 통증이 있으면 즉시 중단하세요. 골절·수술 부위는 통증 없는 범위에서만 시행하세요.", "imageKey": "heel-slide"},
   {"id": 7, "category": "ADL", "level": "Lv1 침상운동", "title": "옆으로 돌아눕기", "target": "침상 이동 능력 향상", "reps": 5, "sets": 3, "durationMin": 5, "side": "좌/우 선택", "image": "🔄", "description": "누운 자세에서 무릎을 살짝 굽히고 몸통을 천천히 옆으로 돌립니다.", "caution": "어지럽거나 통증이 있으면 천천히 쉬어가며 시행하세요.", "imageKey": "log-rolling"},
   {"id": 8, "category": "Strengthening", "level": "Lv1 침상운동", "title": "무릎 누르기", "target": "대퇴사두근 활성화", "reps": 10, "sets": 3, "durationMin": 3, "side": "양측", "image": "🦵", "description": "무릎 아래에 수건을 놓고 무릎을 아래로 눌러 허벅지 앞쪽에 힘을 줍니다.", "caution": "무릎 통증이 심하면 힘주는 강도를 줄이세요.", "imageKey": "quad-set"},
   {"id": 9, "category": "Strengthening", "level": "Lv1 침상운동", "title": "엉덩이 힘주기", "target": "둔근 활성화", "reps": 10, "sets": 3, "durationMin": 3, "side": "양측", "image": "🛏️", "description": "누운 자세에서 엉덩이에 힘을 주고 3초간 유지한 뒤 천천히 힘을 뺍니다.", "caution": "허리나 다리에 통증이 생기면 강도를 줄이세요.", "imageKey": "glute-set"},
@@ -254,10 +267,10 @@ const EXERCISES = [
   {"id": 13, "category": "Strengthening", "level": "Lv1 침상운동", "title": "클램쉘", "target": "고관절 외전근 및 중둔근 강화", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦵", "description": "옆으로 누워 무릎을 구부린 상태에서 발은 붙이고 위쪽 무릎을 천천히 벌렸다가 모읍니다.", "caution": "골반이 뒤로 넘어가지 않도록 주의하고 통증 없는 범위에서 시행하세요.", "imageKey": "clam-shell"},
   {"id": 14, "category": "Strengthening", "level": "Lv1 침상운동", "title": "옆으로 누워 다리 벌리기", "target": "고관절 외전근 강화 및 골반 안정성 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🦵", "description": "옆으로 누운 자세에서 위쪽 다리를 편 상태로 천천히 위로 들었다가 내립니다.", "caution": "허리나 골반이 과하게 움직이지 않도록 주의하세요.", "imageKey": "side-lying-hip-abduction"},
   {"id": 15, "category": "Strengthening", "level": "Lv1 침상운동", "title": "브릿지", "target": "둔근 강화 및 침상 이동 준비", "reps": 10, "sets": 2, "durationMin": 5, "side": "해당 없음", "image": "🌉", "description": "무릎을 세우고 누운 뒤 엉덩이를 천천히 들어 올렸다가 내립니다.", "caution": "허리 통증이 심하면 중단하세요.", "imageKey": "bridge"},
-  {"id": 16, "category": "ADL", "level": "Lv1 침상운동", "title": "손 쥐었다 펴기", "target": "손목·손가락 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "✋", "description": "치료사 또는 보조자가 손목을 위아래로 움직이고 손가락을 부드럽게 펴줍니다. 환자는 힘을 빼고 편안하게 유지합니다.", "caution": "손가락 경직이 심하면 무리하게 펴지 말고 가능한 범위에서만 시행하세요.", "imageKey": "hand-open-close"},
+  {"id": 16, "category": "ADL", "level": "Lv1 침상운동", "title": "손 쥐었다 펴기", "target": "손목·손가락 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "✋", "description": "손가락을 스스로 천천히 쥐었다가 모두 펴기를 반복합니다. 통증이 없는 범위에서 시행합니다.", "caution": "손가락을 억지로 끝까지 펴지 말고, 스스로 움직일 수 있는 범위에서만 시행하세요.", "imageKey": "hand-open-close"},
   {"id": 17, "category": "ADL", "level": "Lv1 침상운동", "title": "손목 굽힘/폄", "target": "손목 관절가동범위 유지", "reps": 10, "sets": 3, "durationMin": 3, "side": "양측", "image": "🤲", "description": "팔을 편안히 둔 상태에서 손목을 천천히 위아래로 움직입니다.", "caution": "반동 없이 천천히 시행하세요.", "imageKey": "wrist-flexion-extension"},
   {"id": 18, "category": "ADL", "level": "Lv1 침상운동", "title": "팔꿈치 굽힘/폄", "target": "팔꿈치 관절가동범위 유지", "reps": 10, "sets": 3, "durationMin": 4, "side": "양측", "image": "💪", "description": "팔꿈치를 천천히 굽혔다가 폅니다. 통증이 없는 범위에서 반복합니다.", "caution": "어깨가 과하게 들리지 않도록 주의하세요.", "imageKey": "elbow-flexion-extension"},
-  {"id": 19, "category": "ADL", "level": "Lv1 침상운동", "title": "누워서 팔 올리기", "target": "어깨 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🙆", "description": "치료사 또는 보조자가 팔을 부드럽게 앞으로 들어 올리고, 옆으로 벌려줍니다. 환자는 힘을 빼고 편안하게 유지합니다.", "caution": "어깨 탈구 병력이 있으면 치료사에게 먼저 알려주세요. 통증 없는 범위에서만 시행하세요.", "imageKey": "supine-shoulder-flexion"},
+  {"id": 19, "category": "ADL", "level": "Lv1 침상운동", "title": "누워서 팔 올리기", "target": "어깨 관절가동범위 유지 및 구축 예방", "reps": 10, "sets": 2, "durationMin": 5, "side": "양측", "image": "🙆", "description": "누운 자세에서 팔을 스스로 천천히 앞으로 들어 올렸다가 내립니다. 통증 없는 범위에서 반복합니다.", "caution": "어깨 통증이나 탈구 병력이 있으면 치료사에게 먼저 알려주세요. 통증 없는 범위에서만 시행하세요.", "imageKey": "supine-shoulder-flexion"},
   {"id": 20, "category": "ADL", "level": "Lv1 침상운동", "title": "환측 팔 체중지지", "target": "상지 체중지지 및 어깨 안정성 향상", "reps": 10, "sets": 2, "durationMin": 5, "side": "환측", "image": "✋", "description": "테이블 위에 환측 팔을 올리고 손바닥 또는 전완으로 천천히 체중을 실어 유지합니다.", "caution": "어깨 통증이나 손목 통증이 있으면 각도와 체중을 줄이세요.", "imageKey": "affected-arm-weight-bearing"},
   {"id": 21, "category": "AROM", "level": "Lv1 침상운동", "title": "골반 기울이기", "target": "골반 조절 및 요부 긴장 완화", "reps": 10, "sets": 2, "durationMin": 4, "side": "해당 없음", "image": "🛏️", "description": "무릎을 세우고 누운 자세에서 허리를 바닥 쪽으로 가볍게 누르며 골반을 움직입니다.", "caution": "통증이 없는 작은 범위에서 시행하세요.", "imageKey": "pelvic-tilt"},
   {"id": 22, "category": "ADL", "level": "Lv1 침상운동", "title": "누워서 손 뻗기", "target": "상지 조절 및 체간 안정성 향상", "reps": 10, "sets": 2, "durationMin": 4, "side": "좌/우 선택", "image": "🤲", "description": "누운 자세에서 한쪽 팔을 천천히 앞으로 뻗었다가 돌아옵니다. 어깨가 과하게 올라가지 않도록 편안한 범위에서 시행합니다.", "caution": "어깨 통증이나 저림이 있으면 범위를 줄이세요.", "imageKey": "supine-reach"},
@@ -311,12 +324,12 @@ const EXERCISES = [
   {"id": 70, "category": "Endurance", "level": "Lv5 유산소운동", "title": "고정식 자전거", "target": "심폐지구력 및 하지 반복운동", "reps": 10, "sets": 1, "durationMin": 10, "side": "해당 없음", "image": "🚲", "description": "고정식 자전거에 앉아 편안한 강도로 페달을 밟습니다.", "caution": "숨이 너무 차거나 어지러우면 즉시 중단하세요.", "imageKey": "stationary-bike"},
   {"id": 71, "category": "Endurance", "level": "Lv5 유산소운동", "title": "트레드밀 걷기", "target": "보행 지구력 및 속도 조절", "reps": 10, "sets": 1, "durationMin": 10, "side": "해당 없음", "image": "🏃", "description": "트레드밀에서 안전 손잡이를 잡고 느린 속도부터 걷습니다.", "caution": "반드시 치료사 또는 보호자 감독하에 시행하세요.", "imageKey": "treadmill-walking"},
   {"id": 72, "category": "Endurance", "level": "Lv5 유산소운동", "title": "야외 지구력 걷기", "target": "전신 지구력 및 일상 활동량 향상", "reps": 1, "sets": 1, "durationMin": 20, "side": "해당 없음", "image": "🌳", "description": "평평하고 안전한 야외 보행로에서 편안한 속도로 15~20분 정도 걷습니다. 필요하면 중간에 쉬어도 됩니다.", "caution": "경사로, 미끄러운 길, 사람이 많은 곳은 피하고, 흉통·호흡곤란·어지러움이 있으면 즉시 중단하세요.", "imageKey": "outdoor-endurance-walking"},
-  {"id": 73, "category": "AROM", "level": "Lv2 앉은자세", "title": "종아리 스트레칭", "target": "발목 가동범위 및 보행 준비", "reps": 30, "sets": 3, "durationMin": 4, "side": "좌/우 선택", "image": "🦶", "description": "벽이나 난간을 짚고 한쪽 다리를 뒤로 뻗습니다. 뒤쪽 무릎을 편 상태에서 발뒤꿈치가 바닥에서 떨어지지 않게 유지하며 종아리가 당기는 느낌을 느낍니다.", "caution": "반동을 주지 말고 천천히 유지하세요. 통증이 있으면 범위를 줄이세요.", "imageKey": "standing-calf-stretch"},
+  {"id": 73, "category": "AROM", "level": "Lv3 선자세", "title": "종아리 스트레칭", "target": "발목 가동범위 및 보행 준비", "reps": 30, "sets": 3, "durationMin": 4, "side": "좌/우 선택", "image": "🦶", "description": "벽이나 난간을 짚고 한쪽 다리를 뒤로 뻗습니다. 뒤쪽 무릎을 편 상태에서 발뒤꿈치가 바닥에서 떨어지지 않게 유지하며 종아리가 당기는 느낌을 느낍니다.", "caution": "반동을 주지 말고 천천히 유지하세요. 통증이 있으면 범위를 줄이세요.", "imageKey": "standing-calf-stretch"},
   {"id": 74, "category": "AROM", "level": "Lv2 앉은자세", "title": "햄스트링 스트레칭", "target": "무릎 뒤쪽 유연성 및 보행 준비", "reps": 30, "sets": 3, "durationMin": 4, "side": "좌/우 선택", "image": "🦵", "description": "의자에 앉아 한쪽 다리를 앞으로 펴고 발끝을 가볍게 당깁니다. 허리를 세운 상태에서 몸을 천천히 앞으로 기울여 허벅지 뒤쪽이 당기는 느낌을 유지합니다.", "caution": "허리를 과하게 굽히거나 반동을 주지 마세요. 저림이나 통증이 있으면 중단하세요.", "imageKey": "hamstring-stretch"}
 ];
 
-const VERSION      = "v2.57";
-const VERSION_DATE = "2026-06-07";
+const VERSION      = "v2.58";
+const VERSION_DATE = "2026-10-19";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
 const FAVORITE_KEY = "exercise-homework-favorites-v1";
@@ -1572,10 +1585,11 @@ let state = {
   patientQuery:"",
   selected:[], patient:newPatientData(),
   savedPatients:loadSavedPatients(),
-  layoutMode:"1단 가로형", showQr:false, showChecklist:false, showPainLog:false, showFallWarning:false, showCaution:false, showImage:false, checklistWeeks:2,
+  layoutMode:"1단 가로형", showQr:false, showChecklist:false, showPainLog:false, showFallWarning:false, showCaution:true, showImage:true, checklistWeeks:2,
   preview:false, message:"", expandedId:null, therapistName:"",
   editingPatientId:null,
   isNewPatient:true,
+  mobileFiltersOpen:false,
   cartSelectMode:false, cartChecked:new Set(), cartDraftSelected:null
 };
 let msgTimer=null;
@@ -1597,6 +1611,11 @@ function persist(){
 ─────────────────────────────────────────── */
 let autoSaveTimer = null;
 function autoSave(){
+  // 대기 중인 입력 저장이 환자 전환 뒤에 실행되지 않도록 먼저 취소
+  if(autoSaveDebounceTimer){
+    clearTimeout(autoSaveDebounceTimer);
+    autoSaveDebounceTimer = null;
+  }
   // 이름 없는 신규는 저장 안 함
   if(!state.patient.name.trim()) return;
 
@@ -1610,6 +1629,7 @@ function autoSave(){
     ...state.patient,
     savedAt: new Date().toISOString(),
     selected: state.selected,
+    therapistName: state.therapistName || "",
     settings:{
       layoutMode:state.layoutMode, showQr:state.showQr,
       showChecklist:state.showChecklist, showPainLog:state.showPainLog,
@@ -1640,6 +1660,8 @@ function autoSaveDebounced(){
   clearTimeout(autoSaveDebounceTimer);
   autoSaveDebounceTimer = setTimeout(autoSave, 600);
 }
+/* 환자 전환·신규 작성 전에 아직 저장되지 않은 입력을 반영 */
+function flushAutoSave(){ autoSave(); }
 
 function loadRecent(){
   try{return JSON.parse(localStorage.getItem(RECENT_KEY)||"[]");}catch(e){return[];}
@@ -1976,11 +1998,14 @@ function saveCurrentPatient(){
   const nameEl=document.getElementById("patient-name-input");
   const noEl=document.getElementById("patient-no-input");
   const noteEl=document.getElementById("patient-note-input");
-  const memoEl=document.querySelector("textarea");
+  const memoEl=document.getElementById("patient-memo-input");
+  const therapistEl=document.getElementById("therapist-input");
   if(nameEl) state.patient.name=nameEl.value.trim();
   if(noEl) state.patient.patientNo=noEl.value.trim();
   if(noteEl) state.patient.note=noteEl.value.trim();
+  // 공통 주의사항 칸이 화면에 있을 때만 갱신. AI 화면의 다른 입력칸은 읽지 않음
   if(memoEl) state.patient.memo=memoEl.value.trim();
+  if(therapistEl) state.therapistName=therapistEl.value.trim();
   if(!state.patient.name){alert("환자 이름을 입력하세요.");if(nameEl)nameEl.focus();return;}
 
   const wasNew = state.isNewPatient;
@@ -1990,7 +2015,7 @@ function saveCurrentPatient(){
 }
 
 function newPatient(){
-  // 항상 폼 초기화 (confirm 없이) — 저장은 명시적으로 버튼 누름
+  flushAutoSave();
   state.patient=newPatientData();
   state.selected=[];
   state.preview=false;
@@ -1999,13 +2024,15 @@ function newPatient(){
 }
 
 function loadPatient(id){
+  flushAutoSave();
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
   state.patient={id:r.id,name:r.name||"",date:r.date||new Date().toISOString().slice(0,10),
     memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:r.patientNo||""};
   state.selected=Array.isArray(r.selected)?r.selected:[];
+  if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
   if(r.settings){state.layoutMode=r.settings.layoutMode??"1단 가로형";state.showQr=r.settings.showQr??false;
     state.showChecklist=r.settings.showChecklist??false;state.showPainLog=r.settings.showPainLog??false;
-    state.showFallWarning=r.settings.showFallWarning??false;state.showCaution=r.settings.showCaution??false;state.showImage=r.settings.showImage??false;
+    state.showFallWarning=r.settings.showFallWarning??false;state.showCaution=r.settings.showCaution??true;state.showImage=r.settings.showImage??true;
     state.checklistWeeks=r.settings.checklistWeeks??2;}
   state.isNewPatient=false;
   // 탭 이동 없이 환자정보 탭 폼에만 반영 (tab=0 유지)
@@ -2013,10 +2040,12 @@ function loadPatient(id){
   showMessage(`${r.name||"이름 없는 환자"} 불러오기 완료`);
 }
 function duplicatePatient(id){
+  flushAutoSave();
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
   state.patient={id:"patient-"+Date.now(),name:(r.name||"이름 없는 환자")+" 복사본",
     date:new Date().toISOString().slice(0,10),memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:r.patientNo||""};
   state.selected=Array.isArray(r.selected)?r.selected.map(x=>({...x})):[];
+  if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
   state.isNewPatient=true; // 복사본은 신규로 취급
   state.tab=0;
   showMessage("복사본을 만들었습니다. 이름 수정 후 [＋ 환자 추가]를 누르세요.");
@@ -2156,7 +2185,7 @@ function render(){
     </header>
 
     <!-- ── 탭 콘텐츠 ── -->
-    <main class="no-print flex-1 mx-auto w-full max-w-5xl px-3 py-4 pb-24 sm:pb-5 overflow-hidden">
+    <main class="app-main no-print flex-1 mx-auto w-full max-w-5xl px-3 py-4 pb-24 sm:pb-5 sm:overflow-hidden">
       ${state.tab===0?tabPatient():""}
       ${state.tab===1?tabExercise():""}
       ${state.tab===2?tabCart():""}
@@ -2351,6 +2380,9 @@ function tabPatient(){
 
       <!-- 폼 본문 -->
       <div class="p-5 grid gap-3">
+        <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-950">
+          환자 이름과 등록번호는 이 브라우저에만 저장됩니다. 여러 사람이 쓰는 컴퓨터에서는 등록번호를 입력하지 마세요. 브라우저에 저장된 데이터를 지우면 환자 목록도 함께 삭제됩니다.
+        </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="text-xs font-semibold text-slate-500 mb-1 block">이름 <span class="text-red-400">*</span></label>
@@ -2386,7 +2418,7 @@ function tabPatient(){
         </div>
         <div>
           <label class="text-xs font-semibold text-slate-500 mb-1 block">공통 주의사항</label>
-          <textarea oninput="setPatientFieldSilent('memo',this.value)" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-400 transition-colors resize-none">${esc(state.patient.memo)}</textarea>
+          <textarea id="patient-memo-input" oninput="setPatientFieldSilent('memo',this.value)" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-400 transition-colors resize-none">${esc(state.patient.memo)}</textarea>
         </div>
         <div class="flex gap-2 pt-1">
           <button onclick="saveCurrentPatient()" class="flex-1 rounded-xl font-bold py-3 text-sm transition-colors text-white bg-blue-600 hover:bg-blue-700">
@@ -2500,12 +2532,18 @@ function tabExercise(){
   const bbsRec=activeBbsRecommendation();
 
   return `<div class="anim-fadeup">
-    <!-- 데스크탑: 좌우 분할 / 모바일: 1열 -->
-    <div class="flex flex-col sm:flex-row gap-4 sm:gap-5" style="height:calc(100vh - 160px)">
+    <!-- 데스크톱: 좌우 분할 / 좁은 화면: 필터를 접고 목록이 아래로 이어짐 -->
+    <div class="exercise-layout">
+      <div class="sm:hidden">
+        <button type="button" onclick="state.mobileFiltersOpen=!state.mobileFiltersOpen;renderMain()"
+          class="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 flex items-center justify-between gap-3">
+          <span>${state.mobileFiltersOpen?"필터 닫기":"검색·필터 열기"}</span>
+          <span class="text-xs font-semibold text-slate-400">${list.length}개</span>
+        </button>
+      </div>
 
-      <!-- ── 좌측: 필터 패널 (독립 스크롤) ── -->
-      <div id="filter-panel" class="w-full sm:w-[300px] sm:shrink-0 overflow-y-auto overscroll-contain space-y-3 pb-4"
-           style="scrollbar-gutter:stable">
+      <!-- ── 좌측: 필터 패널 (데스크톱은 독립 스크롤) ── -->
+      <div id="filter-panel" class="w-full sm:w-[300px] sm:shrink-0 space-y-3 pb-4 ${state.mobileFiltersOpen?"":"is-collapsed"}">
 
         <!-- 검색 + 레벨 pill + 카테고리 pill -->
         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
@@ -2597,8 +2635,7 @@ function tabExercise(){
       </div><!-- /filter-panel -->
 
       <!-- ── 우측: 운동 카드 리스트 (독립 스크롤) ── -->
-      <div id="exercise-results-wrap" class="flex-1 min-w-0 overflow-y-auto overscroll-contain pb-4"
-           style="scrollbar-gutter:stable">
+      <div id="exercise-results-wrap" class="flex-1 min-w-0 pb-4">
         <div id="exercise-results">
           <div class="flex items-center justify-between px-1 mb-2">
             <p class="text-xs text-slate-400 font-semibold">${list.length}개 운동</p>
@@ -2977,7 +3014,6 @@ function tabPrint(){
             ["showChecklist","체크표 포함","요일별 운동 수행 체크"],
             ["showFallWarning","낙상 고위험군 주의멘트","출력물 상단 안전 주의사항 표시"],
             ["showPainLog","통증기록 포함","운동 전후 NRS·피로도 기록"],
-            ["showQr","QR 코드 포함","영상 URL이 입력된 운동만 표시"],
             ["showCaution","개별 주의사항 표시","각 운동 카드의 주의사항 문구 출력"],
             ["showImage","운동 사진 표시","각 운동 카드의 이미지/이모지 출력"]
           ].map(([key,label,desc])=>`
@@ -2989,6 +3025,16 @@ function tabPrint(){
               <input type="checkbox" ${state[key]?"checked":""} onchange="setField('${key}',this.checked)">
               <div class="toggle-track shrink-0"><div class="toggle-thumb"></div></div>
             </label>`).join("")}
+          <div class="flex items-center justify-between gap-3 py-2 opacity-60">
+            <div>
+              <p class="text-sm font-semibold text-slate-500">QR 코드 포함</p>
+              <p class="text-xs text-slate-400">운동 영상 주소를 입력하는 칸이 아직 없어 사용할 수 없습니다.</p>
+            </div>
+            <label class="toggle-wrap shrink-0 cursor-not-allowed">
+              <input type="checkbox" disabled>
+              <div class="toggle-track"><div class="toggle-thumb"></div></div>
+            </label>
+          </div>
         </div>
         ${state.showChecklist?`
         <label class="block text-xs font-semibold text-slate-500 mt-1">체크표 주차 수
