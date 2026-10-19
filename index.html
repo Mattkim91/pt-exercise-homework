@@ -1602,6 +1602,15 @@ function migratePatientRecord(rec){
   let changed=JSON.stringify(rec.selected||[])!==JSON.stringify(selected);
   const record={...rec,selected};
   if(typeof record.imageUrl==="string"){ delete record.imageUrl; changed=true; }
+  const settings={...(record.settings||{})};
+  // 예전 기록은 사진·개별 주의사항이 꺼진 채로 남아 있다. 기록마다 한 번만 켠다.
+  if(!settings.printDefaultsMigrated){
+    settings.showImage=true;
+    settings.showCaution=true;
+    settings.printDefaultsMigrated=true;
+    record.settings=settings;
+    changed=true;
+  }
   return {record,changed};
 }
 function reportStorageError(err){
@@ -1673,7 +1682,8 @@ function autoSave(){
       layoutMode:state.layoutMode, showQr:state.showQr,
       showChecklist:state.showChecklist, showPainLog:state.showPainLog,
       showFallWarning:state.showFallWarning, showCaution:state.showCaution,
-      showImage:state.showImage, checklistWeeks:state.checklistWeeks
+      showImage:state.showImage, checklistWeeks:state.checklistWeeks,
+      printDefaultsMigrated:true
     }
   };
   const exists = state.savedPatients.some(x=>x.id===record.id);
