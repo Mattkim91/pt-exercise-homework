@@ -816,7 +816,26 @@ function setExerciseVideo(id,value){
   autoSave();
   renderMain();
 }
-function totalMinutes(){return state.selected.reduce((s,x)=>s+(Number(x.durationMin)||0),0);}
+function exerciseMinutes(item){
+  if(!item) return 0;
+  const lib=exerciseById(item.id);
+  if(item.isTimeBased) return positiveInt(item.durationMin, lib?lib.durationMin:1);
+  const reps=positiveInt(item.reps, lib?lib.reps:1);
+  const sets=positiveInt(item.sets, lib?lib.sets:1);
+  if(doseUnitOf(item)==="sec") return Math.max(1, Math.ceil((reps*sets)/60));
+  const baseReps=positiveInt(lib?lib.reps:reps, reps);
+  const baseSets=positiveInt(lib?lib.sets:sets, sets);
+  const baseDur=positiveInt(lib?lib.durationMin:item.durationMin, 1);
+  return Math.max(1, Math.round(baseDur*(reps/baseReps)*(sets/baseSets)));
+}
+function totalMinutes(list){
+  const arr=Array.isArray(list)?list:state.selected;
+  return arr.reduce((s,x)=>s+exerciseMinutes(x),0);
+}
+function refreshTimeDisplays(){
+  const mins=String(totalMinutes());
+  document.querySelectorAll("[data-live-minutes]").forEach(el=>{ el.textContent=mins; });
+}
 function categories(){
   const ORDER=["전체","PROM","AROM","Strengthening","Balance","Gait","Endurance","ADL"];
   const present=new Set(exercises.map(e=>e.category));
@@ -982,6 +1001,7 @@ function updateSelectedSilent(id,field,value){
     state.cartDraftSelected=state.cartDraftSelected.map(x=>x.id===id?{...x,[field]:n}:x);
   }
   autoSaveDebounced();
+  refreshTimeDisplays();
 }
 function commitSelectedCount(id,field,input){
   const item=state.selected.find(x=>x.id===id);
@@ -997,6 +1017,7 @@ function commitSelectedCount(id,field,input){
   state.selected=state.selected.map(x=>x.id===id?{...x,[field]:restored}:x);
   if(input) input.value=String(restored);
   autoSaveDebounced();
+  refreshTimeDisplays();
 }
 function applyPreset(name){
   if(state.activePreset===name){ state.activePreset=null; }
@@ -1308,7 +1329,7 @@ function render(){
       <div id="cart-fab" onclick="state.tab=2;render()" class="no-print sm:hidden fixed bottom-20 right-4 z-30 flex items-center gap-2 rounded-2xl bg-blue-600 text-white px-4 py-3 text-sm font-bold cursor-pointer anim-pop">
         🧺 <span>${state.selected.length}개 담음</span>
         <span class="text-blue-200">·</span>
-        <span class="text-blue-100">${totalMinutes()}분</span>
+        <span class="text-blue-100"><span data-live-minutes>${totalMinutes()}</span>분</span>
         <svg class="w-4 h-4 ml-1 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
       </div>`:""}
 
@@ -1364,7 +1385,7 @@ function syncBottomNav(){
       fab.onclick = ()=>{ state.tab=2; render(); };
       document.body.appendChild(fab);
     }
-    fab.innerHTML = `🧺 <span>${cnt}개 담음</span><span class="text-blue-200">·</span><span class="text-blue-100">${totalMinutes()}분</span>`;
+    fab.innerHTML = `🧺 <span>${cnt}개 담음</span><span class="text-blue-200">·</span><span class="text-blue-100"><span data-live-minutes>${totalMinutes()}</span>분</span>`;
   } else if(fab){
     fab.remove();
   }
@@ -1964,14 +1985,14 @@ function tabCart(){
   const sel=state.cartSelectMode;
   const chk=state.cartChecked;
   const list=cartWorkingList();
-  const listMinutes=list.reduce((s,x)=>s+(Number(x.durationMin)||0),0);
+  const listMinutes=totalMinutes(list);
   const allChecked=list.length>0&&list.every(x=>chk.has(x.id));
 
   return `<div class="anim-fadeup space-y-4">
     <div class="flex items-center justify-between">
       <h2 class="font-bold text-slate-800">🧺 담은 운동</h2>
       <div class="flex items-center gap-2">
-        <span class="rounded-full bg-blue-50 text-blue-700 text-sm font-bold px-3 py-1 border border-blue-100">${list.length}개 · 약 ${listMinutes}분</span>
+        <span class="rounded-full bg-blue-50 text-blue-700 text-sm font-bold px-3 py-1 border border-blue-100">${list.length}개 · 약 <span data-live-minutes>${listMinutes}</span>분</span>
         ${state.selected.length>0&&!sel?`
           <button onclick="enterCartEditMode()" class="rounded-xl border border-slate-200 text-slate-600 text-xs font-bold px-3 py-1.5 hover:bg-slate-50 transition-colors">선택/이동</button>
           <button onclick="if(confirm('담은 운동을 전체 삭제하시겠습니까?')){state.selected=[];autoSave();renderMain();}" class="rounded-xl bg-red-50 text-red-500 border border-red-200 text-xs font-bold px-3 py-1.5 hover:bg-red-100 transition-colors">전체 삭제</button>
@@ -2185,7 +2206,7 @@ function tabPrint(){
           </div>
           <div class="flex justify-between py-2 border-b border-slate-100">
             <span class="text-slate-500">예상 소요시간</span>
-            <span class="font-semibold">약 ${totalMinutes()}분</span>
+            <span class="font-semibold">약 <span data-live-minutes>${totalMinutes()}</span>분</span>
           </div>
           <div class="flex justify-between py-2">
             <span class="text-slate-500">레이아웃</span>
@@ -2417,7 +2438,7 @@ function leafletHTML(){
       <div class="text-right text-sm leading-7 shrink-0">
         <p><b>환자명</b> ${esc(state.patient.name||"____________")}${state.patient.patientNo?` (${esc(state.patient.patientNo)})`:""}</p>
         <p><b>작성일</b> ${esc(state.patient.date)}</p>
-        <p><b>예상시간</b> 약 ${totalMinutes()}분</p>
+        <p><b>예상시간</b> 약 <span data-live-minutes>${totalMinutes()}</span>분</p>
         ${state.therapistName?`<p><b>담당치료사</b> ${esc(state.therapistName)}</p>`:""}
       </div>
     </div>
