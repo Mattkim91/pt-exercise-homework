@@ -281,7 +281,7 @@ const exercises = EXERCISES.map(e=>({
 let state = {
   tab: 0,
   query:"", category:"전체", level:"전체", bodyFilter:"전체", purposeFilter:"전체", tagFilter:"전체", showFavoritesOnly:false, bbsScore:"", bbsMode:false, activePreset:null,
-  aiProfile:{diagnosis:"stroke", functionLevel:"moderate", goal:"balance", bbs:"", note:""}, aiResultIds:[], aiText:"", aiPrompt:"", adminExerciseId:1, libraryKeyword:"",
+  aiProfile:{diagnosis:"stroke", functionLevel:"bed", goal:"balance", bbs:"", note:""}, aiResultIds:[], aiText:"", aiPrompt:"", adminExerciseId:1, libraryKeyword:"",
   patientQuery:"",
   selected:[], patient:newPatientData(),
   savedPatients:loadSavedPatients(),
@@ -514,7 +514,7 @@ function setQuickFilter(type,value){
 function exerciseById(id){return exercises.find(e=>e.id===Number(id));}
 function uniqueIds(ids){return [...new Set(ids.map(Number).filter(Boolean))];}
 function labelFromList(list,value){return (list.find(x=>x.value===value)||{}).label||value;}
-function currentAiProfile(){return state.aiProfile||{diagnosis:"stroke",functionLevel:"moderate",goal:"balance",bbs:"",note:""};}
+function currentAiProfile(){return state.aiProfile||{diagnosis:"stroke",functionLevel:"bed",goal:"balance",bbs:"",note:""};}
 function setAiProfile(k,v){state.aiProfile={...currentAiProfile(),[k]:v};}
 function scoreExerciseForProfile(e,profile){
   let score=0;
