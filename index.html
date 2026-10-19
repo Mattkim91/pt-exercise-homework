@@ -2464,12 +2464,12 @@ function leafletHTML(){
           <div class="text-xs font-bold text-slate-400 mb-1">운동 ${i+1} · ${esc(item.level)}</div>
           <h2 class="${isLarge ? "text-2xl" : "text-xl"} font-black">${esc(item.title)}</h2>
           <p class="mt-1 text-xs font-semibold text-slate-500">목표: ${esc(item.target)}</p>
-          <div class="mt-2 inline-flex rounded-xl border-2 border-slate-900 px-3 py-1.5 ${isLarge ? "text-lg" : "text-base"} font-black">${sidePrintPrefix(item.side)}${esc(doseText(item))}</div>
+          <div class="mt-2 inline-flex rounded-xl border-2 border-slate-900 px-3 py-1.5 ${isLarge ? "text-2xl" : "text-base"} font-black">${sidePrintPrefix(item.side)}${esc(doseText(item))}</div>
         </div>
       </div>
       <div class="mt-3 rounded-xl bg-slate-50 p-3 ${textClass}"><b>방법: </b>${esc(item.description)}</div>
       ${state.showCaution && item.caution
-        ? `<div class="mt-2 rounded-xl bg-amber-50 p-3 text-sm leading-6"><b>주의: </b>${esc(item.caution)}</div>`
+        ? `<div class="mt-2 rounded-xl bg-amber-50 p-3 ${isLarge ? "text-xl leading-9" : "text-sm leading-6"}"><b>주의: </b>${esc(item.caution)}</div>`
         : ""}
       ${state.showQr && isValidVideoUrl(item.videoUrl)
         ? `<div class="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 p-2"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr shrink-0" style="width:18mm;height:18mm"><div class="text-xs leading-5">📱 QR코드를 촬영하면 운동 영상을 확인할 수 있습니다.</div></div>`
@@ -2493,7 +2493,7 @@ function leafletHTML(){
       :`<div class="${isGrid?"leaflet-grid":isWide?"space-y-2":"space-y-4"}">${state.selected.map((item,i)=>articleHTML(item,i)).join("")}</div>`}
     ${state.showChecklist&&state.selected.length>0?checklistHTML():""}
     ${state.showPainLog&&state.selected.length>0?painHTML():""}
-    <div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-2 font-black">공통 주의사항</h3><p class="leading-7 text-sm">${esc(state.patient.memo)}</p></div>
+    <div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-2 font-black ${isLarge?"text-2xl":""}">공통 주의사항</h3><p class="${isLarge?"text-xl leading-9":"leading-7 text-sm"}">${esc(state.patient.memo)}</p></div>
   </div>`;
 }
 
