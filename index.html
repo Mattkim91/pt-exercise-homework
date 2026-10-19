@@ -1537,6 +1537,7 @@ let state = {
   layoutMode:"1단 가로형", showQr:false, showChecklist:false, showPainLog:false, showFallWarning:false, showCaution:true, showImage:true, checklistWeeks:2,
   preview:false, message:"", expandedId:null, therapistName:"",
   editingPatientId:null,
+  importPreview:null,
   isNewPatient:true,
   mobileFiltersOpen:false,
   cartSelectMode:false, cartChecked:new Set(), cartDraftSelected:null
@@ -2099,6 +2100,86 @@ function duplicatePatient(id){
   state.tab=0;
   showMessage("복사본을 만들었습니다. 이름 수정 후 [＋ 환자 추가]를 누르세요.");
 }
+function exportPatients(){
+  const payload={
+    app:"pt-exercise-homework",
+    version:VERSION,
+    exportedAt:new Date().toISOString(),
+    patients:state.savedPatients,
+    favorites:loadFavorites(),
+    recent:loadRecent()
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`pt-patients-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+function validateBackup(data){
+  if(!data||typeof data!=="object"||Array.isArray(data)) return "백업 파일이 올바른 JSON 객체가 아닙니다.";
+  if(!Array.isArray(data.patients)) return "환자 목록(patients)이 없습니다.";
+  for(const p of data.patients){
+    if(!p||typeof p!=="object"||Array.isArray(p)) return "환자 기록 형식이 올바르지 않습니다.";
+    if(typeof p.id!=="string"||!p.id.trim()) return "id가 없는 환자 기록이 있습니다.";
+    if(p.name!=null&&typeof p.name!=="string") return "환자 이름 형식이 올바르지 않습니다.";
+    if(p.selected!=null&&!Array.isArray(p.selected)) return "운동 목록 형식이 올바르지 않습니다.";
+    if(Array.isArray(p.selected)){
+      for(const s of p.selected){
+        if(!s||typeof s!=="object"||!Number.isFinite(Number(s.id))) return "운동 id가 올바르지 않은 항목이 있습니다.";
+      }
+    }
+    if(p.settings!=null&&(typeof p.settings!=="object"||Array.isArray(p.settings))) return "출력 설정 형식이 올바르지 않습니다.";
+  }
+  const idsOk=arr=>arr==null||(Array.isArray(arr)&&arr.every(x=>Number.isFinite(Number(x))));
+  if(!idsOk(data.favorites)) return "즐겨찾기 형식이 올바르지 않습니다.";
+  if(!idsOk(data.recent)) return "최근 운동 형식이 올바르지 않습니다.";
+  return "";
+}
+function stageImport(input){
+  const file=input.files&&input.files[0];
+  input.value="";
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    let data;
+    try{data=JSON.parse(String(reader.result||""));}
+    catch(e){alert("JSON 파일을 읽지 못했습니다.");return;}
+    const err=validateBackup(data);
+    if(err){alert(err);return;}
+    state.importPreview={
+      fileName:file.name,
+      patients:data.patients.map(p=>migratePatientRecord(p).record),
+      favorites:(data.favorites||[]).map(Number),
+      recent:(data.recent||[]).map(Number).slice(0,8)
+    };
+    render();
+  };
+  reader.onerror=()=>alert("파일을 읽지 못했습니다.");
+  reader.readAsText(file);
+}
+function cancelImport(){state.importPreview=null;render();}
+function applyImport(mode){
+  const data=state.importPreview;
+  if(!data) return;
+  if(mode==="replace"){
+    if(!confirm(`이 브라우저의 환자 ${state.savedPatients.length}명 기록을 파일의 ${data.patients.length}명으로 바꿉니다. 파일에 없는 기록은 삭제됩니다. 계속할까요?`)) return;
+    state.savedPatients=data.patients;
+    saveFavorites(data.favorites);
+    saveRecent(data.recent);
+  }else{
+    const map=new Map(state.savedPatients.map(p=>[p.id,p]));
+    data.patients.forEach(p=>map.set(p.id,p));
+    state.savedPatients=[...map.values()];
+    saveFavorites([...new Set([...loadFavorites(),...data.favorites])]);
+    saveRecent([...data.recent,...loadRecent().filter(id=>!data.recent.includes(id))].slice(0,8));
+  }
+  persist();
+  state.importPreview=null;
+  showMessage(mode==="replace"?"백업 파일로 환자 목록을 바꿨습니다.":"백업 파일을 기존 목록에 합쳤습니다.");
+}
 function deletePatient(id){
   const r=state.savedPatients.find(x=>x.id===id);
   if(!confirm(`"${r?.name||"이름 없는 환자"}" 기록을 삭제합니다. 계속하시겠습니까?`))return;
@@ -2499,6 +2580,26 @@ function tabPatient(){
         :`<div id="patient-list" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
           ${patientListHTML()}
         </div>`}
+    </section>
+
+    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3">
+      <h2 class="font-bold text-slate-800">환자 목록 백업</h2>
+      <p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-950">이 파일에는 환자 이름과 등록번호가 들어 있습니다. 다른 사람과 공유하거나 공용 컴퓨터에 남겨 두지 마세요.</p>
+      <div class="flex flex-wrap gap-2">
+        <button onclick="exportPatients()" class="rounded-xl bg-slate-800 text-white text-sm font-bold px-4 py-2.5 hover:bg-slate-700 transition-colors">내보내기</button>
+        <button onclick="document.getElementById('patient-import-file').click()" class="rounded-xl border border-slate-200 text-slate-700 text-sm font-bold px-4 py-2.5 hover:bg-slate-50 transition-colors">가져오기</button>
+        <input id="patient-import-file" type="file" accept="application/json,.json" class="hidden" onchange="stageImport(this)">
+      </div>
+      ${state.importPreview?`
+      <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 space-y-3">
+        <p class="text-sm font-bold text-blue-900">${esc(state.importPreview.fileName)} 확인</p>
+        <p class="text-xs leading-5 text-blue-900">환자 ${state.importPreview.patients.length}명, 즐겨찾기 ${state.importPreview.favorites.length}개, 최근 운동 ${state.importPreview.recent.length}개입니다. 합치기는 같은 id의 기록을 파일 내용으로 바꾸고 나머지 기록은 남깁니다. 바꾸기는 이 브라우저의 환자 목록, 즐겨찾기, 최근 운동을 파일 내용으로 교체합니다.</p>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="applyImport('merge')" class="rounded-xl bg-blue-600 text-white text-xs font-bold px-3 py-2 hover:bg-blue-700">기존 목록에 합치기</button>
+          <button onclick="applyImport('replace')" class="rounded-xl bg-amber-600 text-white text-xs font-bold px-3 py-2 hover:bg-amber-700">이 파일로 바꾸기</button>
+          <button onclick="cancelImport()" class="rounded-xl border border-slate-200 bg-white text-slate-600 text-xs font-bold px-3 py-2 hover:bg-slate-50">취소</button>
+        </div>
+      </div>`:""}
     </section>
   </div>`;
 }
