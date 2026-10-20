@@ -197,6 +197,38 @@
         overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable;
       }
     }
+
+    /* 확인 창. app.css에 z-[80], bg-black/50, max-w-md 가 없어서
+       카드가 가로로 퍼지고 필터·목록 뒤에 깔렸다. 유틸리티에 의존하지 않는다. */
+    .app-modal {
+      position:fixed;
+      inset:0;
+      z-index:80;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:16px;
+      background:rgba(15,23,42,.5);
+    }
+    .app-modal-card {
+      width:100%;
+      max-width:28rem;
+      max-height:min(80vh, 36rem);
+      overflow:auto;
+      border-radius:16px;
+      background:#fff;
+      padding:20px;
+      box-shadow:0 24px 48px rgba(15,23,42,.28);
+    }
+    .app-modal button:focus-visible {
+      outline:2px solid #2563eb;
+      outline-offset:2px;
+    }
+    #preview-overlay {
+      position:fixed;
+      inset:0;
+      z-index:80;
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-900">
@@ -219,7 +251,7 @@ const EXERCISE_IMAGES = {};
 ─────────────────────────────────────────── */
 
 
-const VERSION      = "v2.64";
+const VERSION      = "v2.65";
 const VERSION_DATE = "2026-10-20";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
@@ -721,21 +753,37 @@ function aiLeafletMemo(profile){
 function choiceDialogHTML(){
   const d=state.choiceDialog;
   if(!d) return "";
-  return `<div id="choice-dialog" class="no-print fixed inset-0 z-[80] flex items-center justify-center bg-black/50 px-4">
-    <div class="w-full max-w-md rounded-2xl bg-white p-5 shadow-2xl" role="dialog" aria-modal="true">
-      <h3 class="text-lg font-black text-slate-800">${esc(d.title)}</h3>
+  return `<div id="choice-dialog" class="app-modal no-print" onclick="if(event.target===this)resolveChoice('cancel')">
+    <div class="app-modal-card" role="dialog" aria-modal="true" aria-labelledby="choice-dialog-title">
+      <h3 id="choice-dialog-title" class="text-lg font-black text-slate-800">${esc(d.title)}</h3>
       <p class="mt-2 text-sm leading-6 text-slate-600" style="white-space:pre-wrap">${esc(d.message)}</p>
       ${d.memoConsent?`<label class="mt-3 flex items-start gap-2 text-sm text-slate-700">
         <input id="ai-memo-consent" type="checkbox" class="mt-1">
         <span>이미 적은 공통 주의사항을 추천 문구로 바꿉니다. 체크하지 않으면 그대로 둡니다.</span>
       </label>`:""}
       <div class="mt-4 flex flex-wrap justify-end gap-2">
-        ${d.choices.map(c=>`<button type="button" onclick="resolveChoice('${esc(c.id)}')" class="rounded-xl px-4 py-2 text-sm font-bold ${c.primary?"bg-slate-800 text-white hover:bg-slate-700":"border border-slate-200 text-slate-600 hover:bg-slate-50"}">${esc(c.label)}</button>`).join("")}
+        ${d.choices.map(c=>`<button type="button" ${c.primary?'data-choice-primary="1"':""} onclick="resolveChoice('${esc(c.id)}')" class="rounded-xl px-4 py-2 text-sm font-bold ${c.primary?"bg-slate-800 text-white hover:bg-slate-700":"border border-slate-200 text-slate-600 hover:bg-slate-50"}">${esc(c.label)}</button>`).join("")}
       </div>
     </div>
   </div>`;
 }
 let choiceResolver=null;
+/* #app 안의 fadeUp(transform)이나 필터 스크롤에 갇히지 않도록 body에 붙인다. */
+function mountChoiceDialog(){
+  const existing=document.getElementById("choice-dialog");
+  const html=choiceDialogHTML();
+  if(!html){
+    if(existing) existing.remove();
+    return;
+  }
+  const tpl=document.createElement("template");
+  tpl.innerHTML=html.trim();
+  const next=tpl.content.firstElementChild;
+  if(existing) existing.replaceWith(next);
+  else document.body.appendChild(next);
+  const primary=next.querySelector("[data-choice-primary]")||next.querySelector("button");
+  if(primary && document.activeElement!==primary) primary.focus({preventScroll:true});
+}
 function openChoiceDialog(dialog){
   return new Promise(resolve=>{
     choiceResolver=resolve;
@@ -754,6 +802,11 @@ function resolveChoice(id){
   if(fn) fn({id, replaceMemo});
   else render();
 }
+document.addEventListener("keydown", e=>{
+  if(e.key!=="Escape" || !state.choiceDialog) return;
+  e.preventDefault();
+  resolveChoice("cancel");
+});
 async function buildAiLeaflet(){
   if(state.aiResultIds.length===0) recommendAiExercises();
   const ids=state.aiResultIds.slice();
@@ -981,7 +1034,7 @@ function filtered(){
   });
 }
 
-/* 현재 필터 결과 전체 넣기. 12개 또는 45분을 넘으면 개수와 시간을 보여주고 확인한다. */
+/* 현재 필터 결과 전체 담기. 12개 또는 45분을 넘으면 개수와 시간을 보여주고 확인한다. */
 async function addAllFiltered(){
   const adding=filtered().filter(e=>!state.selected.some(x=>x.id===e.id));
   if(!adding.length){ renderExerciseResults(); return; }
@@ -991,7 +1044,7 @@ async function addAllFiltered(){
   if(count>12 || mins>45){
     const choice=await openChoiceDialog({
       title:"운동을 많이 담게 됩니다",
-      message:`전체 넣기 후에는 운동 ${count}개, 예상 ${mins}분입니다.\n12개 또는 45분을 넘습니다. 막지는 않으니, 그대로 담을지 고르세요.`,
+      message:`전체 담기 후에는 운동 ${count}개, 예상 ${mins}분입니다.\n12개 또는 45분을 넘습니다. 막지는 않으니, 그대로 담을지 고르세요.`,
       memoConsent:false,
       choices:[
         {id:"ok", label:"그대로 담기", primary:true},
@@ -1626,7 +1679,6 @@ function render(){
     <div id="storage-error-banner" class="no-print bg-red-600 text-white text-sm font-bold px-4 py-3 ${storageError?"":"hidden"}">${esc(storageError)}</div>
 
     ${state.preview?previewOverlay():""}
-    ${choiceDialogHTML()}
 
     <!-- ── 헤더 ── -->
     <header class="no-print sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
@@ -1725,6 +1777,7 @@ function render(){
     <!-- 인쇄용 숨김 섹션 -->
     <section class="print-area hidden mx-auto max-w-4xl bg-white p-8">${leafletHTML()}</section>
   </div>`);
+  mountChoiceDialog();
   syncBottomNav();
 }
 
@@ -1820,7 +1873,7 @@ function renderExerciseResults(){
       <p class="text-xs text-slate-400 font-semibold">${list.length}개 운동</p>
       ${list.length>0?`
       <div class="flex gap-2">
-        <button onclick="addAllFiltered()" ${allAdded?"disabled":""} class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${allAdded?"bg-slate-100 text-slate-300 border-slate-100 cursor-default":"bg-blue-600 text-white border-blue-600 hover:bg-blue-700"}">＋ 전체 넣기</button>
+        <button onclick="addAllFiltered()" ${allAdded?"disabled":""} class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${allAdded?"bg-slate-100 text-slate-300 border-slate-100 cursor-default":"bg-blue-600 text-white border-blue-600 hover:bg-blue-700"}">＋ 전체 담기</button>
         <button onclick="removeAllFiltered()" ${!anyAdded?"disabled":""} class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${!anyAdded?"bg-slate-100 text-slate-300 border-slate-100 cursor-default":"bg-white text-red-500 border-red-200 hover:bg-red-50"}">− 전체 해제</button>
       </div>`:""}
     </div>
@@ -2171,7 +2224,7 @@ function tabExercise(){
             <p class="text-xs text-slate-400 font-semibold">${list.length}개 운동</p>
             ${list.length>0?`
             <div class="flex gap-2">
-              <button onclick="addAllFiltered()" ${allAdded?"disabled":""} class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${allAdded?"bg-slate-100 text-slate-300 border-slate-100 cursor-default":"bg-blue-600 text-white border-blue-600 hover:bg-blue-700"}">＋ 전체 넣기</button>
+              <button onclick="addAllFiltered()" ${allAdded?"disabled":""} class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${allAdded?"bg-slate-100 text-slate-300 border-slate-100 cursor-default":"bg-blue-600 text-white border-blue-600 hover:bg-blue-700"}">＋ 전체 담기</button>
               <button onclick="removeAllFiltered()" ${!anyAdded?"disabled":""} class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${!anyAdded?"bg-slate-100 text-slate-300 border-slate-100 cursor-default":"bg-white text-red-500 border-red-200 hover:bg-red-50"}">− 전체 해제</button>
             </div>`:""}
           </div>
