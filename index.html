@@ -1044,7 +1044,7 @@ async function addAllFiltered(){
   if(count>12 || mins>45){
     const choice=await openChoiceDialog({
       title:"운동을 많이 담게 됩니다",
-      message:`전체 담기 후에는 운동 ${count}개, 예상 ${mins}분입니다.\n12개 또는 45분을 넘습니다. 막지는 않으니, 그대로 담을지 고르세요.`,
+      message:`전체 담기 후에는 운동 ${count}개, 예상 ${mins}분입니다.\n12개 또는 45분을 넘습니다. 그대로 담을지 고르세요.`,
       memoConsent:false,
       choices:[
         {id:"ok", label:"그대로 담기", primary:true},
