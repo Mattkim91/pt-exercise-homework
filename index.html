@@ -155,6 +155,8 @@
       transition:transform .2s; box-shadow:0 1px 3px rgba(0,0,0,.2);
     }
     .toggle-wrap input:checked ~ .toggle-track .toggle-thumb { transform:translateX(18px); }
+    .toggle-wrap.is-locked { cursor:not-allowed; opacity:.55; }
+    .toggle-wrap.is-locked input { pointer-events:none; }
 
     /* ── 최근 운동 태그 (⑥ 개선) ────────── */
     .recent-tag {
@@ -217,8 +219,8 @@ const EXERCISE_IMAGES = {};
 ─────────────────────────────────────────── */
 
 
-const VERSION      = "v2.63";
-const VERSION_DATE = "2026-10-19";
+const VERSION      = "v2.64";
+const VERSION_DATE = "2026-10-20";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
 const FAVORITE_KEY = "exercise-homework-favorites-v1";
@@ -373,6 +375,11 @@ const exercises = EXERCISES.map(e=>({
 
 
 
+/* QR은 운동 영상이 생기기 전에는 켜지 않는다. docs/video-qr-plan.md
+   state 초기화(기록 마이그레이션)보다 앞에 둔다. */
+const QR_RELEASED = false;
+function qrOnLeaflet(){ return QR_RELEASED && !!state.showQr; }
+
 /* ── State ─────────────────────────────── */
 let state = {
   tab: 0,
@@ -484,6 +491,11 @@ function migratePatientRecord(rec){
     record.settings=settings;
     changed=true;
   }
+  if(!QR_RELEASED && settings.showQr){
+    settings.showQr=false;
+    record.settings=settings;
+    changed=true;
+  }
   return {record,changed};
 }
 function reportStorageError(err){
@@ -556,7 +568,7 @@ function autoSave(){
     selected: serializeSelected(state.selected),
     therapistName: state.therapistName || "",
     settings:{
-      layoutMode:state.layoutMode, showQr:state.showQr,
+      layoutMode:state.layoutMode, showQr:QR_RELEASED && !!state.showQr,
       showChecklist:state.showChecklist, showPainLog:state.showPainLog,
       showFallWarning:state.showFallWarning, showCaution:state.showCaution,
       showImage:state.showImage, showDailyFreq:state.showDailyFreq!==false,
@@ -836,9 +848,11 @@ function imgTag(ex,cls="h-full w-full object-contain"){
   if(ex&&ex.imagePending){
     return `<span class="flex h-full w-full items-center justify-center text-4xl">${esc(ex.image||"")}</span>`;
   }
-  return `<img src="${esc(ex.imageUrl)}" alt="${esc(ex.title)}" class="${cls}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+  return `<img src="${esc(ex.imageUrl)}" alt="${esc(ex.title)}" width="640" height="480" class="${cls}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
   <span class="hidden h-full w-full items-center justify-center text-4xl">${esc(ex.image)}</span>`;
 }
+/* exercise-homework-video-defaults-v1 는 더 이상 읽지 않는다.
+   예전 기록의 videoUrl 은 저장만 유지하고, 화면과 출력에는 쓰지 않는다. */
 const VIDEO_DEFAULT_KEY = "exercise-homework-video-defaults-v1";
 function loadVideoDefaults(){
   try{
@@ -871,8 +885,7 @@ function qrDataUrl(url){
   return qr.createDataURL(4,0);
 }
 function selectedFromLibrary(ex){
-  const remembered=loadVideoDefaults()[String(ex.id)]||"";
-  return {...ex,unit:defaultDoseUnit(ex.id),videoUrl:isHttpUrl(remembered)?remembered:""};
+  return {...ex,unit:defaultDoseUnit(ex.id),videoUrl:""};
 }
 function updateSelectedUnit(id,value){
   const unit=value==="sec"?"sec":"reps";
@@ -1025,6 +1038,7 @@ function showMessage(msg){
 
 /* ── Actions ─────────────────────────── */
 function setField(k,v){
+  if(k==="showQr" && !QR_RELEASED){ state.showQr=false; return; }
   state[k]=v;
   if(["level","category","query","bodyFilter","purposeFilter","tagFilter"].includes(k)) { state.activePreset=null; state.bbsMode=false; }
   // 출력 설정 관련 토글/셀렉트는 자동저장
@@ -1237,7 +1251,7 @@ function loadPatient(id){
   state.freqCustomTarget=null;
   state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
-  if(r.settings){state.layoutMode=r.settings.layoutMode??"1단 가로형";state.showQr=r.settings.showQr??false;
+  if(r.settings){state.layoutMode=r.settings.layoutMode??"1단 가로형";state.showQr=QR_RELEASED && !!r.settings.showQr;
     state.showChecklist=r.settings.showChecklist??false;state.showPainLog=r.settings.showPainLog??false;
     state.showFallWarning=r.settings.showFallWarning??false;state.showCaution=r.settings.showCaution??true;state.showImage=r.settings.showImage??true;
     state.showDailyFreq=r.settings.showDailyFreq??true;
@@ -1435,12 +1449,179 @@ function downloadPdf(){
 }
 
 /* ══════════════════════════════════════════
+   DOM 갱신 — 통째로 갈아끼우지 않는다
+   innerHTML로 #app·목록을 다시 쓰면 카드 이미지가 다시 로드되고
+   fadeUp이 처음부터 재생되며 스크롤과 포커스가 풀린다.
+══════════════════════════════════════════ */
+function setHTML(el, html){
+  if(!el) return;
+  const tpl=document.createElement("template");
+  tpl.innerHTML=html;
+  const active=document.activeElement;
+  const sel=selectionOf(active);
+  const winX=window.scrollX, winY=window.scrollY;
+  const scrolls=captureScrolls(el);
+  morphChildren(el, tpl.content);
+  restoreScrolls(scrolls);
+  if(window.scrollX!==winX || window.scrollY!==winY) window.scrollTo(winX, winY);
+  if(active && active.isConnected && sel) restoreSelection(active, sel);
+}
+function selectionOf(el){
+  if(!el || !el.tagName) return null;
+  if(el.tagName!=="INPUT" && el.tagName!=="TEXTAREA") return null;
+  try{ return {start:el.selectionStart, end:el.selectionEnd, dir:el.selectionDirection}; }
+  catch(e){ return null; }
+}
+function restoreSelection(el, sel){
+  if(document.activeElement!==el || sel.start==null) return;
+  try{ if(el.selectionStart!==sel.start || el.selectionEnd!==sel.end) el.setSelectionRange(sel.start, sel.end, sel.dir||"none"); }
+  catch(e){}
+}
+function captureScrolls(root){
+  const list=[];
+  const walk=node=>{
+    if(!node || node.nodeType!==1) return;
+    if(node.scrollTop || node.scrollLeft) list.push({el:node, top:node.scrollTop, left:node.scrollLeft});
+    for(const child of node.children) walk(child);
+  };
+  walk(root);
+  return list;
+}
+function restoreScrolls(list){
+  for(const s of list){
+    if(!s.el.isConnected) continue;
+    if(s.el.scrollTop!==s.top) s.el.scrollTop=s.top;
+    if(s.el.scrollLeft!==s.left) s.el.scrollLeft=s.left;
+  }
+}
+function nodeKey(node){
+  if(!node || node.nodeType!==1) return "";
+  const keyed=node.getAttribute("data-key");
+  if(keyed) return "k:"+keyed;
+  if(node.id) return "id:"+node.id;
+  return "";
+}
+function sameKind(a, b){
+  if(a.nodeType!==b.nodeType) return false;
+  if(a.nodeType===1) return a.tagName===b.tagName;
+  return true;
+}
+function isFocusedField(el){
+  return !!el && document.activeElement===el && (el.tagName==="INPUT" || el.tagName==="TEXTAREA" || el.tagName==="SELECT");
+}
+function attrsEqual(el, name, value){
+  const cur=el.getAttribute(name);
+  if(cur===value) return true;
+  if(cur==null) return false;
+  if(name==="class"){
+    const norm=s=>s.trim().split(/\s+/).filter(Boolean).join(" ");
+    return norm(cur)===norm(value);
+  }
+  return false;
+}
+function syncAttrs(cur, next){
+  const focused=isFocusedField(cur);
+  const drop=[];
+  for(const attr of cur.attributes){
+    if(!next.hasAttribute(attr.name)) drop.push(attr.name);
+  }
+  for(const name of drop){
+    if(focused && (name==="value" || name==="checked" || name==="selected")) continue;
+    cur.removeAttribute(name);
+  }
+  for(const attr of next.attributes){
+    if(focused && (attr.name==="value" || attr.name==="checked" || attr.name==="selected")) continue;
+    if(attrsEqual(cur, attr.name, attr.value)) continue;
+    cur.setAttribute(attr.name, attr.value);
+  }
+}
+function syncControl(el, next){
+  const tag=el.tagName;
+  if(tag==="INPUT"){
+    const type=(el.getAttribute("type")||"text").toLowerCase();
+    if(type==="file") return;
+    if(type==="checkbox" || type==="radio"){
+      el.checked=next.hasAttribute("checked");
+      return;
+    }
+    const v=next.hasAttribute("value") ? next.getAttribute("value") : "";
+    if(el.value!==v) el.value=v;
+  }else if(tag==="TEXTAREA"){
+    if(el.value!==next.value) el.value=next.value;
+  }else if(tag==="OPTION"){
+    el.selected=next.hasAttribute("selected");
+  }else if(tag==="SELECT"){
+    const opts=[...next.querySelectorAll("option")];
+    const chosen=opts.find(o=>o.hasAttribute("selected"));
+    [...el.options].forEach((o,i)=>{ if(opts[i]) o.selected=opts[i].hasAttribute("selected"); });
+    if(chosen){
+      const v=chosen.hasAttribute("value") ? chosen.getAttribute("value") : chosen.textContent;
+      if(el.value!==v) el.value=v;
+    }
+  }
+}
+function morphNode(cur, next){
+  if(cur===next) return;
+  if(cur.nodeType===3 || cur.nodeType===8){
+    if(cur.data!==next.data) cur.data=next.data;
+    return;
+  }
+  if(cur.nodeType!==1 || next.nodeType!==1) return;
+  syncAttrs(cur, next);
+  if(isFocusedField(cur)) return;
+  morphChildren(cur, next);
+  syncControl(cur, next);
+}
+function morphChildren(parent, nextParent){
+  const olds=[...parent.childNodes];
+  const news=[...nextParent.childNodes];
+  const claimed=new Set();
+  const matches=new Array(news.length).fill(null);
+  const keyed=new Map();
+  for(const old of olds){
+    const key=nodeKey(old);
+    if(!key) continue;
+    if(!keyed.has(key)) keyed.set(key, []);
+    keyed.get(key).push(old);
+  }
+  for(let i=0;i<news.length;i++){
+    const key=nodeKey(news[i]);
+    if(!key || !keyed.has(key)) continue;
+    const found=keyed.get(key).find(old=>!claimed.has(old) && sameKind(old, news[i]));
+    if(found){ claimed.add(found); matches[i]=found; }
+  }
+  for(let i=0;i<news.length;i++){
+    if(matches[i] || nodeKey(news[i])) continue;
+    const found=olds.find(old=>!claimed.has(old) && !nodeKey(old) && sameKind(old, news[i]));
+    if(found){ claimed.add(found); matches[i]=found; }
+  }
+  const final=[];
+  for(let i=0;i<news.length;i++){
+    const next=news[i];
+    const cur=matches[i];
+    if(cur) morphNode(cur, next);
+    final.push(cur||next);
+  }
+  const keep=new Set(final);
+  // 지울 노드를 먼저 빼야, 공백 텍스트 때문에 애니메이션 중인 요소를
+  // 같은 부모 안에서 다시 끼워 넣지 않는다. 다시 끼우면 fadeUp이 재생된다.
+  for(const old of olds){
+    if(!keep.has(old)) old.remove();
+  }
+  let cursor=parent.firstChild;
+  for(const node of final){
+    if(cursor===node){ cursor=cursor.nextSibling; continue; }
+    parent.insertBefore(node, cursor);
+  }
+}
+
+/* ══════════════════════════════════════════
    RENDER
 ══════════════════════════════════════════ */
 function render(){
   syncPrintPageStyle();
   const app=document.getElementById("app");
-  app.innerHTML=`
+  setHTML(app, `
   <div class="min-h-screen flex flex-col bg-slate-100">
     <div id="storage-error-banner" class="no-print bg-red-600 text-white text-sm font-bold px-4 py-3 ${storageError?"":"hidden"}">${esc(storageError)}</div>
 
@@ -1543,11 +1724,11 @@ function render(){
 
     <!-- 인쇄용 숨김 섹션 -->
     <section class="print-area hidden mx-auto max-w-4xl bg-white p-8">${leafletHTML()}</section>
-  </div>`;
+  </div>`);
   syncBottomNav();
 }
 
-/* 탭 콘텐츠(main)만 업데이트 — 헤더를 건드리지 않아 깜빡임 없음 */
+/* 탭 내용만 맞춰 고친다. 같은 카드·이미지는 노드를 유지한다. */
 function renderMain(){
   const main=document.querySelector("main");
   if(!main){render();return;}  // main이 없으면(초기) full render
@@ -1557,7 +1738,7 @@ function renderMain(){
   else if(state.tab===2) html=tabCart();
   else if(state.tab===3) html=tabPrint();
   else html=tabAiAdmin();
-  main.innerHTML=html;
+  setHTML(main, html);
   // 하단 모바일 탭 뱃지 + 플로팅 FAB 도 동기화
   syncBottomNav();
 }
@@ -1596,7 +1777,7 @@ function syncBottomNav(){
       fab.onclick = ()=>{ state.tab=2; render(); };
       (document.getElementById("app")||document.body).appendChild(fab);
     }
-    fab.innerHTML = `🧺 <span>${cnt}개 담음</span><span class="text-blue-200">·</span><span class="text-blue-100" data-session-time>${esc(sessionTimeText())}</span>`;
+    setHTML(fab, `🧺 <span>${cnt}개 담음</span><span class="text-blue-200">·</span><span class="text-blue-100" data-session-time>${esc(sessionTimeText())}</span>`);
   } else {
     fabs.forEach(el => el.remove());
   }
@@ -1634,8 +1815,8 @@ function renderExerciseResults(){
   const list=filtered();
   const allAdded=list.length>0&&list.every(e=>state.selected.some(x=>x.id===e.id));
   const anyAdded=list.some(e=>state.selected.some(x=>x.id===e.id));
-  el.innerHTML=`
-    <div class="flex items-center justify-between px-1">
+  setHTML(el, `
+    <div class="flex items-center justify-between px-1 mb-2">
       <p class="text-xs text-slate-400 font-semibold">${list.length}개 운동</p>
       ${list.length>0?`
       <div class="flex gap-2">
@@ -1647,7 +1828,7 @@ function renderExerciseResults(){
       ${list.length===0
         ?`<div class="p-10 text-center text-sm text-slate-400">검색 결과가 없습니다.</div>`
         :list.map((e,idx)=>exerciseCardRow(e,idx)).join("")}
-    </div>`;
+    </div>`);
   syncBottomNav();
 }
 
@@ -1815,7 +1996,7 @@ function patientListHTML(){
     const isCurrent=!state.isNewPatient&&state.patient.id===r.id;
     if(isEditing){
       return `
-      <div class="rounded-xl border-2 border-blue-300 bg-blue-50 p-3">
+      <div data-key="pt-${esc(r.id)}" class="rounded-xl border-2 border-blue-300 bg-blue-50 p-3">
         <p class="text-xs font-bold text-blue-700 mb-2">✏️ 이름 / 등록번호 수정</p>
         <div class="grid gap-2">
           <input id="edit-name-${r.id}" value="${esc(r.name||"")}" placeholder="환자 이름 *"
@@ -1830,7 +2011,7 @@ function patientListHTML(){
       </div>`;
     }
     return `
-    <div class="rounded-xl border ${isCurrent?"border-blue-300 bg-blue-50":"border-slate-200 hover:border-slate-300"} p-3 transition-colors">
+    <div data-key="pt-${esc(r.id)}" class="rounded-xl border ${isCurrent?"border-blue-300 bg-blue-50":"border-slate-200 hover:border-slate-300"} p-3 transition-colors">
       <div class="flex items-center gap-2">
         <button onclick="loadPatient('${r.id}')" class="flex items-center gap-2 flex-1 text-left min-w-0" title="불러오기">
           <div class="w-8 h-8 rounded-full ${isCurrent?"bg-blue-500 text-white":"bg-slate-100 text-slate-600"} flex items-center justify-center text-sm font-bold shrink-0 transition-colors">${esc((r.name||"?").charAt(0))}</div>
@@ -1862,7 +2043,7 @@ function patientListHTML(){
 // 검색창 입력 시 목록만 DOM 직접 업데이트 (깜빡임 없음)
 function renderPatientList(){
   const el=document.getElementById("patient-list");
-  if(el) el.innerHTML=patientListHTML();
+  if(el) setHTML(el, patientListHTML());
 }
 
 /* ══════════════════════════════════════════
@@ -2015,7 +2196,7 @@ function exerciseCardRow(e,idx){
   const bodyLabel=(BODY_FILTERS.find(x=>x.value===e.bodyRegion)||{}).label||e.bodyRegion||"";
   const purposeLabel=(e.purposeTags||[]).map(t=>(PURPOSE_FILTERS.find(x=>x.value===t)||{}).label||t).join(" · ");
 
-  return `<div class="ex-card-row border-b border-slate-100 last:border-0 transition-colors ${catBar}">
+  return `<div data-key="ex-${e.id}" class="ex-card-row border-b border-slate-100 last:border-0 transition-colors ${catBar}">
     <div class="flex items-center gap-3 px-4 py-2.5 cursor-pointer" onclick="state.expandedId=${expanded?"null":e.id};renderMain()">
       <button onclick="event.stopPropagation();toggleFavorite(${e.id})" title="즐겨찾기" class="shrink-0 w-7 h-7 rounded-lg flex items-center justify-center text-base transition-all ${fav?"text-amber-500 bg-amber-50":"text-slate-300 hover:text-amber-400 hover:bg-amber-50"}">${fav?"★":"☆"}</button>
       <div class="w-10 h-10 rounded-xl overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 text-xl">${imgTag(e)}</div>
@@ -2266,7 +2447,7 @@ function tabCart(){
           const catBar=CAT_BAR[item.category]||"";
           const checked=chk.has(item.id);
           return `
-          <div class="cart-row flex flex-col gap-2 px-4 py-3 border-b border-slate-100 last:border-0 ${catBar} ${sel&&checked?"bg-red-50":"hover:bg-slate-50"} transition-colors
+          <div data-key="cart-${item.id}" class="cart-row flex flex-col gap-2 px-4 py-3 border-b border-slate-100 last:border-0 ${catBar} ${sel&&checked?"bg-red-50":"hover:bg-slate-50"} transition-colors
                [&.drag-over-top]:border-t-2 [&.drag-over-top]:border-t-blue-400
                [&.drag-over-bot]:border-b-2 [&.drag-over-bot]:border-b-blue-400"
             ${!sel?`draggable="true" ondragstart="onDragStart(event,${item.id})" ondragend="onDragEnd(event)" ondragover="onDragOver(event,${item.id})" ondrop="onDrop(event,${item.id})"`:""}>
@@ -2294,12 +2475,6 @@ function tabCart(){
                 <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${catCls}">${esc(item.category)}</span>
               </div>
               <p class="text-xs text-slate-400 mt-0.5">${esc(item.level)}</p>
-              ${sel?"":`<div class="mt-1 flex items-center gap-1 flex-wrap">
-                <input type="url" value="${esc(item.videoUrl||"")}" placeholder="영상 주소 https://"
-                  onchange="setExerciseVideo(${item.id}, this.value)"
-                  class="cart-video w-full rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs focus:border-blue-400">
-                ${loadVideoDefaults()[String(item.id)]?`<button type="button" onclick="clearVideoDefault(${item.id})" class="rounded-lg border border-slate-200 px-2 py-1 text-[10px] font-bold text-slate-500 hover:bg-slate-50">기본 주소 지우기</button>`:""}
-              </div>`}
             </div>
 
             ${sel?"":` 
@@ -2382,8 +2557,7 @@ function tabPrint(){
             ["showPainLog","통증기록 포함","운동 전후 NRS·피로도 기록"],
             ["showCaution","개별 주의사항 표시","각 운동 카드의 주의사항 문구 출력"],
             ["showImage","운동 사진 표시","각 운동 카드의 이미지/이모지 출력"],
-            ["showDailyFreq","하루 횟수 표시","유인물 머리글과, 운동마다 따로 정한 하루 횟수를 출력"],
-            ["showQr","QR 코드 포함","영상 주소가 있는 운동만 출력물에 QR이 표시됩니다."]
+            ["showDailyFreq","하루 횟수 표시","유인물 머리글과, 운동마다 따로 정한 하루 횟수를 출력"]
           ].map(([key,label,desc])=>`
             <label class="toggle-wrap flex items-center justify-between py-2 border-b border-slate-100 last:border-0 w-full">
               <div>
@@ -2393,6 +2567,14 @@ function tabPrint(){
               <input type="checkbox" ${state[key]?"checked":""} onchange="setField('${key}',this.checked)">
               <div class="toggle-track shrink-0"><div class="toggle-thumb"></div></div>
             </label>`).join("")}
+          <label class="toggle-wrap is-locked flex items-center justify-between py-2 border-b border-slate-100 last:border-0 w-full">
+            <div>
+              <p class="text-sm font-semibold text-slate-500">향후 출시 예정</p>
+              <p class="text-xs text-slate-400">QR 코드</p>
+            </div>
+            <input type="checkbox" disabled aria-disabled="true" aria-label="향후 출시 예정">
+            <div class="toggle-track shrink-0"><div class="toggle-thumb"></div></div>
+          </label>
         </div>
         ${state.showChecklist?`
         <label class="block text-xs font-semibold text-slate-500 mt-1">체크표 주차 수
@@ -2572,7 +2754,7 @@ function tabAiAdmin(){
    미리보기 오버레이
 ══════════════════════════════════════════ */
 function previewOverlay(){
-  return `<div class="no-print fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" style="display:flex;flex-direction:column;">
+  return `<div id="preview-overlay" class="no-print fixed inset-0 z-50 bg-black/60 backdrop-blur-sm" style="display:flex;flex-direction:column;">
     <!-- 고정 상단바 -->
     <div class="no-print flex items-center justify-between bg-white border-b px-6 py-3 shadow-sm flex-shrink-0">
       <div>
@@ -2586,7 +2768,7 @@ function previewOverlay(){
       </div>
     </div>
     <!-- 스크롤 영역 -->
-    <div style="flex:1;overflow-y:auto;padding:24px 16px;">
+    <div id="preview-scroll" style="flex:1;overflow-y:auto;padding:24px 16px;">
       <div class="mx-auto max-w-4xl rounded-2xl bg-white shadow-2xl">
         <div class="p-6">${leafletHTML()}</div>
       </div>
@@ -2608,7 +2790,7 @@ function leafletHTML(){
   function articleHTML(item, i){
     // ── 1단 가로형: 낮고 가로로 긴 카드 ──────────────────────
     if(isWide){
-      return `<article class="page-break leaflet-wide-card rounded-xl border border-slate-300 p-3 flex items-start gap-4">
+      return `<article data-key="leaflet-${item.id}" class="page-break leaflet-wide-card rounded-xl border border-slate-300 p-3 flex items-start gap-4">
         ${state.showImage
           ? `<div class="flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 ring-1 ring-slate-100 h-20 w-24 text-3xl">${imgTag(item)}</div>`
           : ""}
@@ -2625,7 +2807,7 @@ function leafletHTML(){
         </div>
         <div class="shrink-0 text-right space-y-1">
           <div class="inline-block rounded-lg border-2 border-slate-900 px-2.5 py-1 text-sm font-black keep-ko" style="white-space:normal;max-width:12rem;line-height:1.35;">${sidePrintPrefix(item.side)}${esc(printedDoseText(item))}</div>
-          ${state.showQr && isValidVideoUrl(item.videoUrl)
+          ${qrOnLeaflet() && isValidVideoUrl(item.videoUrl)
             ? `<div class="flex items-center gap-1 justify-end"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr shrink-0" style="width:18mm;height:18mm"><span class="text-xs text-slate-400">영상</span></div>`
             : ""}
         </div>
@@ -2633,7 +2815,7 @@ function leafletHTML(){
     }
 
     if(isGrid){
-      return `<article class="leaflet-compact keep-ko" style="border:1px solid #cbd5e1;border-radius:6px;padding:1.5mm;">
+      return `<article data-key="leaflet-${item.id}" class="leaflet-compact keep-ko" style="border:1px solid #cbd5e1;border-radius:6px;padding:1.5mm;">
         <div style="display:flex;align-items:flex-start;gap:1.5mm;">
           ${state.showImage
             ? `<div class="leaflet-compact-img" style="display:flex;flex:none;align-items:center;justify-content:center;overflow:hidden;border-radius:4px;background:#f8fafc;">${imgTag(item,"h-full w-full object-contain")}</div>`
@@ -2645,7 +2827,7 @@ function leafletHTML(){
               ? `<p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#92400e;">⚠ ${esc(item.caution)}</p>`
               : ""}
             <div class="leaflet-dose" style="margin-top:1mm;display:inline-block;border:1.5px solid #0f172a;border-radius:4px;padding:0.4mm 1.4mm;font-size:11px;font-weight:800;line-height:1.35;white-space:normal;">${sidePrintPrefix(item.side)}${esc(printedDoseText(item))}</div>
-            ${state.showQr && isValidVideoUrl(item.videoUrl)
+            ${qrOnLeaflet() && isValidVideoUrl(item.videoUrl)
               ? `<div style="margin-top:1mm;"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr" style="width:18mm;height:18mm"></div>`
               : ""}
           </div>
@@ -2655,7 +2837,7 @@ function leafletHTML(){
 
     // ── 큰사진·큰글씨 카드 ──────────────────────────
     const imageClass = (isBig || isLarge) ? "h-44 w-56 text-6xl" : "h-36 w-44 text-5xl";
-    return `<article class="page-break rounded-2xl border border-slate-300 p-4">
+    return `<article data-key="leaflet-${item.id}" class="page-break rounded-2xl border border-slate-300 p-4">
       <div class="grid ${state.showImage ? "grid-cols-[auto_1fr]" : "grid-cols-1"} gap-4">
         ${state.showImage
           ? `<div class="flex shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100 ${imageClass}">${imgTag(item)}</div>`
@@ -2671,7 +2853,7 @@ function leafletHTML(){
       ${state.showCaution && item.caution
         ? `<div class="mt-2 rounded-xl bg-amber-50 p-3 ${isLarge ? "text-xl leading-9" : "text-sm leading-6"}"><b>주의: </b>${esc(item.caution)}</div>`
         : ""}
-      ${state.showQr && isValidVideoUrl(item.videoUrl)
+      ${qrOnLeaflet() && isValidVideoUrl(item.videoUrl)
         ? `<div class="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 p-2"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr shrink-0" style="width:18mm;height:18mm"><div class="text-xs leading-5">📱 QR코드를 촬영하면 운동 영상을 확인할 수 있습니다.</div></div>`
         : ""}
     </article>`;
