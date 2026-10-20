@@ -1589,15 +1589,15 @@ function morphChildren(parent, nextParent){
     final.push(cur||next);
   }
   const keep=new Set(final);
+  // 지울 노드를 먼저 빼야, 공백 텍스트 때문에 애니메이션 중인 요소를
+  // 같은 부모 안에서 다시 끼워 넣지 않는다. 다시 끼우면 fadeUp이 재생된다.
+  for(const old of olds){
+    if(!keep.has(old)) old.remove();
+  }
   let cursor=parent.firstChild;
   for(const node of final){
     if(cursor===node){ cursor=cursor.nextSibling; continue; }
     parent.insertBefore(node, cursor);
-  }
-  while(cursor){
-    const next=cursor.nextSibling;
-    if(!keep.has(cursor)) cursor.remove();
-    cursor=next;
   }
 }
 
