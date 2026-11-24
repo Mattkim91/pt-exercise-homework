@@ -24,6 +24,21 @@
 
     /* 한글은 글자 단위로 끊지 않고, 칸이 부족하면 어절 경계에서 넘긴다 */
     .keep-ko { word-break: keep-all; overflow-wrap: break-word; }
+    /* 출력 언어가 영어·일본어일 때만. 한국어 인쇄는 위 글꼴을 그대로 쓴다. */
+    .leaflet-out[lang="en"],
+    .leaflet-out[lang="en"] .keep-ko,
+    .leaflet-out[lang="en"] .leaflet-compact,
+    .leaflet-out[lang="en"] .leaflet-compact h2,
+    .leaflet-out[lang="en"] .leaflet-compact p,
+    .leaflet-out[lang="en"] .leaflet-dose { word-break: normal; }
+    .leaflet-out[lang="en"],
+    .leaflet-out[lang="en"] * {
+      font-family: Arial, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    }
+    .leaflet-out[lang="ja"],
+    .leaflet-out[lang="ja"] * {
+      font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", "Noto Sans JP", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+    }
     .leaflet-qr { width: 18mm !important; height: 18mm !important; min-width: 18mm; min-height: 18mm; }
     .leaflet-grid { display:grid; grid-template-columns:1fr 1fr; gap:2mm; align-items:start; }
     .leaflet-compact { break-inside:avoid; page-break-inside:avoid; word-break:keep-all; overflow-wrap:break-word; }
@@ -236,6 +251,7 @@
 <section class="print-area hidden" id="print-section"></section>
 
 <script src="exercises.js"></script>
+<script src="i18n.js"></script>
 <script src="vendor/qrcode.js"></script>
 <script>
 /* ══════════════════════════════════════════
@@ -251,12 +267,12 @@ const EXERCISE_IMAGES = {};
 ─────────────────────────────────────────── */
 
 
-const VERSION      = "v2.65";
-const VERSION_DATE = "2026-10-20";
+const VERSION      = "v2.66";
+const VERSION_DATE = "2026-11-24";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
 const FAVORITE_KEY = "exercise-homework-favorites-v1";
-const DEFAULT_MEMO = "통증이나 어지럼증 등의 증상 발생 시 잠시 중단하고 충분한 휴식을 취해주세요.";
+const DEFAULT_MEMO = MEMO_PRESETS.default.ko;
 const SIDE_OPTIONS = ["","좌측","우측","양측","환측","건측"];
 const SIDE_UNSELECTED = new Set(["","좌/우 선택","해당 없음"]);
 function normalizeSide(side){
@@ -269,7 +285,10 @@ function sideSelectOptions(current){
 }
 function sidePrintPrefix(side){
   const s = normalizeSide(side);
-  return s ? esc(s)+" · " : "";
+  if(!s) return "";
+  const lang=outputLang();
+  const label=(lang!=="ko" && SIDE_I18N[s] && SIDE_I18N[s][lang]) || s;
+  return esc(label)+" · ";
 }
 const LEVELS       = ["전체","Lv0 PROM","Lv1 침상","Lv2 앉기","Lv3 서기","Lv4 보행","Lv5 유산소"];
 const LEVELS_FULL  = ["전체","Lv0 PROM/보호자","Lv1 침상운동","Lv2 앉은자세","Lv3 선자세","Lv4 보행훈련","Lv5 유산소운동"];
@@ -421,7 +440,7 @@ let state = {
   selected:[], patient:newPatientData(),
   savedPatients:loadSavedPatients(),
   layoutMode:"1단 가로형", showQr:false, showChecklist:false, showPainLog:false, showFallWarning:false, showCaution:true, showImage:true, showDailyFreq:true, checklistWeeks:2, freqCustomTarget:null,
-  preview:false, message:"", expandedId:null, therapistName:"",
+  preview:false, message:"", expandedId:null, therapistName:"", outputLang:"ko",
   editingPatientId:null,
   importPreview:null,
   isNewPatient:true,
@@ -445,7 +464,7 @@ function positiveInt(value, fallback){
   return Number.isFinite(f)&&f>=1 ? f : 1;
 }
 function newPatientData(){
-  return {id:"patient-"+Date.now(),name:"",date:localDateString(),memo:DEFAULT_MEMO,note:"",patientNo:""};
+  return {id:"patient-"+Date.now(),name:"",date:localDateString(),memo:DEFAULT_MEMO,memoPreset:"default",note:"",patientNo:""};
 }
 
 /* 저장 기록에는 운동 id와 환자별 설정만 둔다.
@@ -528,6 +547,19 @@ function migratePatientRecord(rec){
     record.settings=settings;
     changed=true;
   }
+  if(settings.outputLang!=="ko" && settings.outputLang!=="en" && settings.outputLang!=="ja"){
+    settings.outputLang="ko";
+    record.settings=settings;
+    changed=true;
+  }
+  if(record.memoPreset!=="default" && record.memoPreset!=="tha"){
+    const memo=typeof record.memo==="string"?record.memo.trim():"";
+    const next=memoPresetFor(memo);
+    if(record.memoPreset!==next){
+      record.memoPreset=next;
+      changed=true;
+    }
+  }
   return {record,changed};
 }
 function reportStorageError(err){
@@ -605,6 +637,7 @@ function autoSave(){
       showFallWarning:state.showFallWarning, showCaution:state.showCaution,
       showImage:state.showImage, showDailyFreq:state.showDailyFreq!==false,
       checklistWeeks:state.checklistWeeks,
+      outputLang:outputLang(),
       printDefaultsMigrated:true
     }
   };
@@ -851,7 +884,7 @@ async function buildAiLeaflet(){
   }else{
     state.selected=ids.map(id=>exerciseById(id)).filter(Boolean).map(selectedFromLibrary);
   }
-  if(replaceMemo) state.patient.memo=generated;
+  if(replaceMemo){ state.patient.memo=generated; state.patient.memoPreset=""; }
   if(!String(state.patient.note||"").trim()&&profile.note) state.patient.note=profile.note;
   state.tab=3;
   autoSave();
@@ -980,8 +1013,24 @@ function totalMinutes(list){
   const arr=Array.isArray(list)?list:state.selected;
   return arr.reduce((s,x)=>s+exerciseMinutes(x),0);
 }
-function sessionTimeText(list){
+function sessionTimeText(list, lang){
   const arr=Array.isArray(list)?list:state.selected;
+  if(lang==="en"||lang==="ja"){
+    const mins=totalMinutes(arr);
+    let text=lang==="en"?`About ${mins} min (per session)`:`約${mins}分（1回あたり）`;
+    if(state.showDailyFreq===false) return text;
+    const patientFreq=normalizeDailyFreq(state.patient&&state.patient.dailyFreq);
+    let daily=0;
+    let any=false;
+    arr.forEach(item=>{
+      const freq=normalizeDailyFreq(item&&item.dailyFreq)||patientFreq;
+      if(!freq) return;
+      any=true;
+      daily+=exerciseMinutes(item)*freq;
+    });
+    if(any) text+=lang==="en"?` · about ${daily} min a day`:` · 1日約${daily}分`;
+    return text;
+  }
   let text=`약 ${totalMinutes(arr)}분 (1회 기준)`;
   if(state.showDailyFreq===false) return text;
   const patientFreq=normalizeDailyFreq(state.patient&&state.patient.dailyFreq);
@@ -997,8 +1046,10 @@ function sessionTimeText(list){
   return text;
 }
 function refreshTimeDisplays(){
-  const text=sessionTimeText();
-  document.querySelectorAll("[data-session-time]").forEach(el=>{ el.textContent=text; });
+  document.querySelectorAll("[data-session-time]").forEach(el=>{
+    const lang=el.getAttribute("data-session-time");
+    el.textContent=sessionTimeText(undefined, lang==="en"||lang==="ja"?lang:undefined);
+  });
 }
 function categories(){
   const ORDER=["전체","PROM","AROM","Strengthening","Balance","Gait","Endurance","ADL"];
@@ -1286,6 +1337,7 @@ function saveCurrentPatient(){
 function newPatient(){
   flushAutoSave();
   state.patient=newPatientData();
+  state.outputLang="ko";
   state.freqCustomTarget=null;
   state.selected=[];
   state.preview=false;
@@ -1296,8 +1348,9 @@ function newPatient(){
 function loadPatient(id){
   flushAutoSave();
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
+  const loadedMemo=r.memo||DEFAULT_MEMO;
   const loaded={id:r.id,name:r.name||"",date:r.date||localDateString(),
-    memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:r.patientNo||""};
+    memo:loadedMemo,memoPreset:memoPresetFor(loadedMemo),note:r.note||"",patientNo:r.patientNo||""};
   const loadedFreq=normalizeDailyFreq(r.dailyFreq);
   if(loadedFreq) loaded.dailyFreq=loadedFreq;
   state.patient=loaded;
@@ -1308,7 +1361,9 @@ function loadPatient(id){
     state.showChecklist=r.settings.showChecklist??false;state.showPainLog=r.settings.showPainLog??false;
     state.showFallWarning=r.settings.showFallWarning??false;state.showCaution=r.settings.showCaution??true;state.showImage=r.settings.showImage??true;
     state.showDailyFreq=r.settings.showDailyFreq??true;
-    state.checklistWeeks=r.settings.checklistWeeks??2;}
+    state.checklistWeeks=r.settings.checklistWeeks??2;
+    state.outputLang=(r.settings.outputLang==="en"||r.settings.outputLang==="ja")?r.settings.outputLang:"ko";}
+  else state.outputLang="ko";
   state.isNewPatient=false;
   // 탭 이동 없이 환자정보 탭 폼에만 반영 (tab=0 유지)
   state.tab=0;
@@ -1318,14 +1373,16 @@ function duplicatePatient(id){
   flushAutoSave();
   const r=state.savedPatients.find(x=>x.id===id);if(!r)return;
   const base=(r.name||"이름 없는 환자").trim();
+  const copiedMemo=r.memo||DEFAULT_MEMO;
   const copied={id:"patient-"+Date.now(),name:base+" 복사본",
-    date:localDateString(),memo:r.memo||DEFAULT_MEMO,note:r.note||"",patientNo:""};
+    date:localDateString(),memo:copiedMemo,memoPreset:memoPresetFor(copiedMemo),note:r.note||"",patientNo:""};
   const copiedFreq=normalizeDailyFreq(r.dailyFreq);
   if(copiedFreq) copied.dailyFreq=copiedFreq;
   state.patient=copied;
   state.freqCustomTarget=null;
   state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
+  state.outputLang=(r.settings&&(r.settings.outputLang==="en"||r.settings.outputLang==="ja"))?r.settings.outputLang:"ko";
   state.isNewPatient=true; // 복사본은 신규로 취급
   state.tab=0;
   showMessage("복사본을 만들었습니다. 이름 수정 후 [＋ 환자 추가]를 누르세요.");
@@ -1422,13 +1479,20 @@ function deletePatient(id){
 function cssQuote(s){
   return String(s??"").replace(/\\/g,"\\\\").replace(/"/g,"\\\"").replace(/[\n\r]/g," ");
 }
+function outputFontStack(){
+  if(outputLang()==="ja") return '"Hiragino Sans","Yu Gothic","Meiryo","Noto Sans JP","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+  if(outputLang()==="en") return 'Arial,"Helvetica Neue","Segoe UI","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+  return '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
+}
 function printPageStyle(){
   const name=state.patient.name||"";
-  const date=state.patient.date||localDateString();
+  const rawDate=state.patient.date||localDateString();
+  const date=outputLang()==="ko"?rawDate:printedDate(rawDate);
   const left=cssQuote([name, date].filter(Boolean).join("  ·  "));
+  const font=outputFontStack();
   return `@page{size:A4;margin:16mm 12mm 14mm;
-    @top-left{content:"${left}";font-size:9pt;font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#334155;}
-    @top-right{content:counter(page) " / " counter(pages);font-size:9pt;font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif;color:#334155;}
+    @top-left{content:"${left}";font-size:9pt;font-family:${font};color:#334155;}
+    @top-right{content:counter(page) " / " counter(pages);font-size:9pt;font-family:${font};color:#334155;}
   }`;
 }
 function syncPrintPageStyle(){
@@ -1442,9 +1506,11 @@ function syncPrintPageStyle(){
 }
 function downloadPdf(){
   syncPrintPageStyle();
-  const name = state.patient.name || "환자";
-  const date = state.patient.date || localDateString();
-  const title = `개인별 맞춤 운동 과제 — ${name} (${date})`;
+  const lang=outputLang();
+  const name = state.patient.name || tPrint("pdfName");
+  const rawDate = state.patient.date || localDateString();
+  const date = lang==="ko"?rawDate:printedDate(rawDate);
+  const title = `${tPrint("docTitle")} — ${name} (${date})`;
 
   const pw = window.open("", "_blank", "width=1000,height=800");
   if(!pw){ alert("팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요."); return; }
@@ -1452,7 +1518,7 @@ function downloadPdf(){
   // leafletHTML()과 동일한 정적 CSS와 글꼴을 새 창에 구성. 외부 글꼴·CDN은 쓰지 않는다.
   const pageCss = [...document.querySelectorAll("head style")].map(s=>s.textContent).join("\n");
   const printHTML = `<!DOCTYPE html>
-<html lang="ko">
+<html lang="${outputLang()}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -1460,7 +1526,7 @@ function downloadPdf(){
   <link rel="stylesheet" href="${new URL("app.css", location.href).href}">
   <style>
     ${pageCss}
-    * { font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; }
+    * { font-family: ${outputLang()==="ko"?'"Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif':outputFontStack()}; }
     ${printPageStyle()}
     @media print {
       .no-print { display: none !important; }
@@ -1715,6 +1781,7 @@ function render(){
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
             PDF 저장
           </button>
+          ${outputLangControl()}
           <button onclick="state.preview=true;render()" class="flex items-center gap-1 rounded-xl bg-slate-800 text-white text-xs font-semibold px-3 py-2 hover:bg-slate-700 transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
             미리보기
@@ -1981,7 +2048,12 @@ function tabPatient(){
         </div>
         <div>
           <label class="text-xs font-semibold text-slate-500 mb-1 block">공통 주의사항</label>
-          <textarea id="patient-memo-input" oninput="setPatientFieldSilent('memo',this.value)" rows="2" class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-400 transition-colors resize-none">${esc(state.patient.memo)}</textarea>
+          <textarea id="patient-memo-input" oninput="onMemoInput(this.value)" rows="4" class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-400 transition-colors resize-none">${esc(state.patient.memo)}</textarea>
+          <div class="mt-2 flex flex-wrap gap-2">
+            <button type="button" onclick="applyMemoPreset('default')" class="rounded-xl border px-3 py-1.5 text-xs font-bold ${state.patient.memoPreset==="default"?"bg-blue-600 text-white border-blue-600":"border-slate-200 text-slate-600 hover:bg-slate-50"}">기본 주의문구</button>
+            <button type="button" onclick="applyMemoPreset('tha')" class="rounded-xl border px-3 py-1.5 text-xs font-bold ${state.patient.memoPreset==="tha"?"bg-blue-600 text-white border-blue-600":"border-slate-200 text-slate-600 hover:bg-slate-50"}">THA 고관절 주의</button>
+          </div>
+          <p class="mt-1 text-[11px] text-slate-400">직접 고친 문장은 출력 언어와 관계없이 입력한 그대로 인쇄됩니다. 기본 주의문구와 THA 고관절 주의만 고른 언어로 바뀝니다.</p>
         </div>
         <div class="flex gap-2 pt-1">
           <button onclick="saveCurrentPatient()" class="flex-1 rounded-xl font-bold py-3 text-sm transition-colors text-white bg-blue-600 hover:bg-blue-700">
@@ -2074,7 +2146,7 @@ function patientListHTML(){
               ${r.patientNo?`<span class="text-xs text-slate-400">${esc(r.patientNo)}</span>`:""}
               ${isCurrent?`<span class="text-[10px] font-bold text-blue-600 bg-blue-100 rounded-full px-1.5 py-0.5">작업 중</span>`:""}
             </div>
-            <div class="text-xs text-slate-400 truncate">${r.note?esc(r.note)+" · ":""}${esc(r.date||"")} · 운동 ${Array.isArray(r.selected)?r.selected.length:0}개</div>
+            <div class="text-xs text-slate-400 truncate">${r.note?esc(r.note)+" · ":""}${esc(r.date||"")} · 운동 ${Array.isArray(r.selected)?r.selected.length:0}개${r.settings&&r.settings.outputLang==="en"?" · 출력 EN":""}${r.settings&&r.settings.outputLang==="ja"?" · 출력 JA":""}</div>
           </div>
         </button>
         <div class="flex items-center gap-0.5 shrink-0">
@@ -2673,6 +2745,10 @@ function tabPrint(){
           </div>
         </div>
         <div class="mt-5 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            ${outputLangControl()}
+          </div>
+          <p class="text-[11px] text-slate-400">인쇄와 미리보기만 바뀝니다. 환자 이름, 치료사 이름, 직접 입력한 메모는 그대로 인쇄됩니다.</p>
           <button onclick="state.preview=true;render()" class="w-full rounded-xl bg-slate-800 text-white font-bold py-3 text-sm hover:bg-slate-700 transition-colors">🖨️ 미리보기 / 인쇄</button>
           <button onclick="downloadPdf()" class="w-full rounded-xl bg-emerald-600 text-white font-bold py-3 text-sm hover:bg-emerald-700 transition-colors">📄 PDF 저장 (새 창)</button>
         </div>
@@ -2803,6 +2879,155 @@ function tabAiAdmin(){
   </div>`;
 }
 
+
+function outputLang(){
+  return state.outputLang==="en"||state.outputLang==="ja"?state.outputLang:"ko";
+}
+function tPrint(key){
+  const lang=outputLang();
+  const pack=PRINT_STRINGS[lang]||PRINT_STRINGS.ko;
+  return pack[key]!=null?pack[key]:(PRINT_STRINGS.ko[key]||"");
+}
+function setOutputLang(value){
+  state.outputLang=value==="en"||value==="ja"?value:"ko";
+  autoSave();
+  render();
+}
+function outputLangControl(){
+  const lang=outputLang();
+  return `<label class="flex items-center gap-2 shrink-0">
+    <span class="hidden sm:inline text-[10px] font-bold text-slate-500 whitespace-nowrap">출력 언어</span>
+    <select aria-label="출력 언어" onchange="setOutputLang(this.value)" class="rounded-xl border border-slate-200 bg-white px-2 py-2 text-xs font-bold text-slate-700">
+      <option value="ko" ${lang==="ko"?"selected":""}>한국어</option>
+      <option value="en" ${lang==="en"?"selected":""}>English</option>
+      <option value="ja" ${lang==="ja"?"selected":""}>日本語</option>
+    </select>
+  </label>`;
+}
+function memoPresetFor(text){
+  const trimmed=String(text||"").trim();
+  if(trimmed===MEMO_PRESETS.default.ko) return "default";
+  if(trimmed===MEMO_PRESETS.tha.ko) return "tha";
+  return "";
+}
+function onMemoInput(value){
+  state.patient.memo=value;
+  state.patient.memoPreset=memoPresetFor(value);
+  autoSaveDebounced();
+}
+function applyMemoPreset(key){
+  const preset=MEMO_PRESETS[key];
+  if(!preset) return;
+  state.patient.memo=preset.ko;
+  state.patient.memoPreset=key;
+  autoSave();
+  render();
+}
+function printedDate(iso){
+  const lang=outputLang();
+  if(lang==="ko"||!iso) return iso||"";
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso));
+  if(!m) return String(iso);
+  const y=Number(m[1]), mo=Number(m[2]), d=Number(m[3]);
+  if(lang==="ja") return `${y}年${mo}月${d}日`;
+  const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return `${months[mo-1]||m[2]} ${d}, ${y}`;
+}
+function leafletDailyFreq(n){
+  const lang=outputLang();
+  if(lang==="ko") return dailyFreqText(n);
+  if(lang==="en") return n===1?"1 time a day":`${n} times a day`;
+  return `1日${n}回`;
+}
+function leafletDoseText(item){
+  const lang=outputLang();
+  if(lang==="ko") return printedDoseText(item);
+  if(!item) return "";
+  let base;
+  if(item.isTimeBased){
+    const n=positiveInt(item.durationMin,1);
+    base=lang==="en"?`${n} min`:`${n}分`;
+  }else{
+    const sets=positiveInt(item.sets,1);
+    const n=positiveInt(item.reps,1);
+    const hold=doseUnitOf(item)==="sec";
+    if(lang==="en"){
+      const setWord=sets===1?"set":"sets";
+      base=hold?`Hold ${n} sec × ${sets} ${setWord}`:`${n} ${n===1?"rep":"reps"} × ${sets} ${setWord}`;
+    }else base=hold?`${n}秒保持 × ${sets}セット`:`${n}回 × ${sets}セット`;
+  }
+  if(!state.showDailyFreq) return base;
+  const freq=normalizeDailyFreq(item.dailyFreq);
+  if(!freq) return base;
+  return `${base} · ${leafletDailyFreq(freq)}`;
+}
+function leafletSessionText(){
+  const lang=outputLang();
+  return lang==="ko"?sessionTimeText():sessionTimeText(undefined, lang);
+}
+function exerciseIndexLabel(i){
+  const n=i+1;
+  const lang=outputLang();
+  if(lang==="en") return `Exercise ${n}`;
+  if(lang==="ja") return `運動 ${n}`;
+  return `운동 ${n}`;
+}
+function printedExerciseFields(item){
+  const lang=outputLang();
+  if(!item) return {title:"",description:"",caution:"",target:"",level:""};
+  if(lang==="ko"){
+    return {title:item.title||"",description:item.description||"",caution:item.caution||"",target:item.target||"",level:item.level||""};
+  }
+  const lib=exerciseById(item.id);
+  const tr=EXERCISE_I18N[item.id]||{};
+  const pick=(key)=>{
+    const ko=lib&&lib[key]!=null?lib[key]:(item[key]||"");
+    if(!lib){
+      if(key==="title"){
+        const m=/^목록에 없는 운동 #(\d+)$/.exec(item.title||"");
+        if(m) return `${tPrint("missing")} #${m[1]}`;
+      }
+      return item[key]||"";
+    }
+    if((key==="description"||key==="caution") && item[key]!=null && item[key]!==lib[key]) return item[key];
+    if(key==="target"){
+      const pack=TARGET_I18N[ko];
+      return (pack&&pack[lang])||ko;
+    }
+    const pack=tr[key];
+    return (pack&&pack[lang])||ko;
+  };
+  const koLevel=lib?lib.level:(item.level||"");
+  const levelPack=LEVEL_I18N[koLevel];
+  return {
+    title:pick("title"),
+    description:pick("description"),
+    caution:pick("caution"),
+    target:pick("target"),
+    level:(levelPack&&levelPack[lang])||koLevel
+  };
+}
+function printedMemo(){
+  const lang=outputLang();
+  const memo=state.patient.memo||"";
+  const key=memoPresetFor(memo);
+  if(key && MEMO_PRESETS[key]) return MEMO_PRESETS[key][lang]||memo;
+  return memo;
+}
+function printedSafety(list){
+  const ko=safetyBanner(list);
+  const lang=outputLang();
+  if(lang==="ko") return ko;
+  const map=SAFETY_I18N[lang]||{};
+  return map[ko]||ko;
+}
+function weekLabel(w){
+  const lang=outputLang();
+  if(lang==="en") return `Week ${w}`;
+  if(lang==="ja") return `${w}週目`;
+  return `${w}주차`;
+}
+
 /* ══════════════════════════════════════════
    미리보기 오버레이
 ══════════════════════════════════════════ */
@@ -2814,7 +3039,8 @@ function previewOverlay(){
         <h2 class="text-lg font-black text-slate-800">리플릿 미리보기</h2>
         <p class="text-xs text-slate-400 mt-0.5">아래 화면이 실제 출력물입니다.</p>
       </div>
-      <div class="flex gap-2">
+      <div class="flex gap-2 items-center">
+        ${outputLangControl()}
         <button onclick="downloadPdf()" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-700 transition-colors">📄 PDF 저장</button>
         <button onclick="window.print()" class="rounded-xl bg-slate-800 px-4 py-2 text-sm font-bold text-white hover:bg-slate-700 transition-colors">🖨️ 인쇄</button>
         <button onclick="state.preview=false;render()" class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors">✕ 닫기</button>
@@ -2841,27 +3067,29 @@ function leafletHTML(){
   const textClass = isLarge ? "text-xl leading-9" : "text-sm leading-7";
 
   function articleHTML(item, i){
+    const fields=printedExerciseFields(item);
+    const picture=imgTag({...item, title:fields.title});
     // ── 1단 가로형: 낮고 가로로 긴 카드 ──────────────────────
     if(isWide){
       return `<article data-key="leaflet-${item.id}" class="page-break leaflet-wide-card rounded-xl border border-slate-300 p-3 flex items-start gap-4">
         ${state.showImage
-          ? `<div class="flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 ring-1 ring-slate-100 h-20 w-24 text-3xl">${imgTag(item)}</div>`
+          ? `<div class="flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-slate-50 ring-1 ring-slate-100 h-20 w-24 text-3xl">${picture}</div>`
           : ""}
         <div class="flex-1 min-w-0 keep-ko">
           <div class="flex items-baseline gap-2 flex-wrap">
-            <span class="text-xs text-slate-400 font-bold shrink-0">운동 ${i+1}</span>
-            <h2 class="text-base font-black leading-tight">${esc(item.title)}</h2>
-            <span class="text-xs text-slate-500 shrink-0">· ${esc(item.level)}</span>
+            <span class="text-xs text-slate-400 font-bold shrink-0">${exerciseIndexLabel(i)}</span>
+            <h2 class="text-base font-black leading-tight">${esc(fields.title)}</h2>
+            <span class="text-xs text-slate-500 shrink-0">· ${esc(fields.level)}</span>
           </div>
-          <p class="text-xs text-slate-500 mt-0.5" style="white-space:normal;overflow:visible;">방법: ${esc(item.description)}</p>
+          <p class="text-xs text-slate-500 mt-0.5" style="white-space:normal;overflow:visible;">${tPrint("method")}: ${esc(fields.description)}</p>
           ${state.showCaution && item.caution
-            ? `<p class="text-xs text-amber-700 mt-0.5" style="white-space:normal;overflow:visible;">⚠ ${esc(item.caution)}</p>`
+            ? `<p class="text-xs text-amber-700 mt-0.5" style="white-space:normal;overflow:visible;">⚠ ${esc(fields.caution)}</p>`
             : ""}
         </div>
         <div class="shrink-0 text-right space-y-1">
-          <div class="inline-block rounded-lg border-2 border-slate-900 px-2.5 py-1 text-sm font-black keep-ko" style="white-space:normal;max-width:12rem;line-height:1.35;">${sidePrintPrefix(item.side)}${esc(printedDoseText(item))}</div>
+          <div class="inline-block rounded-lg border-2 border-slate-900 px-2.5 py-1 text-sm font-black keep-ko" style="white-space:normal;max-width:12rem;line-height:1.35;">${sidePrintPrefix(item.side)}${esc(leafletDoseText(item))}</div>
           ${qrOnLeaflet() && isValidVideoUrl(item.videoUrl)
-            ? `<div class="flex items-center gap-1 justify-end"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr shrink-0" style="width:18mm;height:18mm"><span class="text-xs text-slate-400">영상</span></div>`
+            ? `<div class="flex items-center gap-1 justify-end"><img src="${qrDataUrl(item.videoUrl)}" alt="${esc(tPrint("qrAlt"))}" class="leaflet-qr shrink-0" style="width:18mm;height:18mm"><span class="text-xs text-slate-400">${esc(tPrint("video"))}</span></div>`
             : ""}
         </div>
       </article>`;
@@ -2871,17 +3099,17 @@ function leafletHTML(){
       return `<article data-key="leaflet-${item.id}" class="leaflet-compact keep-ko" style="border:1px solid #cbd5e1;border-radius:6px;padding:1.5mm;">
         <div style="display:flex;align-items:flex-start;gap:1.5mm;">
           ${state.showImage
-            ? `<div class="leaflet-compact-img" style="display:flex;flex:none;align-items:center;justify-content:center;overflow:hidden;border-radius:4px;background:#f8fafc;">${imgTag(item,"h-full w-full object-contain")}</div>`
+            ? `<div class="leaflet-compact-img" style="display:flex;flex:none;align-items:center;justify-content:center;overflow:hidden;border-radius:4px;background:#f8fafc;">${picture}</div>`
             : ""}
           <div style="min-width:0;flex:1;">
-            <h2 style="font-size:11px;font-weight:800;line-height:1.35;"><span style="color:#94a3b8;font-weight:700;">${i+1}. </span>${esc(item.title)}</h2>
-            <p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#475569;">${esc(item.description)}</p>
+            <h2 style="font-size:11px;font-weight:800;line-height:1.35;"><span style="color:#94a3b8;font-weight:700;">${i+1}. </span>${esc(fields.title)}</h2>
+            <p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#475569;">${esc(fields.description)}</p>
             ${state.showCaution && item.caution
-              ? `<p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#92400e;">⚠ ${esc(item.caution)}</p>`
+              ? `<p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#92400e;">⚠ ${esc(fields.caution)}</p>`
               : ""}
-            <div class="leaflet-dose" style="margin-top:1mm;display:inline-block;border:1.5px solid #0f172a;border-radius:4px;padding:0.4mm 1.4mm;font-size:11px;font-weight:800;line-height:1.35;white-space:normal;">${sidePrintPrefix(item.side)}${esc(printedDoseText(item))}</div>
+            <div class="leaflet-dose" style="margin-top:1mm;display:inline-block;border:1.5px solid #0f172a;border-radius:4px;padding:0.4mm 1.4mm;font-size:11px;font-weight:800;line-height:1.35;white-space:normal;">${sidePrintPrefix(item.side)}${esc(leafletDoseText(item))}</div>
             ${qrOnLeaflet() && isValidVideoUrl(item.videoUrl)
-              ? `<div style="margin-top:1mm;"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr" style="width:18mm;height:18mm"></div>`
+              ? `<div style="margin-top:1mm;"><img src="${qrDataUrl(item.videoUrl)}" alt="${esc(tPrint("qrAlt"))}" class="leaflet-qr" style="width:18mm;height:18mm"></div>`
               : ""}
           </div>
         </div>
@@ -2893,55 +3121,57 @@ function leafletHTML(){
     return `<article data-key="leaflet-${item.id}" class="page-break rounded-2xl border border-slate-300 p-4">
       <div class="grid ${state.showImage ? "grid-cols-[auto_1fr]" : "grid-cols-1"} gap-4">
         ${state.showImage
-          ? `<div class="flex shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100 ${imageClass}">${imgTag(item)}</div>`
+          ? `<div class="flex shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-slate-50 ring-1 ring-slate-100 ${imageClass}">${picture}</div>`
           : ""}
         <div>
-          <div class="text-xs font-bold text-slate-400 mb-1">운동 ${i+1} · ${esc(item.level)}</div>
-          <h2 class="${isLarge ? "text-2xl" : "text-xl"} font-black">${esc(item.title)}</h2>
-          <p class="mt-1 text-xs font-semibold text-slate-500">목표: ${esc(item.target)}</p>
-          <div class="mt-2 inline-block rounded-xl border-2 border-slate-900 px-3 py-1.5 ${isLarge ? "text-2xl" : "text-base"} font-black keep-ko" style="white-space:normal;line-height:1.35;">${sidePrintPrefix(item.side)}${esc(printedDoseText(item))}</div>
+          <div class="text-xs font-bold text-slate-400 mb-1">${exerciseIndexLabel(i)} · ${esc(fields.level)}</div>
+          <h2 class="${isLarge ? "text-2xl" : "text-xl"} font-black">${esc(fields.title)}</h2>
+          <p class="mt-1 text-xs font-semibold text-slate-500">${tPrint("goal")}: ${esc(fields.target)}</p>
+          <div class="mt-2 inline-block rounded-xl border-2 border-slate-900 px-3 py-1.5 ${isLarge ? "text-2xl" : "text-base"} font-black keep-ko" style="white-space:normal;line-height:1.35;">${sidePrintPrefix(item.side)}${esc(leafletDoseText(item))}</div>
         </div>
       </div>
-      <div class="mt-3 rounded-xl bg-slate-50 p-3 ${textClass}"><b>방법: </b>${esc(item.description)}</div>
+      <div class="mt-3 rounded-xl bg-slate-50 p-3 ${textClass}"><b>${tPrint("method")}: </b>${esc(fields.description)}</div>
       ${state.showCaution && item.caution
-        ? `<div class="mt-2 rounded-xl bg-amber-50 p-3 ${isLarge ? "text-xl leading-9" : "text-sm leading-6"}"><b>주의: </b>${esc(item.caution)}</div>`
+        ? `<div class="mt-2 rounded-xl bg-amber-50 p-3 ${isLarge ? "text-xl leading-9" : "text-sm leading-6"}"><b>${tPrint("caution")}: </b>${esc(fields.caution)}</div>`
         : ""}
       ${qrOnLeaflet() && isValidVideoUrl(item.videoUrl)
-        ? `<div class="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 p-2"><img src="${qrDataUrl(item.videoUrl)}" alt="운동 영상 QR" class="leaflet-qr shrink-0" style="width:18mm;height:18mm"><div class="text-xs leading-5">📱 QR코드를 촬영하면 운동 영상을 확인할 수 있습니다.</div></div>`
+        ? `<div class="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 p-2"><img src="${qrDataUrl(item.videoUrl)}" alt="${esc(tPrint("qrAlt"))}" class="leaflet-qr shrink-0" style="width:18mm;height:18mm"><div class="text-xs leading-5">${tPrint("qrHelp")}</div></div>`
         : ""}
     </article>`;
   }
 
-  return `<div class="mx-auto max-w-4xl bg-white">
+  const lang=outputLang();
+  const showDate=lang==="ko"?state.patient.date:printedDate(state.patient.date);
+  return `<div class="mx-auto max-w-4xl bg-white leaflet-out" lang="${lang}">
     <div class="mb-5 border-b-2 border-slate-900 pb-4 flex items-end justify-between gap-4">
-      <div><h1 class="text-3xl font-black">개인별 맞춤 운동 과제</h1><p class="mt-1 text-slate-600 text-sm">안전한 범위에서 천천히 시행해주세요.</p></div>
+      <div><h1 class="text-3xl font-black">${esc(tPrint("docTitle"))}</h1><p class="mt-1 text-slate-600 text-sm">${esc(tPrint("docSubtitle"))}</p></div>
       <div class="text-right text-sm leading-7 min-w-0" style="max-width:18rem;">
-        <p><b>환자명</b> ${esc(state.patient.name||"____________")}${state.patient.patientNo?` (${esc(state.patient.patientNo)})`:""}</p>
-        <p><b>작성일</b> ${esc(state.patient.date)}</p>
-        ${state.showDailyFreq&&normalizeDailyFreq(state.patient.dailyFreq)?`<p><b>하루 횟수</b> ${esc(dailyFreqText(state.patient.dailyFreq))}</p>`:""}
-        <p><b>예상시간</b> <span data-session-time>${esc(sessionTimeText())}</span></p>
-        ${state.therapistName?`<p><b>담당치료사</b> ${esc(state.therapistName)}</p>`:""}
+        <p><b>${esc(tPrint("patientName"))}</b> ${esc(state.patient.name||"____________")}${state.patient.patientNo?` (${esc(state.patient.patientNo)})`:""}</p>
+        <p><b>${esc(tPrint("dateLabel"))}</b> ${esc(showDate)}</p>
+        ${state.showDailyFreq&&normalizeDailyFreq(state.patient.dailyFreq)?`<p><b>${esc(tPrint("dailyFreqLabel"))}</b> ${esc(leafletDailyFreq(normalizeDailyFreq(state.patient.dailyFreq)))}</p>`:""}
+        <p><b>${esc(tPrint("timeLabel"))}</b> <span data-session-time="${lang}">${esc(leafletSessionText())}</span></p>
+        ${state.therapistName?`<p><b>${esc(tPrint("therapistLabel"))}</b> ${esc(state.therapistName)}</p>`:""}
       </div>
     </div>
-    ${state.showFallWarning&&state.selected.length>0?`<div class="mb-5 rounded-2xl border-2 border-amber-400 bg-amber-50 p-4 font-bold text-amber-900 text-sm leading-6">⚠ ${safetyBanner(state.selected)}</div>`:""}
+    ${state.showFallWarning&&state.selected.length>0?`<div class="mb-5 rounded-2xl border-2 border-amber-400 bg-amber-50 p-4 font-bold text-amber-900 text-sm leading-6">⚠ ${esc(printedSafety(state.selected))}</div>`:""}
     ${state.selected.length===0
-      ?`<div class="rounded-xl border border-slate-300 p-8 text-center text-slate-400">선택된 운동이 없습니다.</div>`
+      ?`<div class="rounded-xl border border-slate-300 p-8 text-center text-slate-400">${esc(tPrint("empty"))}</div>`
       :`<div class="${isGrid?"leaflet-grid":isWide?"space-y-2":"space-y-4"}">${state.selected.map((item,i)=>articleHTML(item,i)).join("")}</div>`}
     ${state.showChecklist&&state.selected.length>0?checklistHTML():""}
     ${state.showPainLog&&state.selected.length>0?painHTML():""}
-    <div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-2 font-black ${isLarge?"text-2xl":""}">공통 주의사항</h3><p class="${isLarge?"text-xl leading-9":"leading-7 text-sm"}">${esc(state.patient.memo)}</p></div>
+    <div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-2 font-black ${isLarge?"text-2xl":""}">${esc(tPrint("generalCaution"))}</h3><p class="${isLarge?"text-xl leading-9":"leading-7 text-sm"}">${esc(printedMemo())}</p></div>
   </div>`;
 }
 
 function checklistHTML(){
   const weeks=state.checklistWeeks||2;
-  const days=["월","화","수","목","금","토","일"];
+  const days=DAY_LABELS[outputLang()]||DAY_LABELS.ko;
   let rows="";
   for(let w=1;w<=weeks;w++){
-    rows+=`<tr><td class="border border-slate-400 p-2 text-xs font-bold text-slate-500 whitespace-nowrap">${w}주차</td>${days.map(()=>`<td class="h-10 border border-slate-400 text-center">□</td>`).join("")}</tr>`;
+    rows+=`<tr><td class="border border-slate-400 p-2 text-xs font-bold text-slate-500 whitespace-nowrap">${esc(weekLabel(w))}</td>${days.map(()=>`<td class="h-10 border border-slate-400 text-center">□</td>`).join("")}</tr>`;
   }
   return `<div class="mt-5 rounded-2xl border-2 border-slate-900 p-4">
-    <h3 class="mb-3 font-black">📅 운동 수행 체크표</h3>
+    <h3 class="mb-3 font-black">${esc(tPrint("checklistTitle"))}</h3>
     <table class="w-full border-collapse text-center text-sm">
       <thead><tr><th class="border border-slate-400 p-2 text-xs"></th>${days.map(d=>`<th class="border border-slate-400 p-2">${d}</th>`).join("")}</tr></thead>
       <tbody>${rows}</tbody>
@@ -2950,7 +3180,8 @@ function checklistHTML(){
 }
 
 function painHTML(){
-  return `<div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-3 font-black">✅ 통증/피로도 기록</h3><div class="grid grid-cols-2 gap-3 text-sm"><div class="rounded-xl border border-slate-300 p-3">운동 전 통증 NRS: 0 1 2 3 4 5 6 7 8 9 10</div><div class="rounded-xl border border-slate-300 p-3">운동 후 통증 NRS: 0 1 2 3 4 5 6 7 8 9 10</div><div class="rounded-xl border border-slate-300 p-3">운동 전 피로도: 낮음 / 보통 / 높음</div><div class="rounded-xl border border-slate-300 p-3">운동 후 피로도: 낮음 / 보통 / 높음</div></div></div>`;
+  const scale=tPrint("fatigueScale");
+  return `<div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-3 font-black">${esc(tPrint("painTitle"))}</h3><div class="grid grid-cols-2 gap-3 text-sm"><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("painBefore"))}: 0 1 2 3 4 5 6 7 8 9 10</div><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("painAfter"))}: 0 1 2 3 4 5 6 7 8 9 10</div><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("fatigueBefore"))}: ${esc(scale)}</div><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("fatigueAfter"))}: ${esc(scale)}</div></div></div>`;
 }
 
 render();
