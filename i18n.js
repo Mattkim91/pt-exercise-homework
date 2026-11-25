@@ -478,6 +478,54 @@ var TARGET_I18N = {
   "기도 분비물 이동": {
     "en": "Help move mucus up and out of the airways.",
     "ja": "気道のたんを上の方へ動かします。"
+  },
+  "어깨 관절가동범위 유지, 보조 능동운동": {
+    "en": "Keep the shoulder moving, with help from the other arm.",
+    "ja": "肩の動きを保ち、反対の手で助けて動かします。"
+  },
+  "몸통 깊은 근육 활성화, 요부 안정 준비": {
+    "en": "Wake up the deep trunk muscles and get ready to steady the lower back.",
+    "ja": "体幹の深い筋肉を働かせ、腰を安定させる準備をします。"
+  },
+  "고관절 내전근 활성화": {
+    "en": "Wake up the muscles that bring the thighs together.",
+    "ja": "股関節を内側に閉じる筋肉を働かせます。"
+  },
+  "고관절 안쪽·바깥 돌림 가동범위 유지": {
+    "en": "Keep the hip able to turn inward and outward.",
+    "ja": "股関節を内側・外側に回す動きを保ちます。"
+  },
+  "체간 안정, 반대쪽 팔·다리 협응": {
+    "en": "Steady the trunk and coordinate the opposite arm and leg.",
+    "ja": "体幹を安定させ、反対側の手足を一緒に動かします。"
+  },
+  "목 자세 조절, 심부 경부 굴곡근 활성화": {
+    "en": "Practice neck posture and wake up the deep muscles that draw the chin in.",
+    "ja": "首の姿勢を整え、あごを引く深い筋肉を働かせます。"
+  },
+  "흉추 가동 및 몸통 회전": {
+    "en": "Help the upper back move, and turn the trunk.",
+    "ja": "胸の背骨を動きやすくし、体を回します。"
+  },
+  "발 안쪽 작은 근육 활성화, 발바닥 감각": {
+    "en": "Wake up the small muscles in the foot and the feeling on the sole.",
+    "ja": "足の内側の小さな筋肉を働かせ、足の裏の感覚を出します。"
+  },
+  "앞허벅지와 고관절 앞쪽 유연성": {
+    "en": "Loosen the front of the thigh and the front of the hip.",
+    "ja": "太ももの前と股関節の前をやわらかくします。"
+  },
+  "장비 없는 저강도 유산소": {
+    "en": "Light aerobic exercise with no equipment.",
+    "ja": "道具を使わない、軽い有酸素運動。"
+  },
+  "신전 선호 요통에서 상체 신전 자세로 증상 완화": {
+    "en": "For a low back that feels better when it is gently arched, ease symptoms by resting propped up.",
+    "ja": "軽く反らす方が楽な腰痛で、上体を起こした姿勢にして症状をやわらげます。"
+  },
+  "체간 안정, 고관절·무릎 90도 자세에서 복부·고관절 굴곡근 지구력": {
+    "en": "Steady the trunk, and build endurance in the belly and hip-lifting muscles with the hips and knees at 90 degrees.",
+    "ja": "体幹を安定させ、股関節と膝を90度にした姿勢で、お腹と股関節を曲げる筋肉の持久力をつけます。"
   }
 };
 var EXERCISE_I18N = {
@@ -1586,6 +1634,174 @@ var EXERCISE_I18N = {
       "en": "Do not cough hard over and over. Stop if you feel dizzy or it hurts.",
       "ja": "続けて強く咳をしないでください。めまいや痛みがあれば中止してください。"
     }
+  },
+  "80": {
+    "title": {
+      "en": "Lift the arm with the other hand",
+      "ja": "反対の手で腕を上げる"
+    },
+    "description": {
+      "en": "Lie on your back. With your other hand, lightly hold the wrist or forearm of the arm you are moving. Slowly lift that arm up toward your head, only as far as it does not hurt, then lower it at the same speed. Do not let the moving arm go completely limp. Lift with it only as much as you can.",
+      "ja": "仰向けになります。反対の手で、動かす腕の手首か前腕を軽く持ちます。痛くない範囲まで腕をゆっくり頭の方へ上げ、同じ速さで下ろします。動かす腕の力を完全には抜かず、できる分だけ一緒に上げます。"
+    },
+    "caution": {
+      "en": "Do not jerk the sore arm upward. If the shoulder hurts or you feel a sharp tingling, lower the height. Right after a dislocation or surgery, lift only to the height your therapist allows.",
+      "ja": "痛い腕を引っ張り上げないでください。肩の痛みやピリッとする感じがあれば、高さを下げてください。脱臼や手術の直後は、療法士が許した高さまでにしてください。"
+    }
+  },
+  "81": {
+    "title": {
+      "en": "Gently tighten the belly and hold",
+      "ja": "お腹に軽く力を入れて保つ"
+    },
+    "description": {
+      "en": "Lie down with your knees bent. Keep the space between your lower back and the floor from getting larger. Gently tighten the lower belly so it becomes a little flatter. Do not hold your breath. Keep breathing comfortably while you hold the tension, then relax.",
+      "ja": "膝を立てて寝ます。腰と床のすき間が大きくならないようにしたまま、下腹に軽く力を入れ、お腹が少し薄くなるようにします。息を止めず、楽に呼吸しながら力を保ってから、力を抜きます。"
+    },
+    "caution": {
+      "en": "Do not hold your breath or tense your shoulders. Do not lift your lower back far off the floor, and do not press it down hard enough to cause pain. Stop right away if it hurts.",
+      "ja": "息を止めたり、肩に力を入れたりしないでください。腰を床から大きく持ち上げたり、逆に強く押しつけて痛みを出したりしないでください。痛みがあればすぐに中止してください。"
+    }
+  },
+  "82": {
+    "title": {
+      "en": "Squeeze a towel between the knees",
+      "ja": "膝の間のタオルを挟む"
+    },
+    "description": {
+      "en": "Lie with your knees bent and place a folded towel between them. Gently squeeze the towel with your knees, as if you were holding it, then relax. Keep your pelvis from rolling and your lower back from lifting.",
+      "ja": "膝を立てて寝て、折ったタオルを両膝の間に入れます。膝でタオルをやさしく挟むように力を入れてから、力を抜きます。骨盤が回ったり、腰が浮かないようにします。"
+    },
+    "caution": {
+      "en": "After a hip replacement, do this only if your therapist says you may. This is not the same as the general hip-replacement warning about bringing the legs too far together: the towel keeps the knees apart, and you only squeeze. Stop if you feel pain in the groin or on the inner knee.",
+      "ja": "股関節を置換した人は、療法士が許した場合だけ行ってください。これは人工股関節の一般的な注意にある、脚を寄せすぎる動きとは違います。タオルが膝の間を開けた状態で、挟むだけです。脚の付け根や膝の内側が痛ければ中止してください。"
+    }
+  },
+  "83": {
+    "title": {
+      "en": "Turn the whole leg in and out",
+      "ja": "脚全体を内外に回す"
+    },
+    "description": {
+      "en": "Lie on your back with the knee straight, or sit with the leg stretched out in front. Keep both knees from bending. From the hip, slowly turn the whole leg inward until the toes point toward each other, then turn it outward until the toes point apart. Do not move only the ankle. Let the kneecap turn in the same direction as the toes.",
+      "ja": "膝を伸ばしたまま仰向けになるか、脚を前に伸ばして座ります。両方の膝が曲がらないようにしたまま、股関節から脚全体をゆっくり内側へ回し、つま先が互いに寄るようにします。次に外側へ回し、つま先が開くようにします。足首だけを動かさず、膝のお皿がつま先と同じ向きに回るようにします。"
+    },
+    "caution": {
+      "en": "If it hurts, make the movement smaller or stop. Do not bend the knee or spread the leg far out to the side.",
+      "ja": "痛みがあれば範囲を小さくするか、中止してください。膝を曲げたり、脚を横に大きく開いたりしないでください。"
+    }
+  },
+  "84": {
+    "title": {
+      "en": "Lift the opposite arm and leg on hands and knees",
+      "ja": "四つばいで反対の手足を上げる"
+    },
+    "description": {
+      "en": "Place your hands and knees on the floor. Put your hands under your shoulders and your knees under your hips. Keep your lower back from sagging down or pushing up. Slowly lift one arm and the opposite leg only until they are about level with the floor, then lower them. Switch sides.",
+      "ja": "手と膝を床について四つばいになります。手は肩の下、膝は股関節の下に置きます。腰が下に沈んだり、上に突き出したりしないようにしたまま、片方の腕と反対の脚を、床とほぼ水平になる高さまでゆっくり上げて下ろします。左右を交互に行います。"
+    },
+    "caution": {
+      "en": "Stop if your lower back, wrist, or knee hurts. If your body twists to one side, do not lift as high. If you cannot balance on your own, start with the arm only, or the leg only. If your wrist is uncomfortable, ask your therapist before using a fist or a supported hand.",
+      "ja": "腰、手首、膝が痛ければ中止してください。体が片方へ回るときは、上げる高さを下げてください。一人でバランスが不安なら、先に腕だけ、または脚だけ行ってください。手首がつらいときは、こぶしや手を支える姿勢にする前に療法士と相談してください。"
+    }
+  },
+  "85": {
+    "title": {
+      "en": "Chin tuck",
+      "ja": "あごを引く"
+    },
+    "description": {
+      "en": "Sit tall and look straight ahead. Do not drop your head. Gently draw the chin in so the head slides straight back, as if it were moving backward on a level line. Hold briefly when the back of the neck feels lightly longer, then relax.",
+      "ja": "背すじを伸ばして座り、正面を見ます。頭を下げず、あごを少し引いて、頭が後ろへ水平に移動するように引きます。首の後ろが軽く長くなる感じで少し保ってから、力を抜きます。"
+    },
+    "caution": {
+      "en": "Do not bend the head forward or drop it down. Stop right away and tell your therapist if you feel dizzy, your hand tingles, or your neck hurts a lot. After neck surgery or an injury, do this only if your therapist allows it.",
+      "ja": "頭を前に傾けたり、下に下げたりしないでください。めまい、手のしびれ、強い首の痛みがあればすぐに中止し、療法士に伝えてください。首の手術やけがの後は、療法士が許した場合だけ行ってください。"
+    }
+  },
+  "86": {
+    "title": {
+      "en": "Turn the trunk while sitting",
+      "ja": "座って体を回す"
+    },
+    "description": {
+      "en": "Sit tall with both feet on the floor. Lightly cross your arms in front of your chest, or rest your hands on your shoulders. Keep your pelvis facing forward and slowly turn only your trunk to one side, then come back. Repeat to the other side.",
+      "ja": "背すじを伸ばして座り、両足を床に置きます。腕を胸の前で軽く組むか、肩に手を置きます。骨盤は正面を向けたまま、体だけを片方へゆっくり回して戻します。反対側も繰り返します。"
+    },
+    "caution": {
+      "en": "Do not twist the lower back hard. Stop if you just had spine surgery, have sudden low-back pain, or feel dizzy. After a hip replacement, stay within the turning and bending range your therapist gave you.",
+      "ja": "腰を大きくねじらないでください。背骨の手術の直後、急な腰痛、めまいがあれば中止してください。股関節を置換した人は、療法士が伝えた回す範囲・曲げる範囲を守ってください。"
+    }
+  },
+  "87": {
+    "title": {
+      "en": "Scrunch a towel with the toes",
+      "ja": "つま先でタオルをたぐる"
+    },
+    "description": {
+      "en": "Sit in a chair and spread a thin towel on the floor in front of your foot. Keep the heel on the floor and scrunch the towel toward you with your toes. Move only the toes, and do not let the knee wobble.",
+      "ja": "椅子に座り、足の前の床に薄いタオルを広げます。かかとを床につけたまま、つま先でタオルを手繰り寄せるようにくしゃくしゃにします。つま先だけを動かし、膝が揺れないようにします。"
+    },
+    "caution": {
+      "en": "Stop if a toe joint or the sole of the foot hurts. If you recently had foot surgery, have a serious wound, or have poor blood flow, ask your therapist first. If the foot cramps, straighten it and rest.",
+      "ja": "足の指の関節や足の裏が痛ければ中止してください。最近足の手術をした、傷がひどい、血流の障害があるときは、療法士と相談してください。つったら、足を伸ばして休んでください。"
+    }
+  },
+  "88": {
+    "title": {
+      "en": "Standing stretch for the front of the thigh",
+      "ja": "立って太ももの前を伸ばす"
+    },
+    "description": {
+      "en": "Stand and hold a chair or a rail with one hand. Bend one knee back and lightly hold the ankle, or the cuff of the pants, with the hand on the same side. Point the knee toward the floor and do not let the lower back bend forward. Hold where you feel a stretch in the front of the thigh.",
+      "ja": "椅子か手すりを片手で持って立ちます。片方の膝を後ろへ曲げ、同じ側の手で足首かズボンの裾を軽く持ちます。膝は床の方を向け、腰が前に折れないようにして、太ももの前が伸びる感じで保ちます。"
+    },
+    "caution": {
+      "en": "Do not bounce. Stop if your lower back or knee hurts, or if your balance feels unsteady. If you had a hip replacement from the front, or you are limited in straightening the hip or turning it outward, do not do this until your therapist allows it. If you cannot hold the ankle, rest the top of the foot on a chair behind you and use only a small stretch.",
+      "ja": "反動をつけないでください。腰の痛み、膝の痛み、バランスの不安があれば中止してください。股関節の前方からの置換や、股関節を伸ばす・外へ回す動きに制限がある人は、療法士が許すまでは行わないでください。足首をつかめないときは、後ろの椅子に足の甲を乗せて、小さくだけ行ってください。"
+    }
+  },
+  "89": {
+    "title": {
+      "en": "Walk in place",
+      "ja": "その場歩き"
+    },
+    "description": {
+      "en": "Stand with a chair or a rail beside you. Lift your feet one after the other and walk in place. Swing your arms naturally, and keep going for the set time at an effort where you can still talk. Hold the support with one hand if you need to.",
+      "ja": "椅子か手すりを横に置いて立ちます。その場で足を交互に軽く上げ、歩くように動きます。腕は自然に振り、話せる強さで決めた時間を続けます。必要なら片手で支えを持ちます。"
+    },
+    "caution": {
+      "en": "Sit down right away if you feel dizzy, very short of breath, or chest pain. If your balance is unsteady, hold a support. If a joint starts to hurt more, do not lift the feet as high.",
+      "ja": "めまい、強い息苦しさ、胸の痛みがあればすぐに座ってください。バランスが不安なら支えを持って行ってください。関節の痛みが増えたら、足を上げる高さを下げてください。"
+    }
+  },
+  "90": {
+    "title": {
+      "en": "Prop up on your elbows while lying face down",
+      "ja": "うつ伏せで肘につき上体を起こす"
+    },
+    "description": {
+      "en": "Do this only if your therapist prescribed it. Lie face down and place your elbows under your shoulders, then gently raise your upper body and rest on your elbows. Keep your pelvis and legs on the floor, and breathe comfortably. Hold the position while you check that pain is not spreading down the leg.",
+      "ja": "療法士がこの動きを処方した場合だけ行います。床にうつ伏せになり、肘を肩の下に置いて上体を軽く起こし、肘に寄りかかります。骨盤と脚は床に置いたまま、楽に呼吸します。痛みが脚へ広がっていないかを確かめながら保ちます。"
+    },
+    "caution": {
+      "en": "Do not use this as a general home exercise without a diagnosis. If tingling or pain spreads down the leg, stop right away and lie comfortably face down or on your side again. Do not do this right after spine surgery, if a fracture is suspected, if spinal narrowing is severe, or if you are pregnant. Do not move on by yourself to the later step of pushing the back up all the way with your palms.",
+      "ja": "診断なしに、一般の宿題として使わないでください。脚のしびれや痛みが下の方へ広がったら、すぐに中止し、楽にうつ伏せか横向きに戻ってください。背骨の手術の直後、骨折の疑い、狭窄が強いとき、妊娠中は行わないでください。手のひらで腰を最後まで押し上げる次の段階へ、一人で進めないでください。"
+    }
+  },
+  "91": {
+    "title": {
+      "en": "Hold the tabletop position",
+      "ja": "テーブルトップの姿勢を保つ"
+    },
+    "description": {
+      "en": "Lie on your back with both arms by your sides. Bend both hips and both knees to a right angle (90 degrees) and lift the legs off the bed. Point the thighs toward the ceiling, and keep the shins level with the bed. Do not let your lower back lift off the floor. Do not hold your breath. Breathe comfortably while you hold the position, then lower the legs slowly.",
+      "ja": "仰向けになり、両腕を体の横に置きます。両方の股関節と膝をそれぞれ直角（90度）に曲げ、脚をベッドから持ち上げます。太ももは天井の方へ立て、すねはベッドと平行に水平にします。腰が床から浮かないようにしたまま、息を止めず楽に呼吸しながら姿勢を保ち、ゆっくり脚を下ろします。"
+    },
+    "caution": {
+      "en": "If your lower back lifts off the floor or your lower back starts to hurt, lower the legs right away and stop. Do not hold your breath or lift your head.",
+      "ja": "腰が床から浮くか、腰が痛くなったら、すぐに脚を下ろして中止してください。息を止めたり、頭を持ち上げたりしないでください。"
+    }
   }
 };
 var TRANSLATION_NOTES = [
@@ -1660,5 +1876,53 @@ var TRANSLATION_NOTES = [
   {
     "id": "date",
     "text": "한국어 출력의 날짜는 지금처럼 YYYY-MM-DD입니다. 영어는 October 20, 2026, 일본어는 2026年10月20日처럼 바꿉니다."
+  },
+  {
+    "id": "80-91",
+    "text": "v2.67에서 추가한 12개 운동의 영어·일본어는 Matt 검토 전입니다. 한국어 이름·목표·방법·주의는 승인 문구 그대로입니다. 이 12개는 THA 고관절 주의 프리셋에 넣지 않았습니다."
+  },
+  {
+    "id": "80",
+    "text": "기본 side는 환측입니다. 처방할 때 좌/우 칸에서 바꿀 수 있습니다."
+  },
+  {
+    "id": "81",
+    "text": "승인 용량은 10초 유지 × 8회 × 2세트입니다. 유지 운동의 용량 칸은 초 × 세트뿐이라, 8회를 세트 칸에 넣어 10초 유지 × 8세트로 표시합니다. 뒤의 × 2세트는 기본값에 곱하지 않았습니다."
+  },
+  {
+    "id": "82",
+    "text": "용량의 (각 2–3초 유지)는 한 번 모을 때의 짧은 힘주기입니다. 9번·28번처럼 용량 칸은 10회 × 2세트로 두었습니다. 초 유지로 바꾸면 10회가 사라집니다."
+  },
+  {
+    "id": "83",
+    "text": "고관절 치환에서 안쪽 돌림을 제한하는 경우는 승인 문장에 금지를 단정하지 않았습니다. THA 프리셋에도 넣지 않았습니다."
+  },
+  {
+    "id": "84",
+    "text": "승인 용량은 좌우 각 8회 × 2세트이고 side는 없습니다. 방법에 좌우를 번갈아 한다는 문장이 있어, 용량 칸은 8회 × 2세트입니다."
+  },
+  {
+    "id": "85",
+    "text": "승인 용량은 5초 유지 × 10회 × 2세트입니다. 81번과 같이 5초 유지 × 10세트로 표시하고, 뒤의 × 2세트는 기본값에 곱하지 않았습니다. 목표의 심부 경부 굴곡근은 환자에게 풀어서 옮겼습니다. 신체 필터에 목(neck)을 추가했습니다."
+  },
+  {
+    "id": "86",
+    "text": "승인 용량은 좌우 각 8회 × 2세트이고 side는 없습니다. 방법에 반대쪽도 반복한다는 문장이 있어, 용량 칸은 8회 × 2세트입니다. 목표의 흉추는 등 위쪽(upper back / 胸の背骨)으로 풀었습니다."
+  },
+  {
+    "id": "88",
+    "text": "승인 용량은 15–20초 유지 × 3세트 (좌우)입니다. 용량 칸은 숫자 하나라 기본값을 15초로 두었고, 치료사가 초를 바꿀 수 있습니다. side는 양측입니다. 전방 접근 치환과 신전·외회전은 환자 문장으로 풀었습니다."
+  },
+  {
+    "id": "89",
+    "text": "승인 용량은 5분 × 1세트이고 시간 기준입니다. 다른 시간 운동(70–72)과 같이 유인물에는 5분만 표시됩니다. 적응 후 8–10분은 기본값에 넣지 않았습니다. 45번 서서 제자리 발 들기와 제목을 구분했습니다."
+  },
+  {
+    "id": "90",
+    "text": "승인 용량은 20–30초 유지 × 3세트입니다. 기본값은 범위의 시작인 20초이고, 치료사가 초를 바꿀 수 있습니다. 신전 선호 요통과 협착은 환자 문장으로 풀었습니다."
+  },
+  {
+    "id": "91",
+    "text": "승인된 매핑 그대로 10초 유지 × 5세트입니다. 초는 치료사가 바꿀 수 있습니다. THA 프리셋에는 넣지 않았습니다."
   }
 ];

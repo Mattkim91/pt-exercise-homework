@@ -1,4 +1,4 @@
-# 출력 언어 번역 검토표 (v2.66)
+# 출력 언어 번역 검토표 (v2.67)
 
 치료사 화면은 한국어입니다. 영어·일본어는 미리보기와 인쇄에만 쓰입니다. 한국어 운동 문장은 `exercises.js` 원문 그대로입니다.
 
@@ -24,6 +24,19 @@
 - **safety.** 낙상·호흡·통증 상단 주의는 한국어 주의 문장의 낱말을 보고 고른 뒤, 고른 문장 전체를 출력 언어로 바꿉니다. 치료사가 주의 문장을 직접 고쳐 그 낱말이 없으면 일반 안내 문장으로 떨어집니다. 이 동작은 한국어 출력과 같습니다.
 - **page.** 쪽 번호는 지금처럼 숫자만 인쇄합니다(1 / 2). 한국어 낱말이 없습니다.
 - **date.** 한국어 출력의 날짜는 지금처럼 YYYY-MM-DD입니다. 영어는 October 20, 2026, 일본어는 2026年10月20日처럼 바꿉니다.
+
+- **80-91.** v2.67에서 추가한 12개 운동의 영어·일본어는 Matt 검토 전입니다. 한국어 이름·목표·방법·주의는 승인 문구 그대로입니다. 이 12개는 THA 고관절 주의 프리셋에 넣지 않았습니다.
+- **80.** 기본 side는 환측입니다. 처방할 때 좌/우 칸에서 바꿀 수 있습니다.
+- **81.** 승인 용량은 10초 유지 × 8회 × 2세트입니다. 유지 운동의 용량 칸은 초 × 세트뿐이라, 8회를 세트 칸에 넣어 10초 유지 × 8세트로 표시합니다. 뒤의 × 2세트는 기본값에 곱하지 않았습니다.
+- **82.** 용량의 (각 2–3초 유지)는 한 번 모을 때의 짧은 힘주기입니다. 9번·28번처럼 용량 칸은 10회 × 2세트로 두었습니다. 초 유지로 바꾸면 10회가 사라집니다.
+- **83.** 고관절 치환에서 안쪽 돌림을 제한하는 경우는 승인 문장에 금지를 단정하지 않았습니다. THA 프리셋에도 넣지 않았습니다.
+- **84.** 승인 용량은 좌우 각 8회 × 2세트이고 side는 없습니다. 방법에 좌우를 번갈아 한다는 문장이 있어, 용량 칸은 8회 × 2세트입니다.
+- **85.** 승인 용량은 5초 유지 × 10회 × 2세트입니다. 81번과 같이 5초 유지 × 10세트로 표시하고, 뒤의 × 2세트는 기본값에 곱하지 않았습니다. 목표의 심부 경부 굴곡근은 환자에게 풀어서 옮겼습니다. 신체 필터에 목(neck)을 추가했습니다.
+- **86.** 승인 용량은 좌우 각 8회 × 2세트이고 side는 없습니다. 방법에 반대쪽도 반복한다는 문장이 있어, 용량 칸은 8회 × 2세트입니다. 목표의 흉추는 등 위쪽(upper back / 胸の背骨)으로 풀었습니다.
+- **88.** 승인 용량은 15–20초 유지 × 3세트 (좌우)입니다. 용량 칸은 숫자 하나라 기본값을 15초로 두었고, 치료사가 초를 바꿀 수 있습니다. side는 양측입니다. 전방 접근 치환과 신전·외회전은 환자 문장으로 풀었습니다.
+- **89.** 승인 용량은 5분 × 1세트이고 시간 기준입니다. 다른 시간 운동(70–72)과 같이 유인물에는 5분만 표시됩니다. 적응 후 8–10분은 기본값에 넣지 않았습니다. 45번 서서 제자리 발 들기와 제목을 구분했습니다.
+- **90.** 승인 용량은 20–30초 유지 × 3세트입니다. 기본값은 범위의 시작인 20초이고, 치료사가 초를 바꿀 수 있습니다. 신전 선호 요통과 협착은 환자 문장으로 풀었습니다.
+- **91.** 승인된 매핑 그대로 10초 유지 × 5세트입니다. 초는 치료사가 바꿀 수 있습니다. THA 프리셋에는 넣지 않았습니다.
 
 ## 고정 출력 문구
 
@@ -130,7 +143,7 @@
 | English | If you get pain, dizziness, or similar symptoms, pause and rest until you feel better. General precautions after hip replacement: do not bend the hip past 90 degrees. Do not bring the leg across the midline of your body or cross your legs. Do not turn the knee and toes inward. |
 | 日本語 | 痛みやめまいなどの症状が出たら、いったん中止して十分に休んでください。人工股関節の手術後の一般的な注意: 股関節を90度より深く曲げないでください。脚を体の真ん中の線より内側に寄せたり、脚を組んだりしないでください。膝とつま先を内側にひねらないでください。 |
 
-## 운동 79개
+## 운동 91개
 
 ### 1. 발목 수동관절운동
 
@@ -1159,3 +1172,195 @@
 | 방법 | 허리를 세우고 앉습니다. 코로 보통 크기로 들이마신 뒤, 입을 크게 벌리고 거울에 김을 서리게 하듯 '허-' 하고 길고 세게 내쉽니다. 가래가 목 근처로 올라오면 한 번 기침하고 쉽니다. | Sit tall. Breathe in through the nose at a usual size. Open the mouth wide and breathe out in one long, strong “huh,” as if you were fogging a mirror. If mucus moves up near the throat, cough once, then rest. | 背すじを伸ばして座ります。鼻から普通の大きさで吸います。口を大きく開け、鏡をくもらせるような「ハッ」という長く強い息で吐きます。たんがのど元まで上がってきたら、一度咳をして休みます。 |
 | 주의 | 연속해서 세게 기침하지 마세요. 어지럽거나 통증이 있으면 중단하세요. | Do not cough hard over and over. Stop if you feel dizzy or it hurts. | 続けて強く咳をしないでください。めまいや痛みがあれば中止してください。 |
 
+
+### 80. 반대 손으로 팔 올려주기 ⚠
+
+- imageKey: `assisted-shoulder-flexion`
+- 단계: Lv1 침상운동
+- 좌/우 기본값: 환측
+- 인쇄 용량: 10회 × 2세트
+- 승인 용량: 10회 × 2세트
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 반대 손으로 팔 올려주기 | Lift the arm with the other hand | 反対の手で腕を上げる |
+| 목표 | 어깨 관절가동범위 유지, 보조 능동운동 | Keep the shoulder moving, with help from the other arm. | 肩の動きを保ち、反対の手で助けて動かします。 |
+| 방법 | 누운 자세에서 반대쪽 손으로 운동하는 팔의 손목이나 아래팔을 가볍게 잡습니다. 통증이 없는 범위까지 팔을 천천히 머리 쪽으로 올려 주었다가, 같은 속도로 내립니다. 운동하는 팔은 힘을 완전히 빼지 말고, 할 수 있는 만큼만 같이 들어 올립니다. | Lie on your back. With your other hand, lightly hold the wrist or forearm of the arm you are moving. Slowly lift that arm up toward your head, only as far as it does not hurt, then lower it at the same speed. Do not let the moving arm go completely limp. Lift with it only as much as you can. | 仰向けになります。反対の手で、動かす腕の手首か前腕を軽く持ちます。痛くない範囲まで腕をゆっくり頭の方へ上げ、同じ速さで下ろします。動かす腕の力を完全には抜かず、できる分だけ一緒に上げます。 |
+| 주의 | 아픈 팔을 잡아채듯 올리지 마세요. 어깨 통증, 찌릿한 느낌이 있으면 높이를 낮추세요. 탈구·수술 직후는 치료사가 허용한 높이까지만 하세요. | Do not jerk the sore arm upward. If the shoulder hurts or you feel a sharp tingling, lower the height. Right after a dislocation or surgery, lift only to the height your therapist allows. | 痛い腕を引っ張り上げないでください。肩の痛みやピリッとする感じがあれば、高さを下げてください。脱臼や手術の直後は、療法士が許した高さまでにしてください。 |
+
+### 81. 배 힘주고 유지하기 ⚠
+
+- imageKey: `abdominal-bracing`
+- 단계: Lv1 침상운동
+- 좌/우 기본값: 없음
+- 인쇄 용량: 10초 유지 × 8세트
+- 승인 용량: 10초 유지 × 8회 × 2세트
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 배 힘주고 유지하기 | Gently tighten the belly and hold | お腹に軽く力を入れて保つ |
+| 목표 | 몸통 깊은 근육 활성화, 요부 안정 준비 | Wake up the deep trunk muscles and get ready to steady the lower back. | 体幹の深い筋肉を働かせ、腰を安定させる準備をします。 |
+| 방법 | 무릎을 세우고 눕습니다. 허리와 바닥 사이 공간이 커지지 않게 유지한 채, 아랫배에 가볍게 힘을 넣어 복부가 살짝 얇아지게 합니다. 숨을 참지 말고 편하게 숨 쉬며 힘을 유지했다가 풉니다. | Lie down with your knees bent. Keep the space between your lower back and the floor from getting larger. Gently tighten the lower belly so it becomes a little flatter. Do not hold your breath. Keep breathing comfortably while you hold the tension, then relax. | 膝を立てて寝ます。腰と床のすき間が大きくならないようにしたまま、下腹に軽く力を入れ、お腹が少し薄くなるようにします。息を止めず、楽に呼吸しながら力を保ってから、力を抜きます。 |
+| 주의 | 숨을 참거나 어깨에 힘을 주지 마세요. 허리를 바닥에서 크게 들어 올리거나, 반대로 세게 누르며 통증을 만들지 마세요. 통증이 있으면 즉시 중단하세요. | Do not hold your breath or tense your shoulders. Do not lift your lower back far off the floor, and do not press it down hard enough to cause pain. Stop right away if it hurts. | 息を止めたり、肩に力を入れたりしないでください。腰を床から大きく持ち上げたり、逆に強く押しつけて痛みを出したりしないでください。痛みがあればすぐに中止してください。 |
+
+### 82. 무릎 사이에 수건 넣고 모으기 ⚠
+
+- imageKey: `hip-adduction-squeeze`
+- 단계: Lv1 침상운동
+- 좌/우 기본값: 없음
+- 인쇄 용량: 10회 × 2세트
+- 승인 용량: 10회 × 2세트 (각 2–3초 유지)
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 무릎 사이에 수건 넣고 모으기 | Squeeze a towel between the knees | 膝の間のタオルを挟む |
+| 목표 | 고관절 내전근 활성화 | Wake up the muscles that bring the thighs together. | 股関節を内側に閉じる筋肉を働かせます。 |
+| 방법 | 무릎을 세우고 누워 양쪽 무릎 사이에 접은 수건을 넣습니다. 무릎으로 수건을 부드럽게 모아 쥐듯이 힘을 주었다가 풉니다. 골반이 돌아가거나 허리가 뜨지 않게 유지합니다. | Lie with your knees bent and place a folded towel between them. Gently squeeze the towel with your knees, as if you were holding it, then relax. Keep your pelvis from rolling and your lower back from lifting. | 膝を立てて寝て、折ったタオルを両膝の間に入れます。膝でタオルをやさしく挟むように力を入れてから、力を抜きます。骨盤が回ったり、腰が浮かないようにします。 |
+| 주의 | 고관절 치환 환자는 치료사가 허용한 경우에만 시행하세요. 일반 THA 주의의 과도한 내전과 혼동하지 말고, 수건이 무릎 사이를 벌려 준 상태에서 모으기만 합니다. 서혜부나 무릎 안쪽 통증이 있으면 중단하세요. | After a hip replacement, do this only if your therapist says you may. This is not the same as the general hip-replacement warning about bringing the legs too far together: the towel keeps the knees apart, and you only squeeze. Stop if you feel pain in the groin or on the inner knee. | 股関節を置換した人は、療法士が許した場合だけ行ってください。これは人工股関節の一般的な注意にある、脚を寄せすぎる動きとは違います。タオルが膝の間を開けた状態で、挟むだけです。脚の付け根や膝の内側が痛ければ中止してください。 |
+
+### 83. 다리 전체 안팎으로 돌리기 ⚠
+
+- imageKey: `whole-leg-rotation`
+- 단계: Lv1 침상운동
+- 좌/우 기본값: 양측
+- 인쇄 용량: 10회 × 2세트
+- 승인 용량: 10회 × 2세트
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 다리 전체 안팎으로 돌리기 | Turn the whole leg in and out | 脚全体を内外に回す |
+| 목표 | 고관절 안쪽·바깥 돌림 가동범위 유지 | Keep the hip able to turn inward and outward. | 股関節を内側・外側に回す動きを保ちます。 |
+| 방법 | 무릎을 편 채 바로 눕거나, 다리를 앞으로 펴고 앉습니다. 양쪽 무릎이 굽혀지지 않게 유지한 채, 엉덩이 관절에서 다리 전체를 천천히 안쪽으로 돌려 발끝이 서로 모이게 했다가, 다시 바깥으로 돌려 발끝이 벌어지게 합니다. 발목만 움직이지 말고, 무릎뼈가 발끝과 같은 방향으로 따라 돌게 합니다. | Lie on your back with the knee straight, or sit with the leg stretched out in front. Keep both knees from bending. From the hip, slowly turn the whole leg inward until the toes point toward each other, then turn it outward until the toes point apart. Do not move only the ankle. Let the kneecap turn in the same direction as the toes. | 膝を伸ばしたまま仰向けになるか、脚を前に伸ばして座ります。両方の膝が曲がらないようにしたまま、股関節から脚全体をゆっくり内側へ回し、つま先が互いに寄るようにします。次に外側へ回し、つま先が開くようにします。足首だけを動かさず、膝のお皿がつま先と同じ向きに回るようにします。 |
+| 주의 | 통증이 있으면 범위를 줄이거나 중단하세요. 무릎을 굽히거나 다리를 옆으로 크게 벌리지 마세요. | If it hurts, make the movement smaller or stop. Do not bend the knee or spread the leg far out to the side. | 痛みがあれば範囲を小さくするか、中止してください。膝を曲げたり、脚を横に大きく開いたりしないでください。 |
+
+### 84. 네발 자세에서 반대 팔·다리 들기 ⚠
+
+- imageKey: `bird-dog`
+- 단계: Lv1 침상운동
+- 좌/우 기본값: 없음
+- 인쇄 용량: 8회 × 2세트
+- 승인 용량: 좌우 각 8회 × 2세트
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 네발 자세에서 반대 팔·다리 들기 | Lift the opposite arm and leg on hands and knees | 四つばいで反対の手足を上げる |
+| 목표 | 체간 안정, 반대쪽 팔·다리 협응 | Steady the trunk and coordinate the opposite arm and leg. | 体幹を安定させ、反対側の手足を一緒に動かします。 |
+| 방법 | 손과 무릎을 바닥에 대고 네발 자세를 만듭니다. 손은 어깨 아래, 무릎은 엉덩이 아래에 둡니다. 허리가 아래로 처지거나 위로 불룩해지지 않게 유지한 채, 한쪽 팔과 반대쪽 다리를 바닥과 수평이 될 정도만 천천히 들어 올렸다가 내립니다. 좌우를 번갈아 합니다. | Place your hands and knees on the floor. Put your hands under your shoulders and your knees under your hips. Keep your lower back from sagging down or pushing up. Slowly lift one arm and the opposite leg only until they are about level with the floor, then lower them. Switch sides. | 手と膝を床について四つばいになります。手は肩の下、膝は股関節の下に置きます。腰が下に沈んだり、上に突き出したりしないようにしたまま、片方の腕と反対の脚を、床とほぼ水平になる高さまでゆっくり上げて下ろします。左右を交互に行います。 |
+| 주의 | 허리 통증, 손목 통증, 무릎 통증이 있으면 중단하세요. 몸이 한쪽으로 돌아가면 드는 높이를 낮추세요. 혼자 균형이 불안하면 팔만, 또는 다리만 먼저 하세요. 손목이 불편하면 주먹 또는 받친 손 자세는 치료사와 상의하세요. | Stop if your lower back, wrist, or knee hurts. If your body twists to one side, do not lift as high. If you cannot balance on your own, start with the arm only, or the leg only. If your wrist is uncomfortable, ask your therapist before using a fist or a supported hand. | 腰、手首、膝が痛ければ中止してください。体が片方へ回るときは、上げる高さを下げてください。一人でバランスが不安なら、先に腕だけ、または脚だけ行ってください。手首がつらいときは、こぶしや手を支える姿勢にする前に療法士と相談してください。 |
+
+### 85. 턱 당기기 ⚠
+
+- imageKey: `chin-tuck`
+- 단계: Lv2 앉은자세
+- 좌/우 기본값: 없음
+- 인쇄 용량: 5초 유지 × 10세트
+- 승인 용량: 5초 유지 × 10회 × 2세트
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 턱 당기기 | Chin tuck | あごを引く |
+| 목표 | 목 자세 조절, 심부 경부 굴곡근 활성화 | Practice neck posture and wake up the deep muscles that draw the chin in. | 首の姿勢を整え、あごを引く深い筋肉を働かせます。 |
+| 방법 | 허리를 세우고 앉아 정면을 봅니다. 고개를 숙이지 말고, 턱을 살짝 넣어 머리가 뒤로 수평 이동하듯이 당깁니다. 목 뒤가 가볍게 길어지는 느낌에서 잠시 유지했다가 풉니다. | Sit tall and look straight ahead. Do not drop your head. Gently draw the chin in so the head slides straight back, as if it were moving backward on a level line. Hold briefly when the back of the neck feels lightly longer, then relax. | 背すじを伸ばして座り、正面を見ます。頭を下げず、あごを少し引いて、頭が後ろへ水平に移動するように引きます。首の後ろが軽く長くなる感じで少し保ってから、力を抜きます。 |
+| 주의 | 고개를 앞으로 숙이거나 아래로 내리지 마세요. 어지럼, 손 저림, 심한 목 통증이 있으면 즉시 중단하고 치료사에게 알리세요. 경추 수술·외상 후에는 치료사가 허용한 경우에만 시행하세요. | Do not bend the head forward or drop it down. Stop right away and tell your therapist if you feel dizzy, your hand tingles, or your neck hurts a lot. After neck surgery or an injury, do this only if your therapist allows it. | 頭を前に傾けたり、下に下げたりしないでください。めまい、手のしびれ、強い首の痛みがあればすぐに中止し、療法士に伝えてください。首の手術やけがの後は、療法士が許した場合だけ行ってください。 |
+
+### 86. 앉아서 몸통 돌리기 ⚠
+
+- imageKey: `seated-trunk-rotation`
+- 단계: Lv2 앉은자세
+- 좌/우 기본값: 없음
+- 인쇄 용량: 8회 × 2세트
+- 승인 용량: 좌우 각 8회 × 2세트
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 앉아서 몸통 돌리기 | Turn the trunk while sitting | 座って体を回す |
+| 목표 | 흉추 가동 및 몸통 회전 | Help the upper back move, and turn the trunk. | 胸の背骨を動きやすくし、体を回します。 |
+| 방법 | 허리를 세우고 앉아 양발을 바닥에 둡니다. 팔을 가슴 앞에서 가볍게 교차하거나 어깨에 손을 올립니다. 골반은 정면을 유지한 채 몸통만 한쪽으로 천천히 돌렸다가 돌아옵니다. 반대쪽도 반복합니다. | Sit tall with both feet on the floor. Lightly cross your arms in front of your chest, or rest your hands on your shoulders. Keep your pelvis facing forward and slowly turn only your trunk to one side, then come back. Repeat to the other side. | 背すじを伸ばして座り、両足を床に置きます。腕を胸の前で軽く組むか、肩に手を置きます。骨盤は正面を向けたまま、体だけを片方へゆっくり回して戻します。反対側も繰り返します。 |
+| 주의 | 허리를 비틀듯 크게 돌리지 마세요. 척추 수술 직후, 급성 요통, 어지럼이 있으면 중단하세요. 고관절 치환 환자는 치료사가 알려준 회전·굽힘 범위를 지키세요. | Do not twist the lower back hard. Stop if you just had spine surgery, have sudden low-back pain, or feel dizzy. After a hip replacement, stay within the turning and bending range your therapist gave you. | 腰を大きくねじらないでください。背骨の手術の直後、急な腰痛、めまいがあれば中止してください。股関節を置換した人は、療法士が伝えた回す範囲・曲げる範囲を守ってください。 |
+
+### 87. 발끝으로 수건 구기기 ⚠
+
+- imageKey: `towel-toe-curl`
+- 단계: Lv2 앉은자세
+- 좌/우 기본값: 양측
+- 인쇄 용량: 10회 × 2세트
+- 승인 용량: 10회 × 2세트
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 발끝으로 수건 구기기 | Scrunch a towel with the toes | つま先でタオルをたぐる |
+| 목표 | 발 안쪽 작은 근육 활성화, 발바닥 감각 | Wake up the small muscles in the foot and the feeling on the sole. | 足の内側の小さな筋肉を働かせ、足の裏の感覚を出します。 |
+| 방법 | 의자에 앉아 발 앞에 얇은 수건을 바닥에 펼칩니다. 발뒤꿈치는 바닥에 붙인 채, 발가락으로 수건을 잡아 당기듯이 구깁니다. 발가락만 움직이고 무릎은 흔들리지 않게 합니다. | Sit in a chair and spread a thin towel on the floor in front of your foot. Keep the heel on the floor and scrunch the towel toward you with your toes. Move only the toes, and do not let the knee wobble. | 椅子に座り、足の前の床に薄いタオルを広げます。かかとを床につけたまま、つま先でタオルを手繰り寄せるようにくしゃくしゃにします。つま先だけを動かし、膝が揺れないようにします。 |
+| 주의 | 발가락 관절이나 발바닥 통증이 있으면 중단하세요. 최근 발 수술, 심한 상처, 혈류 장애가 있으면 치료사와 상의하세요. 경련이 나면 발을 펴고 쉬세요. | Stop if a toe joint or the sole of the foot hurts. If you recently had foot surgery, have a serious wound, or have poor blood flow, ask your therapist first. If the foot cramps, straighten it and rest. | 足の指の関節や足の裏が痛ければ中止してください。最近足の手術をした、傷がひどい、血流の障害があるときは、療法士と相談してください。つったら、足を伸ばして休んでください。 |
+
+### 88. 서서 앞허벅지 스트레칭 ⚠
+
+- imageKey: `standing-quad-stretch`
+- 단계: Lv3 선자세
+- 좌/우 기본값: 양측
+- 인쇄 용량: 15초 유지 × 3세트
+- 승인 용량: 15–20초 유지 × 3세트 (좌우)
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 서서 앞허벅지 스트레칭 | Standing stretch for the front of the thigh | 立って太ももの前を伸ばす |
+| 목표 | 앞허벅지와 고관절 앞쪽 유연성 | Loosen the front of the thigh and the front of the hip. | 太ももの前と股関節の前をやわらかくします。 |
+| 방법 | 의자나 난간을 한 손으로 잡고 섭니다. 한쪽 무릎을 뒤로 굽혀 같은 쪽 손으로 발목 또는 바지자락을 가볍게 잡습니다. 무릎이 바닥을 향하고 허리가 앞으로 꺾이지 않게 한 채, 앞허벅지가 당기는 느낌에서 유지합니다. | Stand and hold a chair or a rail with one hand. Bend one knee back and lightly hold the ankle, or the cuff of the pants, with the hand on the same side. Point the knee toward the floor and do not let the lower back bend forward. Hold where you feel a stretch in the front of the thigh. | 椅子か手すりを片手で持って立ちます。片方の膝を後ろへ曲げ、同じ側の手で足首かズボンの裾を軽く持ちます。膝は床の方を向け、腰が前に折れないようにして、太ももの前が伸びる感じで保ちます。 |
+| 주의 | 반동을 주지 마세요. 허리 통증, 무릎 통증, 균형 불안이 있으면 중단하세요. 고관절 전방 접근 치환, 신전·외회전 제한이 있는 환자는 치료사가 허용하기 전에는 하지 마세요. 발목을 잡지 못하면 의자 뒤에 발등을 올리고 작게만 시행하세요. | Do not bounce. Stop if your lower back or knee hurts, or if your balance feels unsteady. If you had a hip replacement from the front, or you are limited in straightening the hip or turning it outward, do not do this until your therapist allows it. If you cannot hold the ankle, rest the top of the foot on a chair behind you and use only a small stretch. | 反動をつけないでください。腰の痛み、膝の痛み、バランスの不安があれば中止してください。股関節の前方からの置換や、股関節を伸ばす・外へ回す動きに制限がある人は、療法士が許すまでは行わないでください。足首をつかめないときは、後ろの椅子に足の甲を乗せて、小さくだけ行ってください。 |
+
+### 89. 제자리 걷기 ⚠
+
+- imageKey: `marching-in-place`
+- 단계: Lv5 유산소운동
+- 좌/우 기본값: 없음
+- 인쇄 용량: 5분
+- 승인 용량: 5분 × 1세트 (적응 후 8–10분, 시간 기준)
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 제자리 걷기 | Walk in place | その場歩き |
+| 목표 | 장비 없는 저강도 유산소 | Light aerobic exercise with no equipment. | 道具を使わない、軽い有酸素運動。 |
+| 방법 | 의자나 난간을 옆에 두고 섭니다. 제자리에서 발을 번갈아 가볍게 들며 걷듯이 이동합니다. 팔을 자연스럽게 흔들고, 말할 수 있는 강도로 정해진 시간을 유지합니다. 필요하면 한 손으로 지지물을 잡습니다. | Stand with a chair or a rail beside you. Lift your feet one after the other and walk in place. Swing your arms naturally, and keep going for the set time at an effort where you can still talk. Hold the support with one hand if you need to. | 椅子か手すりを横に置いて立ちます。その場で足を交互に軽く上げ、歩くように動きます。腕は自然に振り、話せる強さで決めた時間を続けます。必要なら片手で支えを持ちます。 |
+| 주의 | 어지럼, 심한 숨참, 흉통이 있으면 즉시 앉으세요. 균형이 불안하면 지지물을 잡고 시행하세요. 관절 통증이 늘면 발 드는 높이를 낮추세요. | Sit down right away if you feel dizzy, very short of breath, or chest pain. If your balance is unsteady, hold a support. If a joint starts to hurt more, do not lift the feet as high. | めまい、強い息苦しさ、胸の痛みがあればすぐに座ってください。バランスが不安なら支えを持って行ってください。関節の痛みが増えたら、足を上げる高さを下げてください。 |
+
+### 90. 엎드려 팔꿈치로 상체 기대기 ⚠
+
+- imageKey: `prone-on-elbows`
+- 단계: Lv1 침상운동
+- 좌/우 기본값: 없음
+- 인쇄 용량: 20초 유지 × 3세트
+- 승인 용량: 20–30초 유지 × 3세트
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 엎드려 팔꿈치로 상체 기대기 | Prop up on your elbows while lying face down | うつ伏せで肘につき上体を起こす |
+| 목표 | 신전 선호 요통에서 상체 신전 자세로 증상 완화 | For a low back that feels better when it is gently arched, ease symptoms by resting propped up. | 軽く反らす方が楽な腰痛で、上体を起こした姿勢にして症状をやわらげます。 |
+| 방법 | 치료사가 이 동작을 처방해 준 경우에만 시행합니다. 바닥에 엎드려 팔꿈치를 어깨 아래에 두고 상체를 가볍게 일으켜 기댑니다. 골반과 다리는 바닥에 둔 채 편안한 호흡을 유지합니다. 통증이 다리로 퍼지지 않는지 확인하며 유지합니다. | Do this only if your therapist prescribed it. Lie face down and place your elbows under your shoulders, then gently raise your upper body and rest on your elbows. Keep your pelvis and legs on the floor, and breathe comfortably. Hold the position while you check that pain is not spreading down the leg. | 療法士がこの動きを処方した場合だけ行います。床にうつ伏せになり、肘を肩の下に置いて上体を軽く起こし、肘に寄りかかります。骨盤と脚は床に置いたまま、楽に呼吸します。痛みが脚へ広がっていないかを確かめながら保ちます。 |
+| 주의 | 진단 없이 일반 숙제로 쓰지 마세요. 다리 저림이나 통증이 아래쪽으로 퍼지면 즉시 중단하고 다시 편하게 엎드리거나 옆으로 누우세요. 척추 수술 직후, 골절 의심, 심한 협착, 임산부는 시행하지 마세요. 허리를 손바닥으로 끝까지 밀어 올리는 상위 단계로 혼자 진행하지 마세요. | Do not use this as a general home exercise without a diagnosis. If tingling or pain spreads down the leg, stop right away and lie comfortably face down or on your side again. Do not do this right after spine surgery, if a fracture is suspected, if spinal narrowing is severe, or if you are pregnant. Do not move on by yourself to the later step of pushing the back up all the way with your palms. | 診断なしに、一般の宿題として使わないでください。脚のしびれや痛みが下の方へ広がったら、すぐに中止し、楽にうつ伏せか横向きに戻ってください。背骨の手術の直後、骨折の疑い、狭窄が強いとき、妊娠中は行わないでください。手のひらで腰を最後まで押し上げる次の段階へ、一人で進めないでください。 |
+
+### 91. 테이블탑 자세 유지 ⚠
+
+- imageKey: `table-top`
+- 단계: Lv1 침상운동
+- 좌/우 기본값: 없음
+- 인쇄 용량: 10초 유지 × 5세트
+- 승인 용량: 10초 유지 × 5세트
+- Matt 검토 전
+
+| 항목 | 한국어 | English | 日本語 |
+| --- | --- | --- | --- |
+| 이름 | 테이블탑 자세 유지 | Hold the tabletop position | テーブルトップの姿勢を保つ |
+| 목표 | 체간 안정, 고관절·무릎 90도 자세에서 복부·고관절 굴곡근 지구력 | Steady the trunk, and build endurance in the belly and hip-lifting muscles with the hips and knees at 90 degrees. | 体幹を安定させ、股関節と膝を90度にした姿勢で、お腹と股関節を曲げる筋肉の持久力をつけます。 |
+| 방법 | 바로 누워 두 팔을 몸 옆에 둡니다. 양쪽 엉덩이와 무릎을 각각 직각(90도)으로 구부려 다리를 침대에서 들어 올립니다. 허벅지는 천장 쪽으로 세우고, 정강이는 침대와 나란히 수평이 되게 합니다. 허리가 바닥에서 뜨지 않게 유지한 채, 숨을 참지 말고 편하게 숨 쉬며 자세를 유지했다가, 천천히 다리를 내립니다. | Lie on your back with both arms by your sides. Bend both hips and both knees to a right angle (90 degrees) and lift the legs off the bed. Point the thighs toward the ceiling, and keep the shins level with the bed. Do not let your lower back lift off the floor. Do not hold your breath. Breathe comfortably while you hold the position, then lower the legs slowly. | 仰向けになり、両腕を体の横に置きます。両方の股関節と膝をそれぞれ直角（90度）に曲げ、脚をベッドから持ち上げます。太ももは天井の方へ立て、すねはベッドと平行に水平にします。腰が床から浮かないようにしたまま、息を止めず楽に呼吸しながら姿勢を保ち、ゆっくり脚を下ろします。 |
+| 주의 | 허리가 바닥에서 뜨거나 허리 통증이 생기면 즉시 다리를 내리고 중단하세요. 숨을 참거나 목을 들어 올리지 마세요. | If your lower back lifts off the floor or your lower back starts to hurt, lower the legs right away and stop. Do not hold your breath or lift your head. | 腰が床から浮くか、腰が痛くなったら、すぐに脚を下ろして中止してください。息を止めたり、頭を持ち上げたりしないでください。 |
