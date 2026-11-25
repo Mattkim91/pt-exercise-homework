@@ -1,4 +1,4 @@
-# 출력 언어 번역 검토표 (v2.68)
+# 출력 언어 번역 검토표 (v2.69)
 
 치료사 화면은 한국어입니다. 영어·일본어·아랍어는 미리보기와 인쇄에만 쓰입니다. 한국어 운동 문장은 `exercises.js` 원문 그대로입니다.
 
@@ -42,6 +42,7 @@
 - **ar-rtl.** 아랍어 유인물은 오른쪽에서 왼쪽으로 배치합니다. 그림은 좌우를 뒤집지 않습니다. 환자 이름처럼 번역하지 않는 글자는 원래 방향 그대로 인쇄합니다. 통증 숫자 0–10은 오른쪽부터 읽습니다.
 - **ar-67.** 67번의 8자는 아랍어 숫자 8(٨)과 모양이 달라 '영어식 숫자 8 모양'으로 옮겼습니다.
 - **ar-58.** 58·72번의 야외 걷기, 56번의 실내 걷기는 병원과 집을 모두 포함하는 말로 옮겼습니다.
+- **ar-back.** v2.69에서 아랍어 전체를 구글 번역으로 영어로 되번역해 한국어와 비교했습니다. 뜻이 어긋나거나 모호한 27, 31, 51, 73, 74, 80, 84, 88번을 고쳤습니다. 되번역은 어색한 문체나 환자가 이해하기 쉬운지를 잡지 못하므로 원어민 확인은 그대로 필요합니다.
 
 ## 고정 출력 문구
 
@@ -498,9 +499,9 @@
 
 | 항목 | 한국어 | English | 日本語 | العربية |
 | --- | --- | --- | --- | --- |
-| 이름 | 콘 잡기 | Reach for a cone | コーンに手を伸ばす | الإمساك بالقمع |
+| 이름 | 콘 잡기 | Reach for a cone | コーンに手を伸ばす | الإمساك بقمع التدريب |
 | 목표 | 상지 도달 및 시각 탐색 능력 향상 | Practice reaching and looking toward a target. | 目標を見て手を伸ばす練習をします。 | التدرّب على مدّ اليد والنظر نحو الهدف. |
-| 방법 | 앉은 자세에서 앞이나 옆에 놓인 콘을 향해 손을 뻗어 잡았다가 제자리로 돌아옵니다. | While sitting, reach for a cone in front of you or to the side, touch or hold it, then come back. | 座ったまま、前や横にあるコーンへ手を伸ばしてつかみ、元の位置に戻します。 | اجلس ومدّ يدك لتمسك بقمع موضوع أمامك أو بجانبك، ثم عد إلى وضعك. |
+| 방법 | 앉은 자세에서 앞이나 옆에 놓인 콘을 향해 손을 뻗어 잡았다가 제자리로 돌아옵니다. | While sitting, reach for a cone in front of you or to the side, touch or hold it, then come back. | 座ったまま、前や横にあるコーンへ手を伸ばしてつかみ、元の位置に戻します。 | اجلس ومدّ يدك لتمسك بقمع تدريب موضوع أمامك أو بجانبك، ثم عد إلى وضعك. |
 | 주의 | 몸통을 과하게 기울이지 않도록 하고 필요 시 보호자 감독하에 시행하세요. | Do not lean the trunk too far. Have a caregiver supervise if you need to. | 体を大きく傾けないようにし、必要なら介助者の見守りで行ってください。 | لا تمِل بجذعك كثيرًا، وتمرّن تحت إشراف المرافق عند الحاجة. |
 
 ### 28. 앉아서 무릎 펴기
@@ -553,7 +554,7 @@
 | 이름 | 앉아서 발끝 들기 | Toe raises while sitting | 座って足先を上げる | رفع أصابع القدمين أثناء الجلوس |
 | 목표 | 발목 배측굴곡근 강화 | Strengthen the muscles that lift the foot up. | 足先を上げる筋肉を鍛えます。 | تقوية العضلات التي ترفع مقدمة القدم. |
 | 방법 | 의자에 앉아 뒤꿈치는 바닥에 두고 발끝을 몸쪽으로 천천히 들어 올립니다. | Sit in a chair with the heels on the floor. Slowly lift the toes toward you. | 椅子に座り、かかとは床につけたまま、足先を体の方へゆっくり上げます。 | اجلس على كرسي وأبقِ كعبيك على الأرض، ثم ارفع أصابع قدميك ببطء نحو جسمك. |
-| 주의 | 무리하게 당기지 마세요. | Do not pull hard. | 無理に引っ張らないでください。 | لا تسحب قدميك بقوة. |
+| 주의 | 무리하게 당기지 마세요. | Do not pull hard. | 無理に引っ張らないでください。 | لا ترفع أصابع قدميك إلى أعلى بالقوة. |
 
 ### 32. 테이블 위 팔 밀기
 
@@ -813,7 +814,7 @@
 | 이름 | 서서 앞으로 손 뻗기 | Reach forward while standing | 立って前へ手を伸ばす | مدّ اليد إلى الأمام أثناء الوقوف |
 | 목표 | 전방 체중이동 및 선 자세 균형 향상 | Practice shifting weight forward and balancing while standing. | 前へ体重を移し、立ったバランスを高めます。 | التدرّب على نقل الوزن إلى الأمام والتوازن أثناء الوقوف. |
 | 방법 | 안정적으로 선 자세에서 한 손 또는 양손을 앞으로 천천히 뻗었다가 돌아옵니다. | Stand steadily. Slowly reach forward with one hand or both hands, then come back. | 安定して立ち、片手または両手を前へゆっくり伸ばし、戻します。 | قف بثبات، ومدّ يدًا واحدة أو كلتا يديك ببطء إلى الأمام ثم عد إلى وضعك. |
-| 주의 | 넘어질 위험이 있으면 보호자 또는 난간 가까이에서 시행하세요. | If you might fall, do this near a caregiver or a rail. | 転びそうなときは、介助者または手すりのそばで行ってください。 | إذا كان هناك خطر سقوط فتمرّن بالقرب من المرافق أو الدرابزين. |
+| 주의 | 넘어질 위험이 있으면 보호자 또는 난간 가까이에서 시행하세요. | If you might fall, do this near a caregiver or a rail. | 転びそうなときは、介助者または手すりのそばで行ってください。 | إذا كان هناك خطر سقوط فتمرّن بالقرب من الشخص المرافق لك أو من الدرابزين. |
 
 ### 52. 벽 타고 팔 올리기
 
@@ -1099,7 +1100,7 @@
 | 이름 | 종아리 스트레칭 | Calf stretch | ふくらはぎのストレッチ | إطالة بطة الساق |
 | 목표 | 발목 가동범위 및 보행 준비 | Keep the ankle moving and prepare for walking. | 足首の動きを保ち、歩く準備をします。 | المحافظة على حركة الكاحل والاستعداد للمشي. |
 | 방법 | 벽이나 난간을 짚고 한쪽 다리를 뒤로 뻗습니다. 뒤쪽 무릎을 편 상태에서 발뒤꿈치가 바닥에서 떨어지지 않게 유지하며 종아리가 당기는 느낌을 느낍니다. | Hold a wall or a rail and step one leg back. Keep the back knee straight and the heel on the floor, and feel a stretch in the calf. | 壁か手すりを持ち、片方の脚を後ろへ伸ばします。後ろの膝を伸ばし、かかとが床から離れないようにして、ふくらはぎが伸びる感じを保ちます。 | استند بيديك إلى الحائط أو الدرابزين ومدّ ساقًا واحدة إلى الخلف. أبقِ الركبة الخلفية مفرودة والكعب على الأرض حتى تشعر بشدّ في بطة الساق، واثبت. |
-| 주의 | 반동을 주지 말고 천천히 유지하세요. 통증이 있으면 범위를 줄이세요. | Do not bounce. Hold the stretch quietly. If it hurts, ease off. | 反動をつけず、ゆっくり保ってください。痛みがあれば範囲を小さくしてください。 | لا تهتزّ، واثبت بهدوء. إذا شعرت بألم فقلّل مدى الحركة. |
+| 주의 | 반동을 주지 말고 천천히 유지하세요. 통증이 있으면 범위를 줄이세요. | Do not bounce. Hold the stretch quietly. If it hurts, ease off. | 反動をつけず、ゆっくり保ってください。痛みがあれば範囲を小さくしてください。 | لا تقم بحركات ارتدادية، واثبت بهدوء. إذا شعرت بألم فقلّل مدى الحركة. |
 
 ### 74. 햄스트링 스트레칭
 
@@ -1112,7 +1113,7 @@
 | 이름 | 햄스트링 스트레칭 | Hamstring stretch | ハムストリングスのストレッチ | إطالة خلف الفخذ |
 | 목표 | 무릎 뒤쪽 유연성 및 보행 준비 | Loosen the back of the thigh and prepare for walking. | 太ももの後ろをやわらかくし、歩く準備をします。 | تحسين مرونة خلف الركبة والفخذ والاستعداد للمشي. |
 | 방법 | 의자에 앉아 한쪽 다리를 앞으로 펴고 발끝을 가볍게 당깁니다. 허리를 세운 상태에서 몸을 천천히 앞으로 기울여 허벅지 뒤쪽이 당기는 느낌을 유지합니다. | Sit in a chair, straighten one leg, and gently draw the toes up. Sit tall and slowly lean forward until you feel a stretch at the back of the thigh. Hold it. | 椅子に座り、片方の脚を前へ伸ばして足先を軽く上げます。背すじを伸ばしたまま体をゆっくり前へ傾け、太ももの後ろが伸びる感じを保ちます。 | اجلس على كرسي ومدّ ساقًا واحدة إلى الأمام، واسحب أصابع القدم نحوك برفق. أبقِ ظهرك مستقيمًا ومِل بجسمك ببطء إلى الأمام حتى تشعر بشدّ خلف الفخذ، واثبت. |
-| 주의 | 허리를 과하게 굽히거나 반동을 주지 마세요. 저림이나 통증이 있으면 중단하세요. | Do not round the back hard or bounce. Stop if you feel tingling or pain. | 腰を深く丸めたり、反動をつけたりしないでください。しびれや痛みがあれば中止してください。 | لا تحنِ ظهرك كثيرًا ولا تهتزّ. توقّف إذا شعرت بتنميل أو ألم. |
+| 주의 | 허리를 과하게 굽히거나 반동을 주지 마세요. 저림이나 통증이 있으면 중단하세요. | Do not round the back hard or bounce. Stop if you feel tingling or pain. | 腰を深く丸めたり、反動をつけたりしないでください。しびれや痛みがあれば中止してください。 | لا تحنِ ظهرك كثيرًا ولا تقم بحركات ارتدادية. توقّف إذا شعرت بتنميل أو ألم. |
 
 ### 75. 횡격막 호흡 ⚠
 
@@ -1194,7 +1195,7 @@
 | 이름 | 반대 손으로 팔 올려주기 | Lift the arm with the other hand | 反対の手で腕を上げる | رفع الذراع بمساعدة اليد الأخرى |
 | 목표 | 어깨 관절가동범위 유지, 보조 능동운동 | Keep the shoulder moving, with help from the other arm. | 肩の動きを保ち、反対の手で助けて動かします。 | المحافظة على حركة الكتف بمساعدة الذراع الأخرى. |
 | 방법 | 누운 자세에서 반대쪽 손으로 운동하는 팔의 손목이나 아래팔을 가볍게 잡습니다. 통증이 없는 범위까지 팔을 천천히 머리 쪽으로 올려 주었다가, 같은 속도로 내립니다. 운동하는 팔은 힘을 완전히 빼지 말고, 할 수 있는 만큼만 같이 들어 올립니다. | Lie on your back. With your other hand, lightly hold the wrist or forearm of the arm you are moving. Slowly lift that arm up toward your head, only as far as it does not hurt, then lower it at the same speed. Do not let the moving arm go completely limp. Lift with it only as much as you can. | 仰向けになります。反対の手で、動かす腕の手首か前腕を軽く持ちます。痛くない範囲まで腕をゆっくり頭の方へ上げ、同じ速さで下ろします。動かす腕の力を完全には抜かず、できる分だけ一緒に上げます。 | استلقِ وأمسك برفق بيدك الأخرى رسغ الذراع التي تمرّنها أو ساعدها. ارفع الذراع ببطء نحو رأسك ضمن المدى الخالي من الألم، ثم أنزلها بالسرعة نفسها. لا ترخِ الذراع التي تمرّنها تمامًا، بل شارك في رفعها بقدر ما تستطيع. |
-| 주의 | 아픈 팔을 잡아채듯 올리지 마세요. 어깨 통증, 찌릿한 느낌이 있으면 높이를 낮추세요. 탈구·수술 직후는 치료사가 허용한 높이까지만 하세요. | Do not jerk the sore arm upward. If the shoulder hurts or you feel a sharp tingling, lower the height. Right after a dislocation or surgery, lift only to the height your therapist allows. | 痛い腕を引っ張り上げないでください。肩の痛みやピリッとする感じがあれば、高さを下げてください。脱臼や手術の直後は、療法士が許した高さまでにしてください。 | لا تشدّ الذراع المؤلمة إلى أعلى بقوة. إذا شعرت بألم في الكتف أو وخز حاد فقلّل الارتفاع. بعد الخلع أو الجراحة مباشرة ارفعها فقط إلى الارتفاع الذي يسمح به المعالج. |
+| 주의 | 아픈 팔을 잡아채듯 올리지 마세요. 어깨 통증, 찌릿한 느낌이 있으면 높이를 낮추세요. 탈구·수술 직후는 치료사가 허용한 높이까지만 하세요. | Do not jerk the sore arm upward. If the shoulder hurts or you feel a sharp tingling, lower the height. Right after a dislocation or surgery, lift only to the height your therapist allows. | 痛い腕を引っ張り上げないでください。肩の痛みやピリッとする感じがあれば、高さを下げてください。脱臼や手術の直後は、療法士が許した高さまでにしてください。 | لا تشدّ الذراع المؤلمة إلى أعلى بقوة. إذا شعرت بألم في الكتف أو بوخز يشبه الكهرباء فقلّل الارتفاع. بعد الخلع أو الجراحة مباشرة ارفعها فقط إلى الارتفاع الذي يسمح به المعالج. |
 
 ### 81. 배 힘주고 유지하기 ⚠
 
@@ -1258,7 +1259,7 @@
 | 이름 | 네발 자세에서 반대 팔·다리 들기 | Lift the opposite arm and leg on hands and knees | 四つばいで反対の手足を上げる | رفع الذراع والساق المتقابلتين على اليدين والركبتين |
 | 목표 | 체간 안정, 반대쪽 팔·다리 협응 | Steady the trunk and coordinate the opposite arm and leg. | 体幹を安定させ、反対側の手足を一緒に動かします。 | تثبيت الجذع وتناسق حركة الذراع والساق المتقابلتين. |
 | 방법 | 손과 무릎을 바닥에 대고 네발 자세를 만듭니다. 손은 어깨 아래, 무릎은 엉덩이 아래에 둡니다. 허리가 아래로 처지거나 위로 불룩해지지 않게 유지한 채, 한쪽 팔과 반대쪽 다리를 바닥과 수평이 될 정도만 천천히 들어 올렸다가 내립니다. 좌우를 번갈아 합니다. | Place your hands and knees on the floor. Put your hands under your shoulders and your knees under your hips. Keep your lower back from sagging down or pushing up. Slowly lift one arm and the opposite leg only until they are about level with the floor, then lower them. Switch sides. | 手と膝を床について四つばいになります。手は肩の下、膝は股関節の下に置きます。腰が下に沈んだり、上に突き出したりしないようにしたまま、片方の腕と反対の脚を、床とほぼ水平になる高さまでゆっくり上げて下ろします。左右を交互に行います。 | اتخذ وضع الارتكاز على اليدين والركبتين: اليدان تحت الكتفين والركبتان تحت الوركين. لا تدع أسفل ظهرك يهبط أو يتقوّس إلى أعلى، وارفع ببطء ذراعًا واحدة والساق المقابلة حتى تصيرا موازيتين للأرض فقط، ثم أنزلهما. بدّل بين الجهتين. |
-| 주의 | 허리 통증, 손목 통증, 무릎 통증이 있으면 중단하세요. 몸이 한쪽으로 돌아가면 드는 높이를 낮추세요. 혼자 균형이 불안하면 팔만, 또는 다리만 먼저 하세요. 손목이 불편하면 주먹 또는 받친 손 자세는 치료사와 상의하세요. | Stop if your lower back, wrist, or knee hurts. If your body twists to one side, do not lift as high. If you cannot balance on your own, start with the arm only, or the leg only. If your wrist is uncomfortable, ask your therapist before using a fist or a supported hand. | 腰、手首、膝が痛ければ中止してください。体が片方へ回るときは、上げる高さを下げてください。一人でバランスが不安なら、先に腕だけ、または脚だけ行ってください。手首がつらいときは、こぶしや手を支える姿勢にする前に療法士と相談してください。 | توقّف إذا شعرت بألم في الظهر أو الرسغ أو الركبة. إذا دار جسمك إلى جهة فقلّل ارتفاع الرفع. إذا كان توازنك غير ثابت وحدك فابدأ بالذراع فقط أو بالساق فقط. إذا كان رسغك غير مرتاح فاسأل المعالج عن الاستناد بقبضة اليد أو بيد مسنودة. |
+| 주의 | 허리 통증, 손목 통증, 무릎 통증이 있으면 중단하세요. 몸이 한쪽으로 돌아가면 드는 높이를 낮추세요. 혼자 균형이 불안하면 팔만, 또는 다리만 먼저 하세요. 손목이 불편하면 주먹 또는 받친 손 자세는 치료사와 상의하세요. | Stop if your lower back, wrist, or knee hurts. If your body twists to one side, do not lift as high. If you cannot balance on your own, start with the arm only, or the leg only. If your wrist is uncomfortable, ask your therapist before using a fist or a supported hand. | 腰、手首、膝が痛ければ中止してください。体が片方へ回るときは、上げる高さを下げてください。一人でバランスが不安なら、先に腕だけ、または脚だけ行ってください。手首がつらいときは、こぶしや手を支える姿勢にする前に療法士と相談してください。 | توقّف إذا شعرت بألم في الظهر أو الرسغ أو الركبة. إذا دار جسمك إلى جهة فقلّل ارتفاع الرفع. إذا لم تستطع حفظ توازنك وحدك فابدأ بالذراع فقط أو بالساق فقط. إذا كان رسغك غير مرتاح فاسأل المعالج عن الاستناد بقبضة اليد أو بيد مسنودة. |
 
 ### 85. 턱 당기기 ⚠
 
@@ -1322,7 +1323,7 @@
 | 이름 | 서서 앞허벅지 스트레칭 | Standing stretch for the front of the thigh | 立って太ももの前を伸ばす | إطالة مقدمة الفخذ أثناء الوقوف |
 | 목표 | 앞허벅지와 고관절 앞쪽 유연성 | Loosen the front of the thigh and the front of the hip. | 太ももの前と股関節の前をやわらかくします。 | تحسين مرونة مقدمة الفخذ ومقدمة الورك. |
 | 방법 | 의자나 난간을 한 손으로 잡고 섭니다. 한쪽 무릎을 뒤로 굽혀 같은 쪽 손으로 발목 또는 바지자락을 가볍게 잡습니다. 무릎이 바닥을 향하고 허리가 앞으로 꺾이지 않게 한 채, 앞허벅지가 당기는 느낌에서 유지합니다. | Stand and hold a chair or a rail with one hand. Bend one knee back and lightly hold the ankle, or the cuff of the pants, with the hand on the same side. Point the knee toward the floor and do not let the lower back bend forward. Hold where you feel a stretch in the front of the thigh. | 椅子か手すりを片手で持って立ちます。片方の膝を後ろへ曲げ、同じ側の手で足首かズボンの裾を軽く持ちます。膝は床の方を向け、腰が前に折れないようにして、太ももの前が伸びる感じで保ちます。 | قف وأمسك بكرسي أو بالدرابزين بيد واحدة. اثنِ ركبة واحدة إلى الخلف، وأمسك برفق كاحلك أو طرف البنطال باليد من الجهة نفسها. اجعل الركبة متجهة إلى الأرض ولا تدع أسفل ظهرك يتقوّس إلى الأمام، واثبت عندما تشعر بشدّ في مقدمة الفخذ. |
-| 주의 | 반동을 주지 마세요. 허리 통증, 무릎 통증, 균형 불안이 있으면 중단하세요. 고관절 전방 접근 치환, 신전·외회전 제한이 있는 환자는 치료사가 허용하기 전에는 하지 마세요. 발목을 잡지 못하면 의자 뒤에 발등을 올리고 작게만 시행하세요. | Do not bounce. Stop if your lower back or knee hurts, or if your balance feels unsteady. If you had a hip replacement from the front, or you are limited in straightening the hip or turning it outward, do not do this until your therapist allows it. If you cannot hold the ankle, rest the top of the foot on a chair behind you and use only a small stretch. | 反動をつけないでください。腰の痛み、膝の痛み、バランスの不安があれば中止してください。股関節の前方からの置換や、股関節を伸ばす・外へ回す動きに制限がある人は、療法士が許すまでは行わないでください。足首をつかめないときは、後ろの椅子に足の甲を乗せて、小さくだけ行ってください。 | لا تهتزّ. توقّف إذا شعرت بألم في الظهر أو الركبة أو عدم ثبات في التوازن. إذا أجريت استبدال مفصل الورك من الأمام، أو كان ممنوعًا عليك مدّ الورك إلى الخلف أو تدويره إلى الخارج، فلا تتمرّن قبل أن يسمح المعالج. إذا لم تستطع الإمساك بكاحلك فضع ظهر قدمك على كرسي خلفك وتحرّك ضمن مدى صغير فقط. |
+| 주의 | 반동을 주지 마세요. 허리 통증, 무릎 통증, 균형 불안이 있으면 중단하세요. 고관절 전방 접근 치환, 신전·외회전 제한이 있는 환자는 치료사가 허용하기 전에는 하지 마세요. 발목을 잡지 못하면 의자 뒤에 발등을 올리고 작게만 시행하세요. | Do not bounce. Stop if your lower back or knee hurts, or if your balance feels unsteady. If you had a hip replacement from the front, or you are limited in straightening the hip or turning it outward, do not do this until your therapist allows it. If you cannot hold the ankle, rest the top of the foot on a chair behind you and use only a small stretch. | 反動をつけないでください。腰の痛み、膝の痛み、バランスの不安があれば中止してください。股関節の前方からの置換や、股関節を伸ばす・外へ回す動きに制限がある人は、療法士が許すまでは行わないでください。足首をつかめないときは、後ろの椅子に足の甲を乗せて、小さくだけ行ってください。 | لا تقم بحركات ارتدادية. توقّف إذا شعرت بألم في الظهر أو الركبة أو عدم ثبات في التوازن. إذا أجريت استبدال مفصل الورك من الأمام، أو طُلب منك الحدّ من مدّ الورك إلى الخلف أو من تدويره إلى الخارج، فلا تتمرّن قبل أن يسمح المعالج. إذا لم تستطع الإمساك بكاحلك فضع ظهر قدمك على كرسي خلفك وتحرّك ضمن مدى صغير فقط. |
 
 ### 89. 제자리 걷기 ⚠
 
