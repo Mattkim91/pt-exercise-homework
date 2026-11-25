@@ -7,7 +7,7 @@ const ok=(cond,msg)=>{count++;if(!cond)errors.push(msg);};
 
 const c={};vm.createContext(c);
 vm.runInContext(rd('exercises.js'),c);vm.runInContext(rd('i18n.js'),c);
-const {EXERCISES,IMAGE_META,presets,BBS_RECOMMENDATIONS,SEARCH_ALIASES,PRINT_STRINGS,SAFETY_I18N,LEVEL_I18N,SIDE_I18N,DAY_LABELS,MEMO_PRESETS,TARGET_I18N,EXERCISE_I18N}=c;
+const {EXERCISES,IMAGE_META,presets,BBS_RECOMMENDATIONS,SEARCH_ALIASES,RECOMMEND_PRESETS,RECOMMEND_LEVELS,RECOMMEND_EXCLUDE,PRINT_STRINGS,SAFETY_I18N,LEVEL_I18N,SIDE_I18N,DAY_LABELS,MEMO_PRESETS,TARGET_I18N,EXERCISE_I18N}=c;
 const html=rd('index.html');
 const LANGS=['en','ja','ar'];
 const HANGUL=/[가-힣ㄱ-ㅎㅏ-ㅣ]/, ARABIC=/[؀-ۿ]/, KANA=/[ぁ-んァ-ヶ]/;
@@ -48,7 +48,18 @@ presets.forEach(p=>{
   ok(!p.memoPreset||MEMO_PRESETS[p.memoPreset],`프리셋 ${p.name}: 없는 주의문구`);
 });
 ok(new Set(presets.map(p=>p.name)).size===presets.length,'프리셋 이름이 겹침');
-BBS_RECOMMENDATIONS.forEach(b=>b.ids.forEach(i=>ok(idSet.has(i),`BBS ${b.label}: 없는 운동 ${i}`)));
+presets.filter(p=>p.core).forEach(p=>{
+  ok(p.core.length>=3&&p.core.length<=6&&new Set(p.core).size===p.core.length,`프리셋 ${p.name}: 핵심 운동은 3~6개여야 함`);
+  p.core.forEach(i=>ok(p.ids.includes(i),`프리셋 ${p.name}: 핵심 ${i}번이 프리셋에 없음`));
+});
+const levelOf=i=>(EXERCISES.find(e=>e.id===i)||{level:''}).level.slice(0,3);
+BBS_RECOMMENDATIONS.forEach(b=>b.ids.forEach(i=>{
+  ok(idSet.has(i),`BBS ${b.label}: 없는 운동 ${i}`);
+  ok(!b.levels||((b.levels.includes(levelOf(i))||b.allow.includes(i))&&!b.block.includes(i)),`BBS ${b.label}: ${i}번이 자기 범위를 벗어남`);
+}));
+const tags=new Set(Object.values(IMAGE_META).flatMap(m=>m.diagnosisTags||[]));
+Object.entries(RECOMMEND_PRESETS).forEach(([dx,names])=>{ok(tags.has(dx),`추천 진단 ${dx}: 태그 없음`);names.forEach(n=>ok(presets.some(p=>p.name===n),`추천 진단 ${dx}: 없는 프리셋 ${n}`));});
+Object.entries(RECOMMEND_EXCLUDE).forEach(([k,list])=>{ok(k==='all'||RECOMMEND_PRESETS[k]||RECOMMEND_LEVELS[k],`추천 제외: 없는 조건 ${k}`);list.forEach(i=>ok(idSet.has(i),`추천 제외 ${k}: 없는 운동 ${i}`));});
 for(let n=0;n<=56;n++) ok(BBS_RECOMMENDATIONS.filter(b=>n>=b.min&&n<=b.max).length===1,`BBS ${n}점 구간이 하나가 아님`);
 for(const name of ['HOLD_UNIT_IDS','TIME_BASED_IDS']){
   const m=html.match(new RegExp(`const ${name} = new Set\\(\\[([\\d,]+)\\]`));
@@ -75,6 +86,16 @@ for(const m of clinical.matchAll(/^\| (\d+) \| ([^|]+) \| (Lv\d[^|]*) \|/gm)){
   const e=EXERCISES.find(x=>x.id===Number(m[1]));
   ok(e&&e.title===m[2].trim()&&e.level===m[3].trim(),`clinical-review.md가 다름: ${m[0]}`);
 }
+presets.forEach((p,n)=>{
+  const start=clinical.indexOf(`\n### ${n+1}. ${p.name}\n`);
+  ok(start>=0,`clinical-review.md에 프리셋 ${n+1}. ${p.name} 없음`);
+  const body=clinical.slice(start+1).replace(/^###[^\n]*\n/,'').split(/\n##+ /)[0];
+  const rows=[...body.matchAll(/^\| (\d+) \|/gm)].map(m=>Number(m[1]));
+  const sorted=a=>JSON.stringify(a.slice().sort((x,y)=>x-y));
+  ok(sorted(rows)===sorted(p.ids),`clinical-review.md 프리셋 ${p.name}: 운동이 다름`);
+  const line=p.core&&`핵심 운동(v2.71): ${p.core.map(i=>`${i} ${EXERCISES.find(e=>e.id===i).title}`).join(', ')}\n`;
+  ok(!line||body.includes(line),`clinical-review.md 프리셋 ${p.name}: 핵심 운동이 다름`);
+});
 for(const e of EXERCISES){
   const start=trans.indexOf(`\n### ${e.id}. ${e.title}`);
   ok(start>=0,`translation-review.md에 ${e.id} ${e.title} 없음`);

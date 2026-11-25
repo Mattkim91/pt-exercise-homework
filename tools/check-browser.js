@@ -12,9 +12,10 @@ const sleep=t=>new Promise(r=>setTimeout(r,t));
 const errors=[];let count=0;
 const ok=(cond,msg)=>{count++;if(!cond)errors.push(msg);};
 
+let chrome=null;
 (async()=>{
   const profile=fs.mkdtempSync(path.join(os.tmpdir(),'pt-check-'));
-  const chrome=spawn(CHROME,['--headless=new','--remote-debugging-port=0','--user-data-dir='+profile,'--no-first-run','--disable-background-networking',...(process.env.CI?['--no-sandbox']:[]),'about:blank'],{stdio:'ignore'});
+  chrome=spawn(CHROME,['--headless=new','--remote-debugging-port=0','--user-data-dir='+profile,'--no-first-run','--disable-background-networking',...(process.env.CI?['--no-sandbox']:[]),'about:blank'],{stdio:'ignore'});
   const portFile=path.join(profile,'DevToolsActivePort');
   for(let i=0;i<80&&!fs.existsSync(portFile);i++) await sleep(250);
   await sleep(300);
@@ -29,7 +30,9 @@ const ok=(cond,msg)=>{count++;if(!cond)errors.push(msg);};
     if(d.method==='Log.entryAdded'&&d.params.entry.level==='error') pageErrors.push(d.params.entry.text+' '+(d.params.entry.url||'').slice(0,120));
   };
   const send=(method,params={})=>new Promise(r=>{wait[++id]=r;ws.send(JSON.stringify({id,method,params}));});
-  const ev=async e=>{const d=await send('Runtime.evaluate',{expression:`(async()=>{${e}})()`,returnByValue:true,awaitPromise:true});
+  // 확인 창이 닫히지 않는 것처럼 앱이 멈추면 30초 뒤 실패로 끝낸다
+  const limit=(p,e)=>{let t;return Promise.race([p,new Promise((_,no)=>{t=setTimeout(()=>no(new Error('30초 안에 끝나지 않음: '+e.trim().slice(0,200))),30000);})]).finally(()=>clearTimeout(t));};
+  const ev=async e=>{const d=await limit(send('Runtime.evaluate',{expression:`(async()=>{${e}})()`,returnByValue:true,awaitPromise:true}),e);
     if(d.result.exceptionDetails) throw new Error(d.result.exceptionDetails.exception?.description||d.result.exceptionDetails.text);return d.result.result.value;};
   for(const x of ['Network','Runtime','Log','Page']) await send(x+'.enable');
   const open=async()=>{await send('Page.navigate',{url:pathToFileURL(target).href});for(let i=0;i<60;i++){await sleep(200);try{if(await ev('return typeof state==="object"&&!!document.querySelector("main")'))return;}catch(e){}}throw new Error('앱이 열리지 않음');};
@@ -42,7 +45,7 @@ const ok=(cond,msg)=>{count++;if(!cond)errors.push(msg);};
     newPatient();
     state.patient.name="가환자";addExercise(5);addExercise(44);
     setField("showFallWarning",true);setField("showChecklist",true);setField("layoutMode","큰 글씨형");setOutputLang("en");
-    state.aiProfile={diagnosis:"tka",functionLevel:"walking",goal:"gait",bbs:"12",note:"가환자 메모"};state.bbsScore="12";recommendAiExercises();
+    state.aiProfile={diagnosis:"tka",functionLevel:"standing",goal:"gait",bbs:"12",note:"가환자 메모"};state.bbsScore="12";recommendAiExercises();
     enterCartEditMode();
     const a=state.patient.id;
     newPatient();
@@ -75,6 +78,78 @@ const ok=(cond,msg)=>{count++;if(!cond)errors.push(msg);};
   // ── BBS 빈 칸은 0점이 아님
   const bbs=await ev(`return [""," ","0","20","21","56","57","x"].map(v=>{state.bbsScore=v;const r=activeBbsRecommendation();return r?r.min:"-";}).join();`);
   ok(bbs==='-,-,0,0,21,41,-,-','BBS 구간이 다름: '+bbs);
+
+  // ── BBS 범위: 추천은 거르고, 직접 담을 때는 경고만
+  const guard=await ev(`
+    const tick=()=>new Promise(r=>setTimeout(r,30));const out={};
+    newPatient();state.tab=1;render();setBbsScore("10");out.same=state.aiProfile.bbs;
+    const p1=addExercise(61);await tick();out.asks=!!state.choiceDialog;resolveChoice("cancel");await p1;out.cancelled=state.selected.length;
+    const p2=addExercise(61);await tick();resolveChoice("ok");await p2;out.added=state.selected.map(x=>x.id).join();
+    addExercise(23);out.noAsk=!state.choiceDialog&&state.selected.length===2;
+    state.tab=2;render();out.banner=document.querySelector("main").textContent.includes("추천 범위를 벗어난 운동 1개: 일자 걷기");
+    state.tab=3;render();out.printBanner=document.querySelector("main").textContent.includes("추천 범위를 벗어난 운동 1개");
+    out.leaflet=leafletHTML().includes("BBS");
+    state.tab=1;render();state.query="일자 걷기";renderExerciseResults();out.badge=document.querySelector("#exercise-results").textContent.includes("BBS 범위 밖");
+    setBbsScore("");out.badgeOff=!document.querySelector("#exercise-results").textContent.includes("BBS 범위 밖");state.query="";
+    out.bands=["0","20","21","40","41","56"].map(v=>{const b=bbsBandFor(v);return [3,23,38,43,44,56,57,70,71].filter(i=>bbsAllows(exerciseById(i),b)).join(".")}).join("|");
+    applyPreset("낙상예방");state.presetShowAll=true;renderExerciseResults();setBbsScore("30");
+    const before=state.selected.length;const p3=addAllFiltered();await tick();if(state.choiceDialog.title.includes("많이")){resolveChoice("ok");await tick();}
+    out.bulk=state.choiceDialog.title;resolveChoice("cancel");await p3;out.bulkCancelled=state.selected.length===before;
+    newPatient();out.reset=state.bbsScore===""&&state.aiProfile.bbs==="";
+    return out;`);
+  ok(guard.same==='10'&&guard.asks&&guard.cancelled===0&&guard.added==='61'&&guard.noAsk&&guard.banner&&guard.printBanner&&!guard.leaflet&&guard.badge&&guard.badgeOff&&guard.bulk==='BBS 추천 범위를 벗어납니다'&&guard.bulkCancelled&&guard.reset,'BBS 경고 동작이 다름: '+JSON.stringify(guard));
+  ok(guard.bands==='3.23|3.23|3.23.38.56.70|3.23.38.56.70|3.23.38.43.44.56.57.70.71|3.23.38.43.44.56.57.70.71','BBS 범위가 다름: '+guard.bands);
+
+  // ── 조건별 추천: 모든 진단·기능·목표·BBS 조합이 규칙을 지키는지
+  const rec=await ev(`
+    newPatient();state.tab=4;render();
+    const bad=[];let n=0,empty=0;
+    const lv=e=>e.level.slice(0,3);
+    for(const dx of Object.keys(RECOMMEND_PRESETS)) for(const f of Object.keys(RECOMMEND_LEVELS)) for(const g of ["ROM","strength","balance","gait","endurance","ADL","stretch"]) for(const b of ["","0","20","21","40","41","56"]){
+      if(f==="walking"&&b!==""&&Number(b)<=20) continue;
+      state.aiProfile={diagnosis:dx,functionLevel:f,goal:g,bbs:b,note:""};
+      const draw=render;render=()=>{};try{await recommendAiExercises();}finally{render=draw;}
+      n++;
+      const ids=state.aiResultIds, w=[dx,f,g,b].join("/");
+      if(!ids.length){empty++;if(!state.aiText.includes("맞는 운동이 없습니다")) bad.push(w+" 안내 없음");}
+      if(ids.length>12||new Set(ids).size!==ids.length) bad.push(w+" 개수");
+      const inPreset=new Set(RECOMMEND_PRESETS[dx].flatMap(x=>presets.find(p=>p.name===x).ids));
+      ids.map(exerciseById).forEach(e=>{
+        if(!(e.diagnosisTags||[]).includes(dx)&&!inPreset.has(e.id)) bad.push(w+" 진단 밖 "+e.id);
+        if(!RECOMMEND_LEVELS[f].includes(lv(e))) bad.push(w+" 단계 밖 "+e.id);
+        if(!bbsAllows(e,bbsBandFor(b))) bad.push(w+" BBS 밖 "+e.id);
+        if(e.id===90||(dx==="tka"&&[82,83,87,88].includes(e.id))||(f==="bed"&&e.id===84)) bad.push(w+" 제외 운동 "+e.id);
+      });
+    }
+    const out={n,empty,bad:bad.slice(0,5)};
+    const tick=()=>new Promise(r=>setTimeout(r,30));
+    state.aiProfile={diagnosis:"fall",functionLevel:"walking",goal:"balance",bbs:"10",note:""};
+    const p=recommendAiExercises();await tick();out.asks=state.choiceDialog.title;resolveChoice("ok");await p;out.low=state.aiResultIds.join();
+    const q=recommendAiExercises();await tick();resolveChoice("cancel");out.cancel=await q;
+    setAiProfile("goal","gait");out.cleared=state.aiResultIds.length;
+    let msg="";const al=window.alert;window.alert=m=>{msg=m};state.aiProfile.bbs="57";await recommendAiExercises();window.alert=al;out.invalid=msg.includes("0~56");
+    state.aiProfile={diagnosis:"fall",functionLevel:"bed",goal:"balance",bbs:"",note:""};state.aiResultIds=[];const sel=state.selected.length;await buildAiLeaflet();out.emptyBuild=!state.choiceDialog&&state.selected.length===sel&&state.tab===4;
+    return out;`);
+  ok(!rec.bad.length&&rec.n===2002,'조건별 추천 규칙 위반: '+JSON.stringify(rec));
+  ok(rec.asks==='BBS와 기능 수준을 확인하세요'&&rec.low==='23,24,26,27,87,29'&&rec.cancel===false&&rec.cleared===0&&rec.invalid&&rec.emptyBuild,'조건별 추천 확인 동작이 다름: '+JSON.stringify(rec));
+
+  // ── 프리셋 핵심 운동
+  const coreCheck=await ev(`
+    newPatient();state.tab=1;render();const bad=[];
+    for(const p of presets){
+      state.activePreset=null;applyPreset(p.name);if(state.choiceDialog) resolveChoice("cancel");await new Promise(r=>setTimeout(r,5));
+      const first=filtered().map(e=>e.id).sort((a,b)=>a-b).join(), want=(p.core||p.ids).slice().sort((a,b)=>a-b).join();
+      if(first!==want) bad.push(p.name+" 핵심");
+      const bar=document.querySelector("#exercise-results").textContent;
+      if(p.core&&!bar.includes("나머지 "+(p.ids.length-p.core.length)+"개 더 보기")) bad.push(p.name+" 더 보기");
+      state.presetShowAll=true;renderExerciseResults();
+      const all=filtered().map(e=>e.id);
+      if(all.slice().sort((a,b)=>a-b).join()!==p.ids.slice().sort((a,b)=>a-b).join()) bad.push(p.name+" 전체");
+      if(p.core&&all.slice(0,p.core.length).some(i=>!p.core.includes(i))) bad.push(p.name+" 순서");
+    }
+    applyPreset("낙상예방");const reset=state.presetShowAll===false;newPatient();
+    return bad.concat(reset?[]:["초기화"]);`);
+  ok(!coreCheck.length,'프리셋 핵심 운동이 다름: '+coreCheck.join(', '));
 
   // ── 처방 이력
   const hist=await ev(`
@@ -190,4 +265,4 @@ const ok=(cond,msg)=>{count++;if(!cond)errors.push(msg);};
   await sleep(500);try{fs.rmSync(profile,{recursive:true,force:true});}catch(e){}
   if(errors.length){console.error(errors.map(e=>'✗ '+e).join('\n'));console.error(`\n${errors.length}건 실패 / ${count}건 검사`);process.exit(1);}
   console.log(`✓ 화면 검사 ${count}건 통과 (${path.basename(target)})`);process.exit(0);
-})().catch(e=>{console.error(e);process.exit(1);});
+})().catch(e=>{console.error(e);if(chrome) chrome.kill();process.exit(1);});
