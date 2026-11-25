@@ -75,6 +75,17 @@ let chrome=null;
     return out;`);
   ok(JSON.stringify(tha)===JSON.stringify({tkaAsks:false,asks:true,kept:"default",offAsks:false,changed:"tha",again:false,warns:true,custom:"직접 쓴 문구"}),'THA 주의문구 확인 동작이 다름: '+JSON.stringify(tha));
 
+  // ── 운동 목록의 용량 표시: 유지 운동은 초, 시간 운동은 분, 나머지는 회
+  const dose=await ev(`
+    newPatient();state.tab=1;state.level=state.category=state.bodyFilter=state.purposeFilter=state.tagFilter="전체";state.showFavoritesOnly=false;state.query="";render();
+    return exercises.filter(e=>{
+      const row=document.querySelector('#exercise-results [data-key="ex-'+e.id+'"]');
+      const want=e.isTimeBased?e.durationMin+"분":HOLD_UNIT_IDS.has(e.id)?e.reps+"초 유지 × "+e.sets+"세트":e.reps+"회 × "+e.sets+"세트";
+      const line=row?row.querySelector(".text-xs.text-slate-400").textContent.trim():"";
+      return !line.startsWith(want)||line.endsWith("·")||doseText(selectedFromLibrary(e))!==want;
+    }).map(e=>e.id);`);
+  ok(!dose.length,'운동 목록의 용량 표시가 다름: '+dose);
+
   // ── BBS 빈 칸은 0점이 아님
   const bbs=await ev(`return [""," ","0","20","21","56","57","x"].map(v=>{state.bbsScore=v;const r=activeBbsRecommendation();return r?r.min:"-";}).join();`);
   ok(bbs==='-,-,0,0,21,41,-,-','BBS 구간이 다름: '+bbs);

@@ -289,7 +289,7 @@ const EXERCISE_IMAGES = {};
 ─────────────────────────────────────────── */
 
 
-const VERSION      = "v2.71";
+const VERSION      = "v2.72";
 const VERSION_DATE = "2026-11-26";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
@@ -2849,7 +2849,7 @@ function exerciseCardRow(e,idx){
           ${bbsOut?`<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-50 text-red-700">BBS 범위 밖</span>`:""}
           ${e.imagePriority?`<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">IMG-${esc(e.imagePriority)}</span>`:""}
         </div>
-        <div class="text-xs text-slate-400 mt-0.5">${e.isTimeBased ? `${e.durationMin}분` : `${e.reps}회×${e.sets}세트 · ${e.durationMin}분`} · ${esc(e.side)}</div>
+        <div class="text-xs text-slate-400 mt-0.5">${esc([doseText(e), e.isTimeBased?"":`${e.durationMin}분`, e.side].filter(Boolean).join(" · "))}</div>
         <div class="text-[10px] text-slate-400 mt-0.5 truncate">${bodyLabel?`신체: ${esc(bodyLabel)}`:""}${purposeLabel?` · 목적: ${esc(purposeLabel)}`:""}</div>
       </div>
       <button onclick="event.stopPropagation();${added?"removeExerciseSilent("+e.id+")":"addExercise("+e.id+")"}" class="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center font-bold text-base transition-all ${added?"bg-blue-100 text-blue-600 hover:bg-red-50 hover:text-red-400":"bg-blue-600 text-white hover:bg-blue-700 active:scale-95"}">${added?"✓":"＋"}</button>
