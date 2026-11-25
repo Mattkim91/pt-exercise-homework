@@ -267,8 +267,8 @@ const EXERCISE_IMAGES = {};
 ─────────────────────────────────────────── */
 
 
-const VERSION      = "v2.66";
-const VERSION_DATE = "2026-11-24";
+const VERSION      = "v2.67";
+const VERSION_DATE = "2026-11-25";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
 const FAVORITE_KEY = "exercise-homework-favorites-v1";
@@ -334,7 +334,7 @@ const LV_CLASS = {
 
 const BODY_FILTERS = [
   {value:"전체", label:"전체"}, {value:"ankle", label:"발목"}, {value:"knee", label:"무릎"}, {value:"hip", label:"고관절/엉덩이"},
-  {value:"trunk", label:"체간"}, {value:"shoulder", label:"어깨"}, {value:"elbow", label:"팔꿈치"}, {value:"wrist", label:"손목"},
+  {value:"trunk", label:"체간"}, {value:"neck", label:"목"}, {value:"shoulder", label:"어깨"}, {value:"elbow", label:"팔꿈치"}, {value:"wrist", label:"손목"},
   {value:"hand", label:"손"}, {value:"balance", label:"균형"}, {value:"gait", label:"보행"}, {value:"endurance", label:"유산소"}, {value:"functional", label:"기능"}
 ];
 const PURPOSE_FILTERS = [
@@ -348,9 +348,9 @@ const TAG_FILTERS = [
 ];
 
 
-const TIME_BASED_IDS = new Set([56,57,58,59,60,61,62,63,67,69,70,71,72]); // 걷기/자전거 운동 (id 기준)
+const TIME_BASED_IDS = new Set([56,57,58,59,60,61,62,63,67,69,70,71,72,89]); // 걷기/자전거/제자리걷기 (id 기준)
 /* 숫자 자체가 유지 시간인 운동. 기본 단위만 바꾸고, 운동 이름·방법·주의 문구는 그대로 둔다. */
-const HOLD_UNIT_IDS = new Set([23,42,43,44,73,74]);
+const HOLD_UNIT_IDS = new Set([23,42,43,44,73,74,81,85,88,90,91]);
 function defaultDoseUnit(id){return HOLD_UNIT_IDS.has(Number(id))?"sec":"reps";}
 function doseUnitOf(item){
   if(!item||item.isTimeBased) return "min";
