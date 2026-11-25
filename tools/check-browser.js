@@ -82,13 +82,60 @@ let chrome=null;
       const row=document.querySelector('#exercise-results [data-key="ex-'+e.id+'"]');
       const want=e.isTimeBased?e.durationMin+"분":HOLD_UNIT_IDS.has(e.id)?e.reps+"초 유지 × "+e.sets+"세트":e.reps+"회 × "+e.sets+"세트";
       const line=row?row.querySelector(".text-xs.text-slate-400").textContent.trim():"";
+      const mins=exerciseMinutes(selectedFromLibrary(e))+"분";
+      if(!e.isTimeBased&&!line.startsWith(want+" · "+mins)) return true;
+      if(HOLD_UNIT_IDS.has(e.id)&&exerciseMinutes(selectedFromLibrary(e))!==Math.max(1,Math.ceil(e.reps*e.sets/60))) return true;
       return !line.startsWith(want)||line.endsWith("·")||doseText(selectedFromLibrary(e))!==want;
     }).map(e=>e.id);`);
   ok(!dose.length,'운동 목록의 용량 표시가 다름: '+dose);
 
   // ── BBS 빈 칸은 0점이 아님
-  const bbs=await ev(`return [""," ","0","20","21","56","57","x"].map(v=>{state.bbsScore=v;const r=activeBbsRecommendation();return r?r.min:"-";}).join();`);
-  ok(bbs==='-,-,0,0,21,41,-,-','BBS 구간이 다름: '+bbs);
+  const bbs=await ev(`return [""," ","0","20","21","56","57","x","20.5","-1"].map(v=>{state.bbsScore=v;const r=activeBbsRecommendation();return r?r.min:"-";}).join();`);
+  ok(bbs==='-,-,0,0,21,41,-,-,-,-','BBS 구간이 다름: '+bbs);
+
+  // ── BBS 점수는 환자 기록에 저장, 유인물·복사본에는 넣지 않음
+  const save=await ev(`
+    const out={};const stored=id=>JSON.parse(localStorage.getItem(STORAGE_KEY)).find(r=>r.id===id);
+    newPatient();state.tab=1;render();setBbsScore("33");out.noName=state.savedPatients.some(p=>p.bbsScore===33);
+    state.patient.name="저장A";autoSave();const a=state.patient.id;out.first=stored(a).bbsScore;
+    setBbsScore("47");newPatient();out.flushed=stored(a).bbsScore;out.blank=state.bbsScore+state.aiProfile.bbs;
+    state.patient.name="저장B";autoSave();const b=state.patient.id;out.b="bbsScore" in stored(b);
+    loadPatient(a);out.loaded=state.bbsScore+"/"+state.aiProfile.bbs+"/"+activeBbsRecommendation().min;
+    out.list=document.querySelector("#patient-list").textContent.includes("BBS 47점");
+    addExercise(23);const box=document.createElement("div");box.innerHTML=leafletHTML();out.leaflet=/47|BBS/.test(box.textContent);
+    setBbsScore("57");autoSave();out.invalid="bbsScore" in stored(a);
+    setBbsScore("0");autoSave();out.zero=stored(a).bbsScore;
+    loadPatient(b);out.cross=state.bbsScore;loadPatient(a);out.zeroLoad=state.bbsScore;
+    setBbsScore("");await new Promise(r=>setTimeout(r,800));out.cleared="bbsScore" in stored(a);
+    setBbsScore("12");autoSave();duplicatePatient(a);out.copy=state.bbsScore;
+    out.migrate=[{bbsScore:"30"},{bbsScore:99},{bbsScore:{}},{bbsScore:56},{}].map(r=>{const m=migratePatientRecord({id:"x",selected:[],memoPreset:"default",settings:{printDefaultsMigrated:true,outputLang:"ko"},...r});return (m.record.bbsScore??"-")+(m.changed?"*":"");}).join();
+    newPatient();deletePatient(a);deletePatient(b);return out;`);
+  ok(JSON.stringify(save)===JSON.stringify({noName:false,first:33,flushed:47,blank:'',b:false,loaded:'47/47/41',list:true,leaflet:false,invalid:false,zero:0,cross:'',zeroLoad:'0',cleared:false,copy:'',migrate:'30*,-*,-*,56,-'}),'BBS 저장 동작이 다름: '+JSON.stringify(save));
+
+  // ── 작업 중인 환자 표시
+  const bar=await ev(`
+    const out={};const q=s=>document.querySelector(s), bar=()=>q("#patient-header-badge .patient-bar"), txt=()=>bar().textContent.replace(/\\s+/g," ");
+    newPatient();out.empty=bar().className.includes("is-empty")&&txt().includes("선택된 환자 없음");
+    const name=q("#patient-name-input");name.focus();name.value="표시<b>A";name.dispatchEvent(new Event("input",{bubbles:true}));
+    out.typing=bar().className.includes("is-new")&&txt().includes("아직 저장 전")&&txt().includes("표시<b>A");
+    await new Promise(r=>setTimeout(r,800));
+    out.saved=bar().className.includes("is-active")&&txt().includes("작업 중");
+    out.keep=document.activeElement===q("#patient-name-input")&&q("#patient-name-input").value==="표시<b>A";
+    out.form=q("main").textContent.includes("작업 중인 환자: 표시<b>A");
+    const rows=()=>[...document.querySelectorAll(".patient-row.is-current")];
+    const a=state.patient.id;out.rowA=rows().length===1&&rows()[0].dataset.key==="pt-"+a&&rows()[0].textContent.includes("작업 중");
+    newPatient();out.noRow=rows().length===0;
+    state.patient.name="표시B";saveCurrentPatient();const b=state.patient.id;out.added=txt().includes("새 환자를 추가했습니다")&&rows().length===1&&rows()[0].dataset.key==="pt-"+b;
+    loadPatient(a);out.loaded=txt().includes("환자를 불러왔습니다")&&txt().includes("표시<b>A")&&bar().className.includes("is-flash")&&rows()[0].dataset.key==="pt-"+a;
+    out.loadBtns=document.querySelectorAll(".patient-row .pr-load").length===state.savedPatients.length-1;
+    state.tab=1;render();addExercise(23);addExercise(38);out.count=txt().includes("운동 2개");setBbsScore("41");out.bbs=txt().includes("BBS 41점");
+    out.tabs=[0,1,2,3,4].every(t=>{state.tab=t;render();return bar().className.includes("is-active")&&txt().includes("표시<b>A")});
+    goPatientList();out.list=state.tab===0;
+    await new Promise(r=>setTimeout(r,3300));out.calm=txt().includes("작업 중인 환자")&&!bar().className.includes("is-flash");
+    out.noPrint=!!bar().closest(".no-print");
+    deletePatient(a);out.deleted=bar().className.includes("is-empty");deletePatient(b);
+    return out;`);
+  ok(Object.values(bar).every(v=>v===true)&&Object.keys(bar).length===17,'작업 중인 환자 표시가 다름: '+JSON.stringify(bar));
 
   // ── BBS 범위: 추천은 거르고, 직접 담을 때는 경고만
   const guard=await ev(`
