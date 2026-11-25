@@ -289,7 +289,7 @@ const EXERCISE_IMAGES = {};
 ─────────────────────────────────────────── */
 
 
-const VERSION      = "v2.70";
+const VERSION      = "v2.71";
 const VERSION_DATE = "2026-11-26";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
@@ -464,7 +464,7 @@ const HISTORY_SOURCES = {print:"인쇄", pdf:"PDF", manual:"직접 보관", befo
 /* ── State ─────────────────────────────── */
 let state = {
   tab: 0,
-  query:"", category:"전체", level:"전체", bodyFilter:"전체", purposeFilter:"전체", tagFilter:"전체", showFavoritesOnly:false, bbsScore:"", bbsMode:false, activePreset:null,
+  presetShowAll:false, query:"", category:"전체", level:"전체", bodyFilter:"전체", purposeFilter:"전체", tagFilter:"전체", showFavoritesOnly:false, bbsScore:"", bbsMode:false, activePreset:null,
   aiProfile:{diagnosis:"stroke", functionLevel:"bed", goal:"balance", bbs:"", note:""}, aiResultIds:[], aiText:"", aiPrompt:"", adminExerciseId:1, libraryKeyword:"",
   patientQuery:"",
   selected:[], patient:newPatientData(),
@@ -504,6 +504,7 @@ function resetPatientScopedState(){
   state.bbsScore="";
   state.bbsMode=false;
   state.activePreset=null;
+  state.presetShowAll=false;
   state.freqCustomTarget=null;
   // 편집 중이던 담은 운동 초안이 다음 환자 기록에 저장되지 않게 한다
   state.cartSelectMode=false;
@@ -1013,11 +1014,47 @@ function toggleFavorite(id){
   saveFavorites(next);
   renderMain();
 }
-function activeBbsRecommendation(){
-  if(String(state.bbsScore??"").trim()==="") return null; // 빈 칸은 0점이 아니다
-  const score=Number(state.bbsScore);
+function bbsBandFor(value){
+  if(String(value??"").trim()==="") return null; // 빈 칸은 0점이 아니다
+  const score=Number(value);
   if(Number.isNaN(score)||score<0||score>56) return null;
-  return BBS_RECOMMENDATIONS.find(r=>score>=r.min&&score<=r.max)||null;
+  return BBS_RECOMMENDATIONS.find(r=>score>=r.min&&score<r.max+1)||null;
+}
+function activeBbsRecommendation(){ return bbsBandFor(state.bbsScore); }
+/* 운동 선택과 추천 화면의 BBS 칸은 같은 값이다 */
+function setBbsScore(value){
+  state.bbsScore=value;
+  state.aiProfile={...currentAiProfile(),bbs:value};
+  clearAiResults();
+  if(state.tab===1){
+    if(!activeBbsRecommendation()) state.bbsMode=false;
+    renderExerciseResults();
+  }
+}
+function bbsAllows(e, band){
+  if(!band||!band.levels||!e) return true;
+  if(band.block.includes(e.id)) return false;
+  return band.allow.includes(e.id)||band.levels.includes(String(e.level||"").slice(0,3));
+}
+function bbsOutOfRange(list){
+  const band=activeBbsRecommendation();
+  return band?list.filter(e=>!bbsAllows(e,band)):[];
+}
+function bbsWarningHTML(list){
+  const out=bbsOutOfRange(list);
+  if(!out.length) return "";
+  return `<div class="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-xs font-semibold text-red-700 leading-5">⚠ BBS ${esc(String(state.bbsScore).trim())}점의 추천 범위를 벗어난 운동 ${out.length}개: ${out.map(e=>esc(e.title)).join(", ")}</div>`;
+}
+async function confirmBbsOutOfRange(list){
+  const out=bbsOutOfRange(list);
+  if(!out.length) return true;
+  const choice=await openChoiceDialog({
+    title:"BBS 추천 범위를 벗어납니다",
+    message:`BBS ${String(state.bbsScore).trim()}점의 추천 범위를 벗어난 운동입니다.\n${out.map(e=>`${e.title} (${e.level})`).join("\n")}\n\n환자 상태를 확인한 뒤 담으세요.`,
+    memoConsent:false,
+    choices:[{id:"ok", label:"그대로 담기"},{id:"cancel", label:"취소", primary:true}]
+  });
+  return !!choice&&choice.id==="ok";
 }
 function applyBbsMode(){
   const rec=activeBbsRecommendation();
@@ -1045,7 +1082,28 @@ function exerciseById(id){return exercises.find(e=>e.id===Number(id));}
 function uniqueIds(ids){return [...new Set(ids.map(Number).filter(Boolean))];}
 function labelFromList(list,value){return (list.find(x=>x.value===value)||{}).label||value;}
 function currentAiProfile(){return state.aiProfile||{...DEFAULT_AI_PROFILE};}
-function setAiProfile(k,v){state.aiProfile={...currentAiProfile(),[k]:v};}
+function setAiProfile(k,v){
+  state.aiProfile={...currentAiProfile(),[k]:v};
+  if(k!=="note") clearAiResults();
+}
+/* 조건이 바뀌면 앞 조건의 추천 결과를 담지 못하게 지운다 */
+function clearAiResults(){
+  if(!state.aiResultIds.length) return;
+  state.aiResultIds=[];
+  state.aiText="";
+  if(state.tab===4) renderMain();
+}
+const FUNCTION_LEVEL_LABELS = {bed:"침상/와상", sitting:"앉기 가능", standing:"기립 가능", walking:"보행 가능"};
+/* 진단 태그나 진단 프리셋에 든 운동 가운데 기능 수준과 BBS 범위에 맞는 것만 남긴다 */
+function recommendCandidates(profile){
+  const presetIds=new Set((RECOMMEND_PRESETS[profile.diagnosis]||[]).flatMap(n=>(presets.find(p=>p.name===n)||{ids:[]}).ids));
+  const levels=RECOMMEND_LEVELS[profile.functionLevel]||[];
+  const band=bbsBandFor(profile.bbs);
+  const excluded=new Set([...RECOMMEND_EXCLUDE.all,...(RECOMMEND_EXCLUDE[profile.diagnosis]||[]),...(RECOMMEND_EXCLUDE[profile.functionLevel]||[])]);
+  return exercises.filter(e=>((e.diagnosisTags||[]).includes(profile.diagnosis)||presetIds.has(e.id))
+    &&levels.includes(String(e.level||"").slice(0,3))&&bbsAllows(e,band)&&!excluded.has(e.id))
+    .map(e=>({e, score:scoreExerciseForProfile(e,profile)+(presetIds.has(e.id)?2:0)}));
+}
 function scoreExerciseForProfile(e,profile){
   let score=0;
   const tags=e.diagnosisTags||[];
@@ -1084,22 +1142,31 @@ function scoreExerciseForProfile(e,profile){
   if((e.imagePriority||"")==="A") score+=0.5;
   return score;
 }
-function recommendAiExercises(){
+async function recommendAiExercises(){
   const profile=currentAiProfile();
-  const scored=exercises.map(e=>({e,score:scoreExerciseForProfile(e,profile)}))
-    .filter(x=>x.score>0)
-    .sort((a,b)=>b.score-a.score || a.e.id-b.e.id);
-  let ids=scored.slice(0,12).map(x=>x.e.id);
-  // 안전한 기본 조합 보정
-  if(profile.functionLevel==="bed") ids=uniqueIds([1,2,3,4,5,6,16,17,...ids]).slice(0,12);
-  if(profile.functionLevel==="sitting") ids=uniqueIds([23,24,25,28,29,...ids]).slice(0,12);
-  if(profile.functionLevel==="standing") ids=uniqueIds([38,40,42,45,46,50,...ids]).slice(0,12);
-  if(profile.functionLevel==="walking") ids=uniqueIds([56,59,60,61,62,67,69,...ids]).slice(0,12);
+  const bbsText=String(profile.bbs??"").trim();
+  const band=bbsBandFor(bbsText);
+  if(bbsText&&!band){ state.aiResultIds=[]; alert("BBS 점수를 0~56점 사이로 입력하거나 비워 주세요."); renderMain(); return false; }
+  if(band&&Number(bbsText)<=20&&profile.functionLevel==="walking"){
+    const choice=await openChoiceDialog({
+      title:"BBS와 기능 수준을 확인하세요",
+      message:`BBS ${bbsText}점인데 기능 수준이 「${FUNCTION_LEVEL_LABELS.walking}」입니다.\n계속하면 BBS 범위에 맞는 운동만 추천합니다.`,
+      memoConsent:false,
+      choices:[{id:"ok", label:"BBS 기준으로 추천", primary:true},{id:"cancel", label:"취소"}]
+    });
+    if(!choice||choice.id!=="ok"){ render(); return false; }
+  }
+  const scored=recommendCandidates(profile).sort((a,b)=>b.score-a.score || a.e.id-b.e.id);
+  const ids=scored.slice(0,12).map(x=>x.e.id);
   state.aiResultIds=ids;
   const dxLabel=labelFromList(TAG_FILTERS,profile.diagnosis);
   const goalLabel=labelFromList(PURPOSE_FILTERS,profile.goal);
-  state.aiText=`${dxLabel} / ${goalLabel} 목표 / ${profile.functionLevel} 수준을 기준으로 ${ids.length}개 운동을 추천했습니다. 실제 처방 전 통증, 어지러움, 낙상위험, 수술/금기사항을 확인하세요.`;
-  renderMain();
+  const cond=`${dxLabel} / ${goalLabel} 목표 / ${FUNCTION_LEVEL_LABELS[profile.functionLevel]||""}${band?` / BBS ${bbsText}점`:""}`;
+  state.aiText=ids.length
+    ?`${cond} 기준으로 ${ids.length}개 운동을 추천했습니다. 실제 처방 전 통증, 어지러움, 낙상위험, 수술/금기사항을 확인하세요.`
+    :`${cond} 조건에 맞는 운동이 없습니다. 진단, 기능 수준, BBS 조합을 확인하거나 운동 선택에서 직접 고르세요.`;
+  render();
+  return ids.length>0;
 }
 function addAiRecommended(){
   state.aiResultIds.forEach(id=>{const ex=exerciseById(id); if(ex&&!state.selected.some(x=>x.id===id)) state.selected.push(selectedFromLibrary(ex));});
@@ -1168,7 +1235,7 @@ document.addEventListener("keydown", e=>{
   resolveChoice("cancel");
 });
 async function buildAiLeaflet(){
-  if(state.aiResultIds.length===0) recommendAiExercises();
+  if(state.aiResultIds.length===0 && !(await recommendAiExercises())) return;
   const ids=state.aiResultIds.slice();
   if(!ids.length){ showMessage("추천할 운동이 없습니다."); return; }
   const profile=currentAiProfile();
@@ -1437,10 +1504,11 @@ function filtered(){
   const lf=levelFull(state.level);
   const favSet=new Set(loadFavorites());
   const bbsRec=state.bbsMode?activeBbsRecommendation():null;
+  const preset=state.activePreset?presets.find(p=>p.name===state.activePreset):null;
   const presetIds=state.activePreset
-    ? (presets.find(p=>p.name===state.activePreset)?.ids||[])
+    ? (preset?(preset.core&&!state.presetShowAll?preset.core:preset.ids):[])
     : null;
-  return exercises.filter(e=>{
+  const list=exercises.filter(e=>{
     return (!presetIds||presetIds.includes(e.id)) &&
       (!bbsRec||bbsRec.ids.includes(e.id)) &&
       (!state.showFavoritesOnly||favSet.has(e.id)) &&
@@ -1451,6 +1519,20 @@ function filtered(){
       (state.tagFilter==="전체"||(e.diagnosisTags||[]).includes(state.tagFilter)) &&
       matchesQuery(e,q);
   });
+  // 핵심 운동을 앞에 둔다. 같은 묶음 안에서는 운동 번호 순서 그대로다.
+  if(preset&&preset.core&&state.presetShowAll) list.sort((a,b)=>preset.core.includes(b.id)-preset.core.includes(a.id));
+  return list;
+}
+function presetBarHTML(){
+  const p=presets.find(x=>x.name===state.activePreset);
+  if(!p||!p.core) return "";
+  const mins=ids=>totalMinutes(ids.map(i=>selectedFromLibrary(exerciseById(i))));
+  const rest=p.ids.length-p.core.length;
+  if(rest<=0) return "";
+  return `<div class="mb-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2 flex items-center justify-between gap-2 flex-wrap">
+    <p class="text-xs font-bold text-blue-900">${esc(p.name)} 핵심 ${p.core.length}개 · 약 ${mins(p.core)}분 <span class="font-semibold text-blue-700">(전체 ${p.ids.length}개 · 약 ${mins(p.ids)}분)</span></p>
+    <button onclick="state.presetShowAll=${!state.presetShowAll};renderExerciseResults()" class="rounded-xl border border-blue-200 bg-white text-blue-700 text-xs font-bold px-3 py-1.5">${state.presetShowAll?"핵심만 보기":`나머지 ${rest}개 더 보기`}</button>
+  </div>`;
 }
 
 /* 현재 필터 결과 전체 담기. 12개 또는 45분을 넘으면 개수와 시간을 보여주고 확인한다. */
@@ -1472,6 +1554,7 @@ async function addAllFiltered(){
     });
     if(!choice||choice.id!=="ok"){ render(); return; }
   }
+  if(!(await confirmBbsOutOfRange(adding))){ render(); return; }
   adding.forEach(e=>{
     if(!state.selected.some(x=>x.id===e.id)) state.selected.push(selectedFromLibrary(e));
   });
@@ -1563,10 +1646,14 @@ function saveEditPatient(id){
   showMessage("수정 완료 ✓");
 }
 
-function addExercise(id){
+async function addExercise(id){
   if(state.selected.some(x=>x.id===id))return;
   const ex=exercises.find(e=>e.id===id);
   if(!ex)return;
+  if(bbsOutOfRange([ex]).length){
+    if(!(await confirmBbsOutOfRange([ex]))){ render(); return; }
+    if(state.selected.some(x=>x.id===id)) return;
+  }
   state.selected.push(selectedFromLibrary(ex));
   const recent=loadRecent().filter(x=>x!==id);
   saveRecent([id,...recent]);
@@ -1679,6 +1766,7 @@ function setExerciseDailyFreqNumber(id, value, commit){
 }
 async function applyPreset(name){
   const turningOn=state.activePreset!==name;
+  state.presetShowAll=false;
   if(state.activePreset===name){ state.activePreset=null; }
   else { state.activePreset=name; state.level="전체"; state.category="전체"; state.bodyFilter="전체"; state.purposeFilter="전체"; state.tagFilter="전체"; state.showFavoritesOnly=false; state.bbsMode=false; state.query=""; }
   renderMain();
@@ -2354,6 +2442,7 @@ function renderExerciseResults(){
   const allAdded=list.length>0&&list.every(e=>state.selected.some(x=>x.id===e.id));
   const anyAdded=list.some(e=>state.selected.some(x=>x.id===e.id));
   setHTML(el, `
+    ${presetBarHTML()}
     <div class="flex items-center justify-between px-1 mb-2">
       <p class="text-xs text-slate-400 font-semibold">${list.length}개 운동</p>
       ${list.length>0?`
@@ -2657,7 +2746,7 @@ function tabExercise(){
               <p class="text-[11px] text-slate-400 mt-0.5">Berg Balance Scale 점수로 균형 수준에 맞는 운동을 필터링합니다.</p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
-              <input value="${esc(state.bbsScore)}" oninput="state.bbsScore=this.value" placeholder="0~56" class="w-20 rounded-xl border border-slate-200 px-3 py-2 text-sm text-center font-bold focus:border-indigo-400"/>
+              <input value="${esc(state.bbsScore)}" oninput="setBbsScore(this.value)" placeholder="0~56" class="w-20 rounded-xl border border-slate-200 px-3 py-2 text-sm text-center font-bold focus:border-indigo-400"/>
               <button onclick="applyBbsMode()" class="rounded-xl bg-indigo-600 text-white px-3 py-2 text-xs font-bold hover:bg-indigo-700">추천보기</button>
               <button onclick="addBbsRecommended()" class="rounded-xl border border-indigo-200 text-indigo-700 px-3 py-2 text-xs font-bold hover:bg-indigo-50">추천 담기</button>
               ${state.bbsMode?`<button onclick="clearBbsMode()" class="rounded-xl border border-slate-200 text-slate-500 px-3 py-2 text-xs font-bold hover:bg-slate-50">해제</button>`:""}
@@ -2714,6 +2803,7 @@ function tabExercise(){
       <!-- ── 우측: 운동 카드 리스트 (독립 스크롤) ── -->
       <div id="exercise-results-wrap" class="flex-1 min-w-0 pb-4">
         <div id="exercise-results">
+          ${presetBarHTML()}
           <div class="flex items-center justify-between px-1 mb-2">
             <p class="text-xs text-slate-400 font-semibold">${list.length}개 운동</p>
             ${list.length>0?`
@@ -2740,6 +2830,9 @@ function exerciseCardRow(e,idx){
   const catBar=CAT_BAR[e.category]||"";
   const lvCls=LV_CLASS[e.level]||"bg-slate-100 text-slate-600";
   const fav=isFavorite(e.id);
+  const bbsOut=bbsOutOfRange([e]).length>0;
+  const activeP=presets.find(p=>p.name===state.activePreset);
+  const isCore=!!(activeP&&activeP.core&&activeP.core.includes(e.id));
   const bodyLabel=(BODY_FILTERS.find(x=>x.value===e.bodyRegion)||{}).label||e.bodyRegion||"";
   const purposeLabel=(e.purposeTags||[]).map(t=>(PURPOSE_FILTERS.find(x=>x.value===t)||{}).label||t).join(" · ");
 
@@ -2752,6 +2845,8 @@ function exerciseCardRow(e,idx){
           <span class="text-sm font-bold text-slate-800">${esc(e.title)}</span>
           <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${catCls}">${esc(e.category)}</span>
           <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${lvCls}">${esc(e.level)}</span>
+          ${isCore?`<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-blue-600 text-white">핵심</span>`:""}
+          ${bbsOut?`<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-50 text-red-700">BBS 범위 밖</span>`:""}
           ${e.imagePriority?`<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">IMG-${esc(e.imagePriority)}</span>`:""}
         </div>
         <div class="text-xs text-slate-400 mt-0.5">${e.isTimeBased ? `${e.durationMin}분` : `${e.reps}회×${e.sets}세트 · ${e.durationMin}분`} · ${esc(e.side)}</div>
@@ -2982,6 +3077,7 @@ function tabCart(){
       <span class="text-[11px] text-slate-400">PROM → 침상 → 앉기 → 서기 → 보행 → 유산소 흐름</span>
     </div>`:""}
 
+    ${state.selected.length>0&&!sel?bbsWarningHTML(state.selected):""}
     ${state.selected.length>0&&!sel?`<div class="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-xs font-semibold text-amber-800">⚠ ${safetyBanner(state.selected)}</div>`:""}
 
     ${list.length===0
@@ -3090,6 +3186,7 @@ function tabCart(){
 ══════════════════════════════════════════ */
 function tabPrint(){
   return `<div class="anim-fadeup space-y-4">
+    ${bbsWarningHTML(state.selected)}
     <div class="grid sm:grid-cols-2 gap-4">
       <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-4">
         <h2 class="font-bold text-slate-800">⚙️ 출력 레이아웃</h2>
@@ -3236,7 +3333,7 @@ function tabAiAdmin(){
             </select>
           </label>
           <label class="text-xs font-bold text-slate-500">BBS 점수 <span class="text-slate-300">선택</span>
-            <input type="number" min="0" max="56" value="${esc(profile.bbs)}" oninput="setAiProfile('bbs',this.value)" placeholder="0~56" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/>
+            <input type="number" min="0" max="56" value="${esc(profile.bbs)}" oninput="setBbsScore(this.value)" placeholder="0~56" class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm"/>
           </label>
         </div>
         <label class="block text-xs font-bold text-slate-500 mt-3">메모/주의사항 <span class="text-slate-300">선택</span>
