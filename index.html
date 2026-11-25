@@ -204,12 +204,49 @@
     }
     .recent-tag:hover { background:#e0e7ff; color:#3730a3; border-color:#c7d2fe; }
 
-    /* ── 현재 환자 고정 헤더 (④ 개선) ─────── */
-    .patient-sticky-badge {
-      display:flex; align-items:center; gap:8px;
-      background:#f8faff; border:1.5px solid #bfdbfe;
-      border-radius:12px; padding:6px 12px 6px 8px;
-      min-width:0;
+    /* ── 작업 중인 환자 표시줄: 모든 탭 위에 고정 ─────── */
+    .patient-bar { display:flex; align-items:center; gap:10px; padding:7px 12px; border-radius:12px; border:2px solid transparent; min-width:0; }
+    .patient-bar.is-active { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
+    .patient-bar.is-new    { background:#fef3c7; border-color:#f59e0b; color:#78350f; }
+    .patient-bar.is-empty  { background:#f8fafc; border:2px dashed #cbd5e1; color:#475569; }
+    .patient-bar .pb-main  { min-width:0; flex:1; }
+    .patient-bar .pb-label { font-size:11px; font-weight:700; line-height:1.2; opacity:.9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .patient-bar .pb-line  { display:flex; align-items:baseline; gap:8px; min-width:0; }
+    .patient-bar .pb-name  { font-size:18px; font-weight:800; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .patient-bar .pb-sub   { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; flex:0 1000 auto; opacity:.92; }
+    .patient-bar .pb-count { flex-shrink:0; border-radius:99px; padding:3px 10px; font-size:12px; font-weight:800; background:rgba(255,255,255,.2); }
+    .patient-bar.is-new .pb-count { background:#fde68a; }
+    .patient-bar .pb-btn   { flex-shrink:0; border-radius:10px; padding:6px 12px; font-size:12px; font-weight:800; background:#fff; color:#1d4ed8; border:1px solid #bfdbfe; }
+    .patient-bar .pb-btn:hover { background:#eff6ff; }
+    .patient-bar .patient-avatar { width:34px; height:34px; font-size:15px; }
+    .patient-bar.is-active .patient-avatar { background:#fff; color:#1d4ed8; }
+    .patient-bar.is-new .patient-avatar { background:#f59e0b; color:#fff; }
+    .patient-bar.is-empty .patient-avatar { background:#e2e8f0; color:#64748b; }
+    .patient-bar.is-flash { animation:pbFlash 1.1s ease 2; }
+    @keyframes pbFlash { 0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,0)} 40%{box-shadow:0 0 0 6px rgba(37,99,235,.35)} }
+    @media (max-width:639px) {
+      .patient-bar { gap:8px; padding:6px 10px; }
+      .patient-bar .pb-name { font-size:16px; }
+      .patient-bar .pb-line { flex-direction:column; align-items:stretch; gap:0; }
+      .patient-bar .pb-line .pb-sub { flex:none; }
+      .patient-bar .pb-count { display:none; }
+      .patient-bar.is-empty .pb-sub { white-space:normal; line-height:1.3; }
+      .patient-bar .pb-btn { padding:6px 9px; }
+    }
+    @media (prefers-reduced-motion:reduce) { .patient-bar.is-flash { animation:none; } }
+
+    /* 환자 목록: 작업 중인 환자 */
+    .patient-row { border:2px solid #e2e8f0; border-radius:12px; padding:12px; background:#fff; }
+    .patient-row:hover { border-color:#93c5fd; }
+    .patient-row.is-current { border-color:#1d4ed8; background:#eff6ff; box-shadow:inset 6px 0 0 #1d4ed8; padding-left:18px; }
+    .patient-row .pr-now { display:inline-flex; align-items:center; gap:5px; border-radius:99px; background:#1d4ed8; color:#fff; font-size:12px; font-weight:800; padding:3px 10px; white-space:nowrap; }
+    .patient-row .pr-now::before { content:""; width:7px; height:7px; border-radius:50%; background:#86efac; }
+    .patient-row .pr-load { border:1px solid #bfdbfe; border-radius:8px; color:#1d4ed8; background:#fff; font-size:12px; font-weight:800; padding:4px 10px; white-space:nowrap; }
+    .patient-row .pr-load:hover { background:#eff6ff; }
+    @media (max-width:639px) {
+      .patient-row > .patient-row-line { flex-wrap:wrap; }
+      .patient-row > .patient-row-line > button:first-child { flex-basis:100%; }
+      .patient-row > .patient-row-line > .shrink-0:last-child { margin-left:auto; }
     }
     .patient-avatar {
       width:28px; height:28px; border-radius:50%;
@@ -228,7 +265,7 @@
       .exercise-layout #filter-panel.is-collapsed { display:none; }
     }
     @media (min-width:640px) {
-      .exercise-layout { flex-direction:row; gap:1.25rem; height:calc(100vh - 160px); }
+      .exercise-layout { flex-direction:row; gap:1.25rem; height:calc(100vh - 250px); }
       .exercise-layout #filter-panel,
       .exercise-layout #exercise-results-wrap {
         overflow-y:auto; overscroll-behavior:contain; scrollbar-gutter:stable;
@@ -289,7 +326,7 @@ const EXERCISE_IMAGES = {};
 ─────────────────────────────────────────── */
 
 
-const VERSION      = "v2.72";
+const VERSION      = "v2.73";
 const VERSION_DATE = "2026-11-26";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
@@ -472,6 +509,7 @@ let state = {
   layoutMode:"1단 가로형", showQr:false, showChecklist:false, showPainLog:false, showFallWarning:false, showCaution:true, showImage:true, showDailyFreq:true, checklistWeeks:2, freqCustomTarget:null,
   preview:false, message:"", expandedId:null, therapistName:"", outputLang:"ko",
   editingPatientId:null,
+  patientFlash:"",
   historyOpenId:null,
   importPreview:null,
   isNewPatient:true,
@@ -591,6 +629,12 @@ function migratePatientRecord(rec){
   const selected=serializeSelected(rec.selected);
   let changed=JSON.stringify(rec.selected||[])!==JSON.stringify(selected);
   const record={...rec,selected};
+  if(Object.prototype.hasOwnProperty.call(rec,"bbsScore")){
+    const bbs=normalizeBbs(rec.bbsScore);
+    if(bbs!==rec.bbsScore) changed=true;
+    if(bbs!=null) record.bbsScore=bbs;
+    else delete record.bbsScore;
+  }
   if(Object.prototype.hasOwnProperty.call(rec,"history")){
     const history=normalizeHistory(rec.history);
     if(JSON.stringify(history)!==JSON.stringify(rec.history)) changed=true;
@@ -871,6 +915,10 @@ function autoSave(){
   const patientFreq=normalizeDailyFreq(patient.dailyFreq);
   if(patientFreq) patient.dailyFreq=patientFreq;
   else delete patient.dailyFreq;
+  // 0~56이 아닌 값은 저장하지 않는다
+  const patientBbs=normalizeBbs(state.bbsScore);
+  if(patientBbs!=null) patient.bbsScore=patientBbs;
+  else delete patient.bbsScore;
   const record = {
     ...patient,
     savedAt: new Date().toISOString(),
@@ -907,7 +955,16 @@ function autoSave(){
 let autoSaveDebounceTimer = null;
 function autoSaveDebounced(){
   clearTimeout(autoSaveDebounceTimer);
-  autoSaveDebounceTimer = setTimeout(autoSave, 600);
+  autoSaveDebounceTimer = setTimeout(()=>{
+    const wasNew=state.isNewPatient;
+    autoSave();
+    // 새 환자가 처음 저장된 순간 목록과 폼의 「작업 중」 표시를 맞춘다
+    if(wasNew&&!state.isNewPatient){
+      announcePatient("새 환자를 저장했습니다 · 작업 중");
+      updatePatientBadge();
+      if(state.tab===0) renderMain();
+    }
+  }, 600);
 }
 /* 환자 전환·신규 작성 전에 아직 저장되지 않은 입력을 반영 */
 function flushAutoSave(){ autoSave(); }
@@ -1014,17 +1071,24 @@ function toggleFavorite(id){
   saveFavorites(next);
   renderMain();
 }
+/* BBS는 0~56의 정수. 빈 칸은 0점이 아니다. */
+function normalizeBbs(value){
+  const text=String(value??"").trim();
+  if(!/^\d+$/.test(text)) return null;
+  const score=Number(text);
+  return score<=56?score:null;
+}
 function bbsBandFor(value){
-  if(String(value??"").trim()==="") return null; // 빈 칸은 0점이 아니다
-  const score=Number(value);
-  if(Number.isNaN(score)||score<0||score>56) return null;
-  return BBS_RECOMMENDATIONS.find(r=>score>=r.min&&score<r.max+1)||null;
+  const score=normalizeBbs(value);
+  return score==null?null:(BBS_RECOMMENDATIONS.find(r=>score>=r.min&&score<=r.max)||null);
 }
 function activeBbsRecommendation(){ return bbsBandFor(state.bbsScore); }
 /* 운동 선택과 추천 화면의 BBS 칸은 같은 값이다 */
 function setBbsScore(value){
   state.bbsScore=value;
   state.aiProfile={...currentAiProfile(),bbs:value};
+  updatePatientBadge();
+  autoSaveDebounced();
   clearAiResults();
   if(state.tab===1){
     if(!activeBbsRecommendation()) state.bbsMode=false;
@@ -1391,6 +1455,7 @@ function setExerciseVideo(id,value){
   autoSave();
   renderMain();
 }
+/* 예상시간은 운동하는 시간만 센다. 세트 사이 쉬는 시간은 넣지 않는다. */
 function exerciseMinutes(item){
   if(!item) return 0;
   const lib=exerciseById(item.id);
@@ -1604,27 +1669,45 @@ function setField(k,v){
 }
 
 /* 텍스트 입력 필드는 state만 업데이트 (render 없음 → 깜빡임 방지) */
-function setPatientFieldSilent(k,v){state.patient[k]=v; autoSaveDebounced();}
+function setPatientFieldSilent(k,v){state.patient[k]=v; updatePatientBadge(); autoSaveDebounced();}
 /* 재렌더가 필요한 경우만 (날짜) */
 function setPatientField(k,v){state.patient[k]=v; autoSave(); render();}
 
-/* 헤더 배지만 DOM 직접 업데이트 — render() 없이 이름 반영 */
+function patientBarHTML(){
+  const p=state.patient, name=String(p.name||"").trim(), count=state.selected.length;
+  const mode=!name&&state.isNewPatient?"empty":state.isNewPatient?"new":"active";
+  const bbs=normalizeBbs(state.bbsScore);
+  const sub=[p.patientNo, p.note, bbs!=null?`BBS ${bbs}점`:"", state.outputLang!=="ko"?`출력 ${state.outputLang.toUpperCase()}`:""].map(x=>String(x||"").trim()).filter(Boolean).join(" · ");
+  const label=state.patientFlash||(mode==="active"?"작업 중인 환자":mode==="new"?"새 환자 작성 중 · 아직 저장 전":"선택된 환자 없음");
+  return `<div class="patient-bar is-${mode} ${state.patientFlash?"is-flash":""}" role="status" aria-live="polite">
+      <div class="patient-avatar" aria-hidden="true">${mode==="empty"?"＋":esc(name.charAt(0)||"?")}</div>
+      <div class="pb-main">
+        <div class="pb-label">${esc(label)}</div>
+        <div class="pb-line">${mode==="empty"
+          ?`<span class="pb-sub">새 환자 이름을 입력하거나 환자 목록에서 고르세요.</span>`
+          :`<span class="pb-name">${esc(name||"이름 없는 환자")}</span>${sub?`<span class="pb-sub">${esc(sub)}</span>`:""}`}</div>
+      </div>
+      ${mode==="empty"?"":`<span class="pb-count selected-count">운동 ${count}개</span>`}
+      <button type="button" class="pb-btn" onclick="goPatientList()">${mode==="empty"?"환자 목록":"환자 바꾸기"}</button>
+    </div>`;
+}
+/* 표시줄만 바꾼다. 이름을 입력하는 동안 다른 화면은 다시 그리지 않는다. */
 function updatePatientBadge(){
   const badge=document.getElementById("patient-header-badge");
-  if(!badge) return;
-  const name=state.patient.name;
-  if(name){
-    badge.innerHTML=`
-      <div class="patient-avatar">${esc(name.charAt(0))}</div>
-      <div class="min-w-0 flex-1">
-        <div class="text-xs font-bold text-slate-800 truncate">${esc(name)}</div>
-        <div class="text-[10px] text-slate-400">${esc(state.patient.note||state.patient.date)}</div>
-      </div>
-      ${state.selected.length>0?`<span class="shrink-0 rounded-full bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5">운동 ${state.selected.length}개</span>`:""}
-    `;
-  } else {
-    badge.innerHTML=`<span class="text-xs text-slate-400 italic">환자를 먼저 입력하세요</span>`;
-  }
+  if(badge) setHTML(badge, patientBarHTML());
+}
+let patientFlashTimer=null;
+/* 환자를 만들거나 불러온 직후 표시줄에서 알린다 */
+function announcePatient(text){
+  state.patientFlash=text;
+  clearTimeout(patientFlashTimer);
+  patientFlashTimer=setTimeout(()=>{ state.patientFlash=""; updatePatientBadge(); },3000);
+}
+function goPatientList(){
+  state.tab=0;
+  render();
+  const el=document.getElementById("patient-list-section");
+  if(el) el.scrollIntoView({block:"start"});
 }
 
 /* 저장된 환자 인라인 편집 */
@@ -1810,6 +1893,7 @@ function saveCurrentPatient(){
 
   const wasNew = state.isNewPatient;
   autoSave(); // 실제 저장은 autoSave가 처리
+  announcePatient(wasNew?"새 환자를 추가했습니다 · 작업 중":"저장했습니다 · 작업 중");
   showMessage(`${state.patient.name} ${wasNew?"추가":"수정"} 완료 ✓`);
   render();
 }
@@ -1821,6 +1905,7 @@ function newPatient(){
 }
 /* 저장하지 않고 빈 환자 화면으로 바꾼다 */
 function startBlankPatient(){
+  state.patientFlash="";
   resetPatientScopedState();
   applyPrintSettings(null);
   state.patient=newPatientData();
@@ -1838,6 +1923,12 @@ function loadPatient(id){
     memo:loadedMemo,memoPreset:memoPresetFor(loadedMemo),note:r.note||"",patientNo:r.patientNo||""};
   const loadedFreq=normalizeDailyFreq(r.dailyFreq);
   if(loadedFreq) loaded.dailyFreq=loadedFreq;
+  const loadedBbs=normalizeBbs(r.bbsScore);
+  if(loadedBbs!=null){
+    loaded.bbsScore=loadedBbs;
+    state.bbsScore=String(loadedBbs);
+    state.aiProfile={...currentAiProfile(),bbs:state.bbsScore};
+  }
   const loadedHistory=normalizeHistory(r.history);
   if(loadedHistory.length) loaded.history=loadedHistory;
   state.patient=loaded;
@@ -1847,7 +1938,9 @@ function loadPatient(id){
   state.isNewPatient=false;
   // 탭 이동 없이 환자정보 탭 폼에만 반영 (tab=0 유지)
   state.tab=0;
+  announcePatient("환자를 불러왔습니다 · 작업 중");
   showMessage(`${r.name||"이름 없는 환자"} 불러오기 완료`);
+  window.scrollTo(0,0);
 }
 function duplicatePatient(id){
   flushAutoSave();
@@ -2260,19 +2353,7 @@ function render(){
         <span class="text-sm font-black tracking-tight text-slate-800 shrink-0">운동숙제</span>
         <span class="rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold px-1.5 py-0.5 border border-blue-100 shrink-0" title="${VERSION_DATE}">${VERSION}</span>
 
-        <!-- ④ 환자 고정 헤더 배지 -->
-        <div class="flex-1 min-w-0 flex justify-center">
-          <div id="patient-header-badge" class="patient-sticky-badge max-w-[260px] w-full" style="${state.patient.name?"":"background:transparent;border-color:transparent;padding:4px 0"}">
-          ${state.patient.name
-            ? `<div class="patient-avatar">${esc(state.patient.name.charAt(0))}</div>
-                <div class="min-w-0 flex-1">
-                  <div class="text-xs font-bold text-slate-800 truncate">${esc(state.patient.name)}</div>
-                  ${state.patient.note?`<div class="text-[10px] text-slate-400 truncate">${esc(state.patient.note)}</div>`:`<div class="text-[10px] text-slate-400">${esc(state.patient.date)}</div>`}
-                </div>
-                ${state.selected.length>0?`<span class="shrink-0 rounded-full bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5">운동 ${state.selected.length}개</span>`:""}`
-            : `<span class="text-xs text-slate-400 italic">환자를 먼저 입력하세요</span>`}
-          </div>
-        </div>
+        <div class="flex-1 min-w-0"></div>
 
         ${state.message?`<span class="anim-pop rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-1 border border-emerald-100 shrink-0 hidden sm:inline">${esc(state.message)}</span>`:""}
         <span id="autosave-indicator" class="text-[10px] text-slate-400 font-semibold shrink-0 hidden sm:inline transition-opacity duration-500" style="opacity:0">자동저장됨 ✓</span>
@@ -2294,6 +2375,9 @@ function render(){
           </button>
         </div>
       </div>
+
+      <!-- 작업 중인 환자 -->
+      <div class="mx-auto max-w-5xl px-3 pb-2 no-print"><div id="patient-header-badge">${patientBarHTML()}</div></div>
 
       <!-- ⑤ 단계 진행 바 -->
       <div class="mx-auto max-w-5xl px-3 pb-2 no-print">
@@ -2410,7 +2494,7 @@ function syncBottomNav(){
 
   // ── 헤더 환자 뱃지 운동 개수 ──
   const hbadge = document.getElementById("patient-header-badge");
-  if(hbadge && state.patient.name){
+  if(hbadge){
     const countEl = hbadge.querySelector(".selected-count");
     if(countEl) countEl.textContent = `운동 ${cnt}개`;
   }
@@ -2498,7 +2582,7 @@ function tabPatient(){
         <div class="flex items-center gap-2">
           ${isEdit
             ? `<span class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs shrink-0">✎</span>
-               <span class="text-sm font-bold text-blue-700">수정 중 — ${esc(state.patient.name)}</span>`
+               <span class="text-sm font-bold text-blue-700">작업 중인 환자: ${esc(state.patient.name)}</span>`
             : `<span class="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold shrink-0">＋</span>
                <span class="text-sm font-bold text-blue-700">새 환자 작성</span>`}
         </div>
@@ -2513,14 +2597,14 @@ function tabPatient(){
       <!-- 폼 본문 -->
       <div class="p-5 grid gap-3">
         <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-950">
-          환자 이름과 등록번호는 이 브라우저에만 저장됩니다. 여러 사람이 쓰는 컴퓨터에서는 등록번호를 입력하지 마세요. 브라우저에 저장된 데이터를 지우면 환자 목록도 함께 삭제됩니다.
+          환자 이름, 등록번호, BBS 점수는 이 브라우저에만 저장됩니다. 여러 사람이 쓰는 컴퓨터에서는 등록번호를 입력하지 마세요. 브라우저에 저장된 데이터를 지우면 환자 목록도 함께 삭제됩니다.
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="text-xs font-semibold text-slate-500 mb-1 block">이름 <span class="text-red-400">*</span></label>
             <input id="patient-name-input"
               value="${esc(state.patient.name)}"
-              oninput="setPatientFieldSilent('name',this.value);updatePatientBadge()"
+              oninput="setPatientFieldSilent('name',this.value)"
               onkeydown="if(event.key==='Enter'){event.preventDefault();saveCurrentPatient();}"
               placeholder="이름 (Enter로 저장)"
               class="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-blue-400 transition-colors"/>
@@ -2576,7 +2660,7 @@ function tabPatient(){
     ${historySectionHTML()}
 
     <!-- ── 환자 목록 ── -->
-    <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
+    <section id="patient-list-section" style="scroll-margin-top:220px" class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5">
       <div class="flex items-center justify-between mb-3">
         <h2 class="font-bold text-slate-800">📋 환자 목록</h2>
         <span class="text-xs font-bold text-slate-500 bg-slate-100 rounded-full px-2 py-1">${state.savedPatients.length}명</span>
@@ -2597,7 +2681,7 @@ function tabPatient(){
 
     <section class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 space-y-3">
       <h2 class="font-bold text-slate-800">환자 목록 백업</h2>
-      <p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-950">이 파일에는 환자 이름과 등록번호가 들어 있습니다. 다른 사람과 공유하거나 공용 컴퓨터에 남겨 두지 마세요.</p>
+      <p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-950">이 파일에는 환자 이름, 등록번호, BBS 점수가 들어 있습니다. 다른 사람과 공유하거나 공용 컴퓨터에 남겨 두지 마세요.</p>
       <div class="flex flex-wrap gap-2">
         <button onclick="exportPatients()" class="rounded-xl bg-slate-800 text-white text-sm font-bold px-4 py-2.5 hover:bg-slate-700 transition-colors">내보내기</button>
         <button onclick="document.getElementById('patient-import-file').click()" class="rounded-xl border border-slate-200 text-slate-700 text-sm font-bold px-4 py-2.5 hover:bg-slate-50 transition-colors">가져오기</button>
@@ -2645,19 +2729,19 @@ function patientListHTML(){
       </div>`;
     }
     return `
-    <div data-key="pt-${esc(r.id)}" class="rounded-xl border ${isCurrent?"border-blue-300 bg-blue-50":"border-slate-200 hover:border-slate-300"} p-3 transition-colors">
-      <div class="flex items-center gap-2">
+    <div data-key="pt-${esc(r.id)}" class="patient-row ${isCurrent?"is-current":""}"${isCurrent?` aria-current="true"`:""}>
+      <div class="patient-row-line flex items-center gap-2">
         <button onclick="loadPatient('${r.id}')" class="flex items-center gap-2 flex-1 text-left min-w-0" title="불러오기">
           <div class="w-8 h-8 rounded-full ${isCurrent?"bg-blue-500 text-white":"bg-slate-100 text-slate-600"} flex items-center justify-center text-sm font-bold shrink-0 transition-colors">${esc((r.name||"?").charAt(0))}</div>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="font-bold text-sm text-slate-800">${esc(r.name||"이름 없는 환자")}</span>
               ${r.patientNo?`<span class="text-xs text-slate-400">${esc(r.patientNo)}</span>`:""}
-              ${isCurrent?`<span class="text-[10px] font-bold text-blue-600 bg-blue-100 rounded-full px-1.5 py-0.5">작업 중</span>`:""}
             </div>
-            <div class="text-xs text-slate-400 truncate">${r.note?esc(r.note)+" · ":""}${esc(r.date||"")} · 운동 ${Array.isArray(r.selected)?r.selected.length:0}개${r.settings&&r.settings.outputLang==="en"?" · 출력 EN":""}${r.settings&&r.settings.outputLang==="ja"?" · 출력 JA":""}${r.settings&&r.settings.outputLang==="ar"?" · 출력 AR":""}</div>
+            <div class="text-xs text-slate-400 truncate">${r.note?esc(r.note)+" · ":""}${esc(r.date||"")} · 운동 ${Array.isArray(r.selected)?r.selected.length:0}개${normalizeBbs(r.bbsScore)!=null?` · BBS ${normalizeBbs(r.bbsScore)}점`:""}${r.settings&&r.settings.outputLang==="en"?" · 출력 EN":""}${r.settings&&r.settings.outputLang==="ja"?" · 출력 JA":""}${r.settings&&r.settings.outputLang==="ar"?" · 출력 AR":""}</div>
           </div>
         </button>
+        ${isCurrent?`<span class="pr-now shrink-0">작업 중</span>`:`<button onclick="loadPatient('${r.id}')" class="pr-load shrink-0">불러오기</button>`}
         <div class="flex items-center gap-0.5 shrink-0">
           <button onclick="startEditPatient('${r.id}')" title="이름/등록번호 수정" class="p-1.5 rounded-lg text-slate-400 hover:bg-blue-50 hover:text-blue-500 transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
@@ -2743,7 +2827,7 @@ function tabExercise(){
           <div class="flex items-center justify-between gap-3 flex-wrap">
             <div>
               <p class="text-xs font-bold text-indigo-700">🧭 BBS 기반 추천</p>
-              <p class="text-[11px] text-slate-400 mt-0.5">Berg Balance Scale 점수로 균형 수준에 맞는 운동을 필터링합니다.</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">Berg Balance Scale 점수로 균형 수준에 맞는 운동을 필터링합니다. 점수는 환자 기록에 저장되고 유인물에는 나오지 않습니다.</p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
               <input value="${esc(state.bbsScore)}" oninput="setBbsScore(this.value)" placeholder="0~56" class="w-20 rounded-xl border border-slate-200 px-3 py-2 text-sm text-center font-bold focus:border-indigo-400"/>
@@ -2849,7 +2933,7 @@ function exerciseCardRow(e,idx){
           ${bbsOut?`<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-red-50 text-red-700">BBS 범위 밖</span>`:""}
           ${e.imagePriority?`<span class="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">IMG-${esc(e.imagePriority)}</span>`:""}
         </div>
-        <div class="text-xs text-slate-400 mt-0.5">${esc([doseText(e), e.isTimeBased?"":`${e.durationMin}분`, e.side].filter(Boolean).join(" · "))}</div>
+        <div class="text-xs text-slate-400 mt-0.5">${esc([doseText(e), e.isTimeBased?"":`${exerciseMinutes(selectedFromLibrary(e))}분`, e.side].filter(Boolean).join(" · "))}</div>
         <div class="text-[10px] text-slate-400 mt-0.5 truncate">${bodyLabel?`신체: ${esc(bodyLabel)}`:""}${purposeLabel?` · 목적: ${esc(purposeLabel)}`:""}</div>
       </div>
       <button onclick="event.stopPropagation();${added?"removeExerciseSilent("+e.id+")":"addExercise("+e.id+")"}" class="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center font-bold text-base transition-all ${added?"bg-blue-100 text-blue-600 hover:bg-red-50 hover:text-red-400":"bg-blue-600 text-white hover:bg-blue-700 active:scale-95"}">${added?"✓":"＋"}</button>
