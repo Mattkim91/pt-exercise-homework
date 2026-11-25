@@ -1,5 +1,5 @@
 /* 인쇄·미리보기 문구
-   치료사 화면은 한국어입니다. 이 파일은 출력 언어가 영어·일본어일 때만 쓰입니다.
+   치료사 화면은 한국어입니다. 이 파일은 출력 언어가 영어·일본어·아랍어일 때만 쓰입니다.
    <script src="i18n.js"> 로 읽으므로 file:// 에서도 동작합니다.
    환자 이름, 치료사 이름, 직접 고친 메모는 번역하지 않습니다.
    운동의 한국어 원문은 exercises.js 에만 있습니다. 이 파일은 그 문장을 바꾸지 않습니다.
@@ -85,6 +85,33 @@ var PRINT_STRINGS = {
     "qrHelp": "📱 QRコードを読み取ると、運動の動画を見られます。",
     "pdfName": "患者",
     "missing": "一覧にない運動"
+  },
+  "ar": {
+    "docTitle": "برنامج التمارين المنزلية الخاص بك",
+    "docSubtitle": "تحرّك ببطء، وضمن المدى الذي تشعر فيه بالأمان.",
+    "patientName": "الاسم",
+    "dateLabel": "التاريخ",
+    "dailyFreqLabel": "عدد المرات في اليوم",
+    "timeLabel": "الوقت المتوقع",
+    "therapistLabel": "المعالج",
+    "exercise": "تمرين",
+    "method": "الطريقة",
+    "goal": "الهدف",
+    "caution": "تنبيه",
+    "generalCaution": "تنبيهات عامة",
+    "empty": "لم يتم اختيار أي تمرين.",
+    "checklistTitle": "📅 جدول متابعة التمارين",
+    "painTitle": "✅ سجل الألم والتعب",
+    "painBefore": "الألم قبل التمرين (من 0 إلى 10)",
+    "painAfter": "الألم بعد التمرين (من 0 إلى 10)",
+    "fatigueBefore": "التعب قبل التمرين",
+    "fatigueAfter": "التعب بعد التمرين",
+    "fatigueScale": "خفيف / متوسط / شديد",
+    "video": "فيديو",
+    "qrAlt": "رمز QR لفيديو التمرين",
+    "qrHelp": "📱 وجّه الكاميرا نحو رمز QR لمشاهدة فيديو التمرين.",
+    "pdfName": "مريض",
+    "missing": "تمرين غير موجود في القائمة"
   }
 };
 var SAFETY_I18N = {
@@ -99,54 +126,71 @@ var SAFETY_I18N = {
     "운동 중 흉통·호흡곤란·어지러움 시 즉시 중단하세요.": "運動中に胸の痛み、息苦しさ、めまいが出たら、すぐに中止してください。",
     "통증이 심해지면 강도를 줄이거나 중단하세요.": "痛みが強くなるときは、楽にするか中止してください。",
     "안전한 범위에서 천천히 시행하고 불편감이 있으면 치료사에게 알려주세요.": "安全な範囲でゆっくり行い、違和感があれば療法士に伝えてください。"
+  },
+  "ar": {
+    "낙상 위험 — 반드시 보호자 감독 또는 지지물 가까이에서 시행하세요.": "خطر السقوط — لا تتمرّن إلا بوجود مرافق يراقبك، أو بالقرب من شيء ثابت يمكنك الإمساك به.",
+    "운동 중 흉통·호흡곤란·어지러움 시 즉시 중단하세요.": "توقّف فورًا إذا شعرت بألم في الصدر أو ضيق في التنفس أو دوخة أثناء التمرين.",
+    "통증이 심해지면 강도를 줄이거나 중단하세요.": "إذا زاد الألم فخفّف شدة التمرين أو توقّف.",
+    "안전한 범위에서 천천히 시행하고 불편감이 있으면 치료사에게 알려주세요.": "تحرّك ببطء ضمن المدى الآمن، وأخبر المعالج إذا شعرت بأي انزعاج."
   }
 };
 var LEVEL_I18N = {
   "Lv0 PROM/보호자": {
     "en": "Lv0 PROM / caregiver",
-    "ja": "Lv0 他動運動／介助"
+    "ja": "Lv0 他動運動／介助",
+    "ar": "المستوى 0: تحريك بمساعدة المعالج أو المرافق"
   },
   "Lv1 침상운동": {
     "en": "Lv1 Bed exercise",
-    "ja": "Lv1 ベッド上の運動"
+    "ja": "Lv1 ベッド上の運動",
+    "ar": "المستوى 1: تمارين على السرير"
   },
   "Lv2 앉은자세": {
     "en": "Lv2 Sitting",
-    "ja": "Lv2 座って行う運動"
+    "ja": "Lv2 座って行う運動",
+    "ar": "المستوى 2: تمارين في وضع الجلوس"
   },
   "Lv3 선자세": {
     "en": "Lv3 Standing",
-    "ja": "Lv3 立って行う運動"
+    "ja": "Lv3 立って行う運動",
+    "ar": "المستوى 3: تمارين في وضع الوقوف"
   },
   "Lv4 보행훈련": {
     "en": "Lv4 Walking practice",
-    "ja": "Lv4 歩行練習"
+    "ja": "Lv4 歩行練習",
+    "ar": "المستوى 4: التدرّب على المشي"
   },
   "Lv5 유산소운동": {
     "en": "Lv5 Aerobic exercise",
-    "ja": "Lv5 有酸素運動"
+    "ja": "Lv5 有酸素運動",
+    "ar": "المستوى 5: تمارين هوائية"
   }
 };
 var SIDE_I18N = {
   "좌측": {
     "en": "Left",
-    "ja": "左側"
+    "ja": "左側",
+    "ar": "الجهة اليسرى"
   },
   "우측": {
     "en": "Right",
-    "ja": "右側"
+    "ja": "右側",
+    "ar": "الجهة اليمنى"
   },
   "양측": {
     "en": "Both sides",
-    "ja": "両側"
+    "ja": "両側",
+    "ar": "الجهتان"
   },
   "환측": {
     "en": "Affected side",
-    "ja": "患側"
+    "ja": "患側",
+    "ar": "الجهة المصابة"
   },
   "건측": {
     "en": "Unaffected side",
-    "ja": "健側"
+    "ja": "健側",
+    "ar": "الجهة السليمة"
   }
 };
 var DAY_LABELS = {
@@ -176,1631 +220,1999 @@ var DAY_LABELS = {
     "金",
     "土",
     "日"
+  ],
+  "ar": [
+    "الاثنين",
+    "الثلاثاء",
+    "الأربعاء",
+    "الخميس",
+    "الجمعة",
+    "السبت",
+    "الأحد"
   ]
 };
 var MEMO_PRESETS = {
   "default": {
     "ko": "통증이나 어지럼증 등의 증상 발생 시 잠시 중단하고 충분한 휴식을 취해주세요.",
     "en": "If you get pain, dizziness, or similar symptoms, pause and rest until you feel better.",
-    "ja": "痛みやめまいなどの症状が出たら、いったん中止して十分に休んでください。"
+    "ja": "痛みやめまいなどの症状が出たら、いったん中止して十分に休んでください。",
+    "ar": "إذا شعرت بألم أو دوخة أو أعراض مشابهة فتوقّف قليلًا واسترح راحة كافية."
   },
   "tha": {
     "ko": "통증이나 어지럼증 등의 증상 발생 시 잠시 중단하고 충분한 휴식을 취해주세요. 인공고관절 수술 후의 일반 주의: 고관절을 90도보다 많이 굽히지 마세요. 다리를 몸 가운데선 너머로 모으거나 꼬지 마세요. 무릎과 발끝을 안쪽으로 돌리지 마세요.",
     "en": "If you get pain, dizziness, or similar symptoms, pause and rest until you feel better. General precautions after hip replacement: do not bend the hip past 90 degrees. Do not bring the leg across the midline of your body or cross your legs. Do not turn the knee and toes inward.",
-    "ja": "痛みやめまいなどの症状が出たら、いったん中止して十分に休んでください。人工股関節の手術後の一般的な注意: 股関節を90度より深く曲げないでください。脚を体の真ん中の線より内側に寄せたり、脚を組んだりしないでください。膝とつま先を内側にひねらないでください。"
+    "ja": "痛みやめまいなどの症状が出たら、いったん中止して十分に休んでください。人工股関節の手術後の一般的な注意: 股関節を90度より深く曲げないでください。脚を体の真ん中の線より内側に寄せたり、脚を組んだりしないでください。膝とつま先を内側にひねらないでください。",
+    "ar": "إذا شعرت بألم أو دوخة أو أعراض مشابهة فتوقّف قليلًا واسترح راحة كافية. تنبيهات عامة بعد جراحة استبدال مفصل الورك: لا تثنِ مفصل الورك أكثر من 90 درجة. لا تقرّب ساقك إلى ما بعد خط منتصف الجسم ولا تضع ساقًا فوق الأخرى. لا تُدِر الركبة وأصابع القدم نحو الداخل."
   }
 };
 var TARGET_I18N = {
   "발목 관절가동범위 유지 및 구축 예방": {
     "en": "Keep the ankle moving and help prevent stiffness.",
-    "ja": "足首の動きを保ち、硬くなるのを防ぎます。"
+    "ja": "足首の動きを保ち、硬くなるのを防ぎます。",
+    "ar": "المحافظة على حركة الكاحل والوقاية من التيبّس."
   },
   "하지 관절가동범위 유지 및 구축 예방": {
     "en": "Keep the leg joints moving and help prevent stiffness.",
-    "ja": "脚の関節の動きを保ち、硬くなるのを防ぎます。"
+    "ja": "脚の関節の動きを保ち、硬くなるのを防ぎます。",
+    "ar": "المحافظة على حركة مفاصل الساق والوقاية من التيبّس."
   },
   "어깨 관절가동범위 유지 및 구축 예방": {
     "en": "Keep the shoulder moving and help prevent stiffness.",
-    "ja": "肩の動きを保ち、硬くなるのを防ぎます。"
+    "ja": "肩の動きを保ち、硬くなるのを防ぎます。",
+    "ar": "المحافظة على حركة الكتف والوقاية من التيبّس."
   },
   "손목·손가락 관절가동범위 유지 및 구축 예방": {
     "en": "Keep the wrist and fingers moving and help prevent stiffness.",
-    "ja": "手首と指の動きを保ち、硬くなるのを防ぎます。"
+    "ja": "手首と指の動きを保ち、硬くなるのを防ぎます。",
+    "ar": "المحافظة على حركة الرسغ والأصابع والوقاية من التيبّس."
   },
   "침상 이동 능력 향상": {
     "en": "Make it easier to move in bed.",
-    "ja": "ベッドの上で動きやすくします。"
+    "ja": "ベッドの上で動きやすくします。",
+    "ar": "تسهيل الحركة في السرير."
   },
   "대퇴사두근 활성화": {
     "en": "Wake up the muscle on the front of the thigh.",
-    "ja": "太ももの前の筋肉を働かせます。"
+    "ja": "太ももの前の筋肉を働かせます。",
+    "ar": "تنشيط عضلات مقدمة الفخذ."
   },
   "둔근 활성화": {
     "en": "Wake up the buttock muscles.",
-    "ja": "お尻の筋肉を働かせます。"
+    "ja": "お尻の筋肉を働かせます。",
+    "ar": "تنشيط عضلات الأرداف."
   },
   "대퇴사두근 강화 및 무릎 펴기 조절": {
     "en": "Strengthen the front of the thigh and control straightening the knee.",
-    "ja": "太ももの前を鍛え、膝を伸ばす動きをコントロールします。"
+    "ja": "太ももの前を鍛え、膝を伸ばす動きをコントロールします。",
+    "ar": "تقوية عضلات مقدمة الفخذ والتحكم في فرد الركبة."
   },
   "고관절 굴곡근 및 대퇴사두근 강화": {
     "en": "Strengthen the muscles that lift the thigh and straighten the knee.",
-    "ja": "脚を上げる筋肉と、膝を伸ばす筋肉を鍛えます。"
+    "ja": "脚を上げる筋肉と、膝を伸ばす筋肉を鍛えます。",
+    "ar": "تقوية العضلات التي ترفع الفخذ والعضلات التي تفرد الركبة."
   },
   "고관절 외전근 강화": {
     "en": "Strengthen the muscles that move the leg out to the side.",
-    "ja": "脚を横に開く筋肉を鍛えます。"
+    "ja": "脚を横に開く筋肉を鍛えます。",
+    "ar": "تقوية العضلات التي تبعد الساق إلى الجانب."
   },
   "고관절 외전근 및 중둔근 강화": {
     "en": "Strengthen the side-hip and gluteus medius muscles.",
-    "ja": "股関節の外側と中殿筋を鍛えます。"
+    "ja": "股関節の外側と中殿筋を鍛えます。",
+    "ar": "تقوية عضلات جانب الورك والعضلة الألوية الوسطى."
   },
   "고관절 외전근 강화 및 골반 안정성 향상": {
     "en": "Strengthen the side-hip muscles and steady the pelvis.",
-    "ja": "股関節の外側を鍛え、骨盤を安定させます。"
+    "ja": "股関節の外側を鍛え、骨盤を安定させます。",
+    "ar": "تقوية عضلات جانب الورك وتحسين ثبات الحوض."
   },
   "둔근 강화 및 침상 이동 준비": {
     "en": "Strengthen the buttocks and prepare for moving in bed.",
-    "ja": "お尻を鍛え、ベッドの上で動く準備をします。"
+    "ja": "お尻を鍛え、ベッドの上で動く準備をします。",
+    "ar": "تقوية الأرداف والاستعداد للحركة في السرير."
   },
   "손목 관절가동범위 유지": {
     "en": "Keep the wrist moving.",
-    "ja": "手首の動きを保ちます。"
+    "ja": "手首の動きを保ちます。",
+    "ar": "المحافظة على حركة الرسغ."
   },
   "팔꿈치 관절가동범위 유지": {
     "en": "Keep the elbow moving.",
-    "ja": "肘の動きを保ちます。"
+    "ja": "肘の動きを保ちます。",
+    "ar": "المحافظة على حركة المرفق."
   },
   "상지 체중지지 및 어깨 안정성 향상": {
     "en": "Practice taking weight through the arm and steady the shoulder.",
-    "ja": "腕に体重をのせ、肩を安定させます。"
+    "ja": "腕に体重をのせ、肩を安定させます。",
+    "ar": "التدرّب على تحميل الوزن على الذراع وتحسين ثبات الكتف."
   },
   "골반 조절 및 요부 긴장 완화": {
     "en": "Practice pelvic control and ease tension in the low back.",
-    "ja": "骨盤のコントロールを練習し、腰の緊張をやわらげます。"
+    "ja": "骨盤のコントロールを練習し、腰の緊張をやわらげます。",
+    "ar": "التدرّب على التحكم في الحوض وتخفيف شدّ أسفل الظهر."
   },
   "상지 조절 및 체간 안정성 향상": {
     "en": "Improve arm control and trunk steadiness.",
-    "ja": "腕のコントロールと体幹の安定を高めます。"
+    "ja": "腕のコントロールと体幹の安定を高めます。",
+    "ar": "تحسين التحكم في الذراع وثبات الجذع."
   },
   "정적 앉은 균형 향상": {
     "en": "Improve steady balance while sitting.",
-    "ja": "座ったままのバランスを高めます。"
+    "ja": "座ったままのバランスを高めます。",
+    "ar": "تحسين التوازن الثابت أثناء الجلوس."
   },
   "앉은 균형 및 체간 조절": {
     "en": "Improve sitting balance and trunk control.",
-    "ja": "座ったバランスと体幹のコントロールを高めます。"
+    "ja": "座ったバランスと体幹のコントロールを高めます。",
+    "ar": "تحسين توازن الجلوس والتحكم في الجذع."
   },
   "상지 도달 및 체간 조절": {
     "en": "Practice reaching and trunk control.",
-    "ja": "手を伸ばす動きと体幹のコントロールを練習します。"
+    "ja": "手を伸ばす動きと体幹のコントロールを練習します。",
+    "ar": "التدرّب على مدّ اليد والتحكم في الجذع."
   },
   "동적 앉은 균형 향상": {
     "en": "Improve balance while sitting and moving.",
-    "ja": "座りながら動くバランスを高めます。"
+    "ja": "座りながら動くバランスを高めます。",
+    "ar": "تحسين التوازن أثناء الحركة في وضع الجلوس."
   },
   "상지 도달 및 시각 탐색 능력 향상": {
     "en": "Practice reaching and looking toward a target.",
-    "ja": "目標を見て手を伸ばす練習をします。"
+    "ja": "目標を見て手を伸ばす練習をします。",
+    "ar": "التدرّب على مدّ اليد والنظر نحو الهدف."
   },
   "대퇴사두근 강화": {
     "en": "Strengthen the front of the thigh.",
-    "ja": "太ももの前を鍛えます。"
+    "ja": "太ももの前を鍛えます。",
+    "ar": "تقوية عضلات مقدمة الفخذ."
   },
   "고관절 굴곡 및 보행 준비": {
     "en": "Practice lifting the thigh to prepare for walking.",
-    "ja": "太ももを上げて、歩く準備をします。"
+    "ja": "太ももを上げて、歩く準備をします。",
+    "ar": "التدرّب على رفع الفخذ استعدادًا للمشي."
   },
   "종아리 근력 강화": {
     "en": "Strengthen the calf.",
-    "ja": "ふくらはぎを鍛えます。"
+    "ja": "ふくらはぎを鍛えます。",
+    "ar": "تقوية عضلات بطة الساق."
   },
   "발목 배측굴곡근 강화": {
     "en": "Strengthen the muscles that lift the foot up.",
-    "ja": "足先を上げる筋肉を鍛えます。"
+    "ja": "足先を上げる筋肉を鍛えます。",
+    "ar": "تقوية العضلات التي ترفع مقدمة القدم."
   },
   "어깨 움직임 및 상지 조절": {
     "en": "Practice shoulder movement and arm control.",
-    "ja": "肩の動きと腕のコントロールを練習します。"
+    "ja": "肩の動きと腕のコントロールを練習します。",
+    "ar": "التدرّب على حركة الكتف والتحكم في الذراع."
   },
   "양측 상지 협응 및 어깨 ROM": {
     "en": "Use both arms together and keep the shoulder moving.",
-    "ja": "両腕をそろえて動かし、肩の可動域を保ちます。"
+    "ja": "両腕をそろえて動かし、肩の可動域を保ちます。",
+    "ar": "استخدام الذراعين معًا والمحافظة على مدى حركة الكتف."
   },
   "손가락 협응 및 미세운동 향상": {
     "en": "Improve finger coordination and fine movement.",
-    "ja": "指の協調と細かい動きを高めます。"
+    "ja": "指の協調と細かい動きを高めます。",
+    "ar": "تحسين تناسق الأصابع والحركات الدقيقة."
   },
   "손 근력 및 쥐기 기능 향상": {
     "en": "Strengthen the hand and improve grip.",
-    "ja": "手の力と握る働きを高めます。"
+    "ja": "手の力と握る働きを高めます。",
+    "ar": "تقوية اليد وتحسين القبضة."
   },
   "견갑골 안정화 및 자세 조절 향상": {
     "en": "Steady the shoulder blades and improve posture.",
-    "ja": "肩甲骨を安定させ、姿勢のコントロールを高めます。"
+    "ja": "肩甲骨を安定させ、姿勢のコントロールを高めます。",
+    "ar": "تحسين ثبات لوحي الكتف والتحكم في وضعية الجسم."
   },
   "상지 지지 및 체중부하 훈련": {
     "en": "Practice supporting yourself through the arms.",
-    "ja": "腕で体を支える練習をします。"
+    "ja": "腕で体を支える練習をします。",
+    "ar": "التدرّب على الاستناد وتحميل الوزن على الذراعين."
   },
   "하지 근력 및 기능적 이동 향상": {
     "en": "Strengthen the legs and make everyday transfers easier.",
-    "ja": "脚を鍛え、日常の移動をしやすくします。"
+    "ja": "脚を鍛え、日常の移動をしやすくします。",
+    "ar": "تقوية الساقين وتسهيل التنقّل اليومي."
   },
   "하지 근력 및 선 자세 안정성 향상": {
     "en": "Strengthen the legs and improve steady standing.",
-    "ja": "脚を鍛え、立った姿勢を安定させます。"
+    "ja": "脚を鍛え、立った姿勢を安定させます。",
+    "ar": "تقوية الساقين وتحسين الثبات أثناء الوقوف."
   },
   "보행 전 체중이동 훈련": {
     "en": "Practice shifting weight before walking.",
-    "ja": "歩く前に、体重を移す練習をします。"
+    "ja": "歩く前に、体重を移す練習をします。",
+    "ar": "التدرّب على نقل الوزن قبل المشي."
   },
   "계단 준비 및 하지 체중부하 조절": {
     "en": "Prepare for stairs and practice controlling weight on the leg.",
-    "ja": "階段の準備として、脚への体重のかけ方を練習します。"
+    "ja": "階段の準備として、脚への体重のかけ方を練習します。",
+    "ar": "الاستعداد لصعود الدرج والتحكم في تحميل الوزن على الساق."
   },
   "정적 균형 향상": {
     "en": "Improve steady balance.",
-    "ja": "じっと立つバランスを高めます。"
+    "ja": "じっと立つバランスを高めます。",
+    "ar": "تحسين التوازن الثابت."
   },
   "좁은 지지면 균형 향상": {
     "en": "Improve balance on a narrow base.",
-    "ja": "せまい面で立つバランスを高めます。"
+    "ja": "せまい面で立つバランスを高めます。",
+    "ar": "تحسين التوازن على قاعدة ضيقة."
   },
   "보행 준비 및 하지 조절": {
     "en": "Prepare for walking and improve leg control.",
-    "ja": "歩く準備をし、脚のコントロールを高めます。"
+    "ja": "歩く準備をし、脚のコントロールを高めます。",
+    "ar": "الاستعداد للمشي وتحسين التحكم في الساق."
   },
   "햄스트링 강화 및 무릎 굽힘 조절": {
     "en": "Strengthen the hamstrings and control bending the knee.",
-    "ja": "ハムストリングスを鍛え、膝を曲げる動きをコントロールします。"
+    "ja": "ハムストリングスを鍛え、膝を曲げる動きをコントロールします。",
+    "ar": "تقوية عضلات خلف الفخذ والتحكم في ثني الركبة."
   },
   "고관절 신전근 강화": {
     "en": "Strengthen the muscles that move the leg backward.",
-    "ja": "脚を後ろに動かす筋肉を鍛えます。"
+    "ja": "脚を後ろに動かす筋肉を鍛えます。",
+    "ar": "تقوية العضلات التي تحرّك الساق إلى الخلف."
   },
   "하지 근력 강화": {
     "en": "Strengthen the legs.",
-    "ja": "脚を鍛えます。"
+    "ja": "脚を鍛えます。",
+    "ar": "تقوية الساقين."
   },
   "전방 체중이동 및 선 자세 균형 향상": {
     "en": "Practice shifting weight forward and balancing while standing.",
-    "ja": "前へ体重を移し、立ったバランスを高めます。"
+    "ja": "前へ体重を移し、立ったバランスを高めます。",
+    "ar": "التدرّب على نقل الوزن إلى الأمام والتوازن أثناء الوقوف."
   },
   "어깨 관절가동범위 및 상지 기능 향상": {
     "en": "Keep the shoulder moving and improve arm use.",
-    "ja": "肩の動きを保ち、腕の働きを高めます。"
+    "ja": "肩の動きを保ち、腕の働きを高めます。",
+    "ar": "المحافظة على حركة الكتف وتحسين استخدام الذراع."
   },
   "견갑골 가동범위 및 어깨 주변 근육 활성화": {
     "en": "Move the shoulder blades and wake up the muscles around the shoulder.",
-    "ja": "肩甲骨を動かし、肩のまわりの筋肉を働かせます。"
+    "ja": "肩甲骨を動かし、肩のまわりの筋肉を働かせます。",
+    "ar": "تحريك لوحي الكتف وتنشيط العضلات حول الكتف."
   },
   "발 위치 조절 및 체중이동 향상": {
     "en": "Practice placing the foot and shifting weight.",
-    "ja": "足の位置と体重移動を練習します。"
+    "ja": "足の位置と体重移動を練習します。",
+    "ar": "التدرّب على التحكم في موضع القدم ونقل الوزن."
   },
   "보행 중 방향전환 능력 향상": {
     "en": "Improve turning while walking.",
-    "ja": "歩きながらの方向転換を練習します。"
+    "ja": "歩きながらの方向転換を練習します。",
+    "ar": "تحسين تغيير الاتجاه أثناء المشي."
   },
   "기본 보행 능력 및 활동량 향상": {
     "en": "Improve basic walking and daily activity.",
-    "ja": "基本的な歩行と活動量を高めます。"
+    "ja": "基本的な歩行と活動量を高めます。",
+    "ar": "تحسين المشي الأساسي ومستوى النشاط."
   },
   "보행 지구력 향상": {
     "en": "Build walking endurance.",
-    "ja": "歩く持久力を高めます。"
+    "ja": "歩く持久力を高めます。",
+    "ar": "تحسين القدرة على الاستمرار في المشي."
   },
   "일상 활동량 및 지구력 향상": {
     "en": "Increase daily activity and endurance.",
-    "ja": "日常の活動量と持久力を高めます。"
+    "ja": "日常の活動量と持久力を高めます。",
+    "ar": "زيادة النشاط اليومي والقدرة على التحمّل."
   },
   "측방 균형 및 고관절 근력 향상": {
     "en": "Improve side-to-side balance and hip strength.",
-    "ja": "横方向のバランスと股関節の筋力を高めます。"
+    "ja": "横方向のバランスと股関節の筋力を高めます。",
+    "ar": "تحسين التوازن الجانبي وقوة الورك."
   },
   "후방 보행 조절 및 균형 향상": {
     "en": "Improve control and balance when stepping backward.",
-    "ja": "後ろへ歩くコントロールとバランスを高めます。"
+    "ja": "後ろへ歩くコントロールとバランスを高めます。",
+    "ar": "تحسين التحكم والتوازن أثناء المشي إلى الخلف."
   },
   "동적 균형 향상": {
     "en": "Improve balance while moving.",
-    "ja": "動きながらのバランスを高めます。"
+    "ja": "動きながらのバランスを高めます。",
+    "ar": "تحسين التوازن أثناء الحركة."
   },
   "보행 중 발 들기 및 균형 향상": {
     "en": "Practice lifting the foot while walking, and improve balance.",
-    "ja": "歩きながら足を上げ、バランスを高めます。"
+    "ja": "歩きながら足を上げ、バランスを高めます。",
+    "ar": "التدرّب على رفع القدم أثناء المشي وتحسين التوازن."
   },
   "방향전환 및 장애물 회피 능력 향상": {
     "en": "Practice turning and walking around obstacles.",
-    "ja": "方向転換と、障害物を避ける歩き方を練習します。"
+    "ja": "方向転換と、障害物を避ける歩き方を練習します。",
+    "ar": "تحسين تغيير الاتجاه وتفادي العوائق."
   },
   "방향전환 및 동적 균형 향상": {
     "en": "Practice turning and balance while moving.",
-    "ja": "方向転換と、動きながらのバランスを練習します。"
+    "ja": "方向転換と、動きながらのバランスを練習します。",
+    "ar": "تحسين تغيير الاتجاه والتوازن أثناء الحركة."
   },
   "하지 근력 및 계단 기능 향상": {
     "en": "Strengthen the legs and practice stair skills.",
-    "ja": "脚を鍛え、階段の動作を練習します。"
+    "ja": "脚を鍛え、階段の動作を練習します。",
+    "ar": "تقوية الساقين وتحسين استخدام الدرج."
   },
   "계단 기능 및 하지 근력 향상": {
     "en": "Practice stairs and strengthen the legs.",
-    "ja": "階段の動作を練習し、脚を鍛えます。"
+    "ja": "階段の動作を練習し、脚を鍛えます。",
+    "ar": "تحسين استخدام الدرج وتقوية الساقين."
   },
   "계단 하강 조절 능력 향상": {
     "en": "Improve control when coming down stairs.",
-    "ja": "階段を下りるコントロールを高めます。"
+    "ja": "階段を下りるコントロールを高めます。",
+    "ar": "تحسين التحكم أثناء نزول الدرج."
   },
   "기능적 보행 및 양손 사용 향상": {
     "en": "Practice walking while using both hands.",
-    "ja": "両手を使う歩き方を練習します。"
+    "ja": "両手を使う歩き方を練習します。",
+    "ar": "تحسين المشي مع استخدام اليدين معًا."
   },
   "보행 조절 능력 향상": {
     "en": "Improve control of walking speed and rhythm.",
-    "ja": "歩く速さやリズムのコントロールを高めます。"
+    "ja": "歩く速さやリズムのコントロールを高めます。",
+    "ar": "تحسين التحكم في المشي."
   },
   "심폐지구력 및 하지 반복운동": {
     "en": "Build heart-and-lung endurance and repeat leg movement.",
-    "ja": "心肺の持久力を高め、脚の繰り返し運動をします。"
+    "ja": "心肺の持久力を高め、脚の繰り返し運動をします。",
+    "ar": "تحسين لياقة القلب والرئتين مع تكرار حركة الساقين."
   },
   "보행 지구력 및 속도 조절": {
     "en": "Build walking endurance and practice speed control.",
-    "ja": "歩く持久力と、速さのコントロールを高めます。"
+    "ja": "歩く持久力と、速さのコントロールを高めます。",
+    "ar": "تحسين القدرة على الاستمرار في المشي والتحكم في السرعة."
   },
   "전신 지구력 및 일상 활동량 향상": {
     "en": "Build whole-body endurance and daily activity.",
-    "ja": "全身の持久力と日常の活動量を高めます。"
+    "ja": "全身の持久力と日常の活動量を高めます。",
+    "ar": "زيادة قدرة الجسم على التحمّل ومستوى النشاط اليومي."
   },
   "발목 가동범위 및 보행 준비": {
     "en": "Keep the ankle moving and prepare for walking.",
-    "ja": "足首の動きを保ち、歩く準備をします。"
+    "ja": "足首の動きを保ち、歩く準備をします。",
+    "ar": "المحافظة على حركة الكاحل والاستعداد للمشي."
   },
   "무릎 뒤쪽 유연성 및 보행 준비": {
     "en": "Loosen the back of the thigh and prepare for walking.",
-    "ja": "太ももの後ろをやわらかくし、歩く準備をします。"
+    "ja": "太ももの後ろをやわらかくし、歩く準備をします。",
+    "ar": "تحسين مرونة خلف الركبة والفخذ والاستعداد للمشي."
   },
   "횡격막 호흡과 환기 효율": {
     "en": "Practice diaphragmatic breathing and easier air movement.",
-    "ja": "横隔膜を使う呼吸で、空気の出入りをしやすくします。"
+    "ja": "横隔膜を使う呼吸で、空気の出入りをしやすくします。",
+    "ar": "التدرّب على التنفس بالحجاب الحاجز وتحسين كفاءة التنفس."
   },
   "날숨 시간과 기도 개방": {
     "en": "Lengthen the breath out and help keep the airways open.",
-    "ja": "息を吐く時間を長くし、気道を開きやすくします。"
+    "ja": "息を吐く時間を長くし、気道を開きやすくします。",
+    "ar": "إطالة الزفير والمساعدة على إبقاء مجرى الهواء مفتوحًا."
   },
   "흉곽 확장과 흡기 깊이": {
     "en": "Expand the rib cage and take a deeper breath in.",
-    "ja": "胸郭を広げ、息を深く吸えるようにします。"
+    "ja": "胸郭を広げ、息を深く吸えるようにします。",
+    "ar": "توسيع القفص الصدري وزيادة عمق الشهيق."
   },
   "느리고 깊은 들숨": {
     "en": "Practice a slow, deep breath in.",
-    "ja": "ゆっくり深い息吸いを練習します。"
+    "ja": "ゆっくり深い息吸いを練習します。",
+    "ar": "التدرّب على شهيق بطيء وعميق."
   },
   "기도 분비물 이동": {
     "en": "Help move mucus up and out of the airways.",
-    "ja": "気道のたんを上の方へ動かします。"
+    "ja": "気道のたんを上の方へ動かします。",
+    "ar": "المساعدة على تحريك البلغم وإخراجه من مجرى الهواء."
   },
   "어깨 관절가동범위 유지, 보조 능동운동": {
     "en": "Keep the shoulder moving, with help from the other arm.",
-    "ja": "肩の動きを保ち、反対の手で助けて動かします。"
+    "ja": "肩の動きを保ち、反対の手で助けて動かします。",
+    "ar": "المحافظة على حركة الكتف بمساعدة الذراع الأخرى."
   },
   "몸통 깊은 근육 활성화, 요부 안정 준비": {
     "en": "Wake up the deep trunk muscles and get ready to steady the lower back.",
-    "ja": "体幹の深い筋肉を働かせ、腰を安定させる準備をします。"
+    "ja": "体幹の深い筋肉を働かせ、腰を安定させる準備をします。",
+    "ar": "تنشيط عضلات الجذع العميقة والاستعداد لتثبيت أسفل الظهر."
   },
   "고관절 내전근 활성화": {
     "en": "Wake up the muscles that bring the thighs together.",
-    "ja": "股関節を内側に閉じる筋肉を働かせます。"
+    "ja": "股関節を内側に閉じる筋肉を働かせます。",
+    "ar": "تنشيط العضلات التي تقرّب الفخذين."
   },
   "고관절 안쪽·바깥 돌림 가동범위 유지": {
     "en": "Keep the hip able to turn inward and outward.",
-    "ja": "股関節を内側・外側に回す動きを保ちます。"
+    "ja": "股関節を内側・外側に回す動きを保ちます。",
+    "ar": "المحافظة على دوران مفصل الورك إلى الداخل والخارج."
   },
   "체간 안정, 반대쪽 팔·다리 협응": {
     "en": "Steady the trunk and coordinate the opposite arm and leg.",
-    "ja": "体幹を安定させ、反対側の手足を一緒に動かします。"
+    "ja": "体幹を安定させ、反対側の手足を一緒に動かします。",
+    "ar": "تثبيت الجذع وتناسق حركة الذراع والساق المتقابلتين."
   },
   "목 자세 조절, 심부 경부 굴곡근 활성화": {
     "en": "Practice neck posture and wake up the deep muscles that draw the chin in.",
-    "ja": "首の姿勢を整え、あごを引く深い筋肉を働かせます。"
+    "ja": "首の姿勢を整え、あごを引く深い筋肉を働かせます。",
+    "ar": "التحكم في وضعية الرقبة وتنشيط العضلات العميقة في مقدمة الرقبة."
   },
   "흉추 가동 및 몸통 회전": {
     "en": "Help the upper back move, and turn the trunk.",
-    "ja": "胸の背骨を動きやすくし、体を回します。"
+    "ja": "胸の背骨を動きやすくし、体を回します。",
+    "ar": "تحسين حركة أعلى الظهر ودوران الجذع."
   },
   "발 안쪽 작은 근육 활성화, 발바닥 감각": {
     "en": "Wake up the small muscles in the foot and the feeling on the sole.",
-    "ja": "足の内側の小さな筋肉を働かせ、足の裏の感覚を出します。"
+    "ja": "足の内側の小さな筋肉を働かせ、足の裏の感覚を出します。",
+    "ar": "تنشيط العضلات الصغيرة داخل القدم وتحسين الإحساس في باطن القدم."
   },
   "앞허벅지와 고관절 앞쪽 유연성": {
     "en": "Loosen the front of the thigh and the front of the hip.",
-    "ja": "太ももの前と股関節の前をやわらかくします。"
+    "ja": "太ももの前と股関節の前をやわらかくします。",
+    "ar": "تحسين مرونة مقدمة الفخذ ومقدمة الورك."
   },
   "장비 없는 저강도 유산소": {
     "en": "Light aerobic exercise with no equipment.",
-    "ja": "道具を使わない、軽い有酸素運動。"
+    "ja": "道具を使わない、軽い有酸素運動。",
+    "ar": "تمرين هوائي خفيف من دون أجهزة."
   },
   "신전 선호 요통에서 상체 신전 자세로 증상 완화": {
     "en": "For a low back that feels better when it is gently arched, ease symptoms by resting propped up.",
-    "ja": "軽く反らす方が楽な腰痛で、上体を起こした姿勢にして症状をやわらげます。"
+    "ja": "軽く反らす方が楽な腰痛で、上体を起こした姿勢にして症状をやわらげます。",
+    "ar": "تخفيف أعراض ألم أسفل الظهر الذي يتحسّن عند فرد الظهر إلى الخلف، بالاستناد على المرفقين."
   },
   "체간 안정, 고관절·무릎 90도 자세에서 복부·고관절 굴곡근 지구력": {
     "en": "Steady the trunk, and build endurance in the belly and hip-lifting muscles with the hips and knees at 90 degrees.",
-    "ja": "体幹を安定させ、股関節と膝を90度にした姿勢で、お腹と股関節を曲げる筋肉の持久力をつけます。"
+    "ja": "体幹を安定させ、股関節と膝を90度にした姿勢で、お腹と股関節を曲げる筋肉の持久力をつけます。",
+    "ar": "تثبيت الجذع وزيادة قدرة عضلات البطن والعضلات التي ترفع الفخذ على التحمّل، مع ثني الورك والركبة 90 درجة."
   }
 };
 var EXERCISE_I18N = {
   "1": {
     "title": {
       "en": "Passive ankle movement",
-      "ja": "足首の他動運動"
+      "ja": "足首の他動運動",
+      "ar": "تحريك الكاحل بمساعدة شخص آخر"
     },
     "description": {
       "en": "A therapist or caregiver gently moves your ankle up and down. Let the leg relax.",
-      "ja": "療法士または介助者が、足首をやさしく上下に動かします。力を抜いて楽にしてください。"
+      "ja": "療法士または介助者が、足首をやさしく上下に動かします。力を抜いて楽にしてください。",
+      "ar": "يحرّك المعالج أو المرافق كاحلك برفق إلى أعلى وأسفل. أرخِ ساقك وابقَ مرتاحًا."
     },
     "caution": {
       "en": "Stop and tell your therapist if it hurts. Move gently, without pushing against tightness.",
-      "ja": "痛みがあれば中止し、療法士に伝えてください。抵抗に逆らわず、やさしく行ってください。"
+      "ja": "痛みがあれば中止し、療法士に伝えてください。抵抗に逆らわず、やさしく行ってください。",
+      "ar": "إذا شعرت بألم فتوقّف فورًا وأخبر المعالج. تتمّ الحركة برفق ومن دون مقاومة الشدّ."
     }
   },
   "2": {
     "title": {
       "en": "Passive knee and hip movement",
-      "ja": "膝・股関節の他動運動"
+      "ja": "膝・股関節の他動運動",
+      "ar": "تحريك الركبة والورك بمساعدة شخص آخر"
     },
     "description": {
       "en": "A therapist or caregiver slowly bends and straightens the knee, and gently bends the hip. Let the leg relax.",
-      "ja": "療法士または介助者が、膝をゆっくり曲げ伸ばしし、股関節をやさしく曲げます。力を抜いて楽にしてください。"
+      "ja": "療法士または介助者が、膝をゆっくり曲げ伸ばしし、股関節をやさしく曲げます。力を抜いて楽にしてください。",
+      "ar": "يثني المعالج أو المرافق ركبتك ويفردها ببطء، ويثني مفصل الورك برفق. أرخِ ساقك وابقَ مرتاحًا."
     },
     "caution": {
       "en": "Stop right away if the joint makes an unusual noise or it hurts. Be especially careful around a fracture or a surgical site.",
-      "ja": "関節からいつもと違う音がしたり痛みがあれば、すぐに中止してください。骨折や手術した部位は特に注意してください。"
+      "ja": "関節からいつもと違う音がしたり痛みがあれば、すぐに中止してください。骨折や手術した部位は特に注意してください。",
+      "ar": "توقّف فورًا إذا صدر من المفصل صوت غير معتاد أو شعرت بألم. انتبه بشكل خاص إلى موضع الكسر أو الجراحة."
     }
   },
   "3": {
     "title": {
       "en": "Passive shoulder movement",
-      "ja": "肩の他動運動"
+      "ja": "肩の他動運動",
+      "ar": "تحريك الكتف بمساعدة شخص آخر"
     },
     "description": {
       "en": "A therapist or caregiver gently lifts the arm forward and out to the side. Let the arm relax.",
-      "ja": "療法士または介助者が、腕をやさしく前に上げ、横に開きます。力を抜いて楽にしてください。"
+      "ja": "療法士または介助者が、腕をやさしく前に上げ、横に開きます。力を抜いて楽にしてください。",
+      "ar": "يرفع المعالج أو المرافق ذراعك برفق إلى الأمام، ثم يبعدها إلى الجانب. أرخِ ذراعك وابقَ مرتاحًا."
     },
     "caution": {
       "en": "If the shoulder has dislocated before, tell your therapist first. Stay in a range that does not hurt.",
-      "ja": "肩が外れたことがある人は、先に療法士に伝えてください。痛くない範囲だけで行ってください。"
+      "ja": "肩が外れたことがある人は、先に療法士に伝えてください。痛くない範囲だけで行ってください。",
+      "ar": "إذا سبق أن تعرّضت لخلع في الكتف فأخبر المعالج أولًا. تتمّ الحركة فقط ضمن المدى الخالي من الألم."
     }
   },
   "4": {
     "title": {
       "en": "Passive wrist and finger movement",
-      "ja": "手首・指の他動運動"
+      "ja": "手首・指の他動運動",
+      "ar": "تحريك الرسغ والأصابع بمساعدة شخص آخر"
     },
     "description": {
       "en": "A therapist or caregiver moves the wrist up and down and gently straightens the fingers. Let the hand relax.",
-      "ja": "療法士または介助者が、手首を上下に動かし、指をやさしく伸ばします。力を抜いて楽にしてください。"
+      "ja": "療法士または介助者が、手首を上下に動かし、指をやさしく伸ばします。力を抜いて楽にしてください。",
+      "ar": "يحرّك المعالج أو المرافق رسغك إلى أعلى وأسفل ويفرد أصابعك برفق. أرخِ يدك وابقَ مرتاحًا."
     },
     "caution": {
       "en": "If the fingers are very stiff, do not force them straight. Stay within the range that is available.",
-      "ja": "指の硬さが強いときは、無理に伸ばさず、動く範囲だけで行ってください。"
+      "ja": "指の硬さが強いときは、無理に伸ばさず、動く範囲だけで行ってください。",
+      "ar": "إذا كانت الأصابع شديدة التصلّب فلا تُفرد بالقوة، بل ضمن المدى الممكن فقط."
     }
   },
   "5": {
     "title": {
       "en": "Ankle pumps",
-      "ja": "アンクルポンプ"
+      "ja": "アンクルポンプ",
+      "ar": "تحريك الكاحل إلى أعلى وأسفل"
     },
     "description": {
       "en": "Lying down, slowly move your ankle up and down on your own. Pull the toes toward you, then point them away. Repeat.",
-      "ja": "仰向けで、自分で足首をゆっくり上下に動かします。足先を体の方へ引き、次に下へ押す動きを繰り返します。"
+      "ja": "仰向けで、自分で足首をゆっくり上下に動かします。足先を体の方へ引き、次に下へ押す動きを繰り返します。",
+      "ar": "استلقِ وحرّك كاحلك بنفسك ببطء إلى أعلى وأسفل. اسحب أصابع القدم نحو جسمك ثم ادفعها إلى أسفل، وكرّر ذلك."
     },
     "caution": {
       "en": "Stop and tell your therapist if it hurts. Move slowly, without bouncing.",
-      "ja": "痛みがあれば中止し、療法士に伝えてください。反動をつけず、ゆっくり行ってください。"
+      "ja": "痛みがあれば中止し、療法士に伝えてください。反動をつけず、ゆっくり行ってください。",
+      "ar": "إذا شعرت بألم فتوقّف فورًا وأخبر المعالج. تحرّك ببطء ومن دون اندفاع."
     }
   },
   "6": {
     "title": {
       "en": "Bend and straighten the knee",
-      "ja": "膝の曲げ伸ばし"
+      "ja": "膝の曲げ伸ばし",
+      "ar": "ثني الركبة وفردها"
     },
     "description": {
       "en": "Lie down with the heel on the bed. Slowly slide the heel toward you to bend the knee, then slowly straighten the leg back down.",
-      "ja": "仰向けで、かかとを床につけます。かかとを体の方へゆっくり滑らせて膝を曲げ、またゆっくり伸ばして下ろします。"
+      "ja": "仰向けで、かかとを床につけます。かかとを体の方へゆっくり滑らせて膝を曲げ、またゆっくり伸ばして下ろします。",
+      "ar": "استلقِ وأبقِ كعبك على السرير، ثم اسحبه ببطء نحو جسمك لتثني الركبة، وبعدها افردها ببطء."
     },
     "caution": {
       "en": "Stop right away if the knee makes an unusual noise or it hurts. After a fracture or surgery, stay in a range that does not hurt.",
-      "ja": "膝からいつもと違う音がしたり痛みがあれば、すぐに中止してください。骨折や手術のあとは、痛くない範囲だけで行ってください。"
+      "ja": "膝からいつもと違う音がしたり痛みがあれば、すぐに中止してください。骨折や手術のあとは、痛くない範囲だけで行ってください。",
+      "ar": "توقّف فورًا إذا صدر من الركبة صوت غير معتاد أو شعرت بألم. عند وجود كسر أو جراحة تحرّك فقط ضمن المدى الخالي من الألم."
     }
   },
   "7": {
     "title": {
       "en": "Roll onto your side",
-      "ja": "横向きに寝返り"
+      "ja": "横向きに寝返り",
+      "ar": "التقلّب إلى الجانب"
     },
     "description": {
       "en": "Lie down, bend the knees a little, and slowly roll the body onto one side.",
-      "ja": "仰向けで膝を軽く曲げ、体をゆっくり横向きに回します。"
+      "ja": "仰向けで膝を軽く曲げ、体をゆっくり横向きに回します。",
+      "ar": "استلقِ واثنِ ركبتيك قليلًا، ثم أدر جذعك ببطء إلى الجانب."
     },
     "caution": {
       "en": "If you feel dizzy or it hurts, rest, then continue slowly.",
-      "ja": "めまいや痛みがあれば、休みながらゆっくり行ってください。"
+      "ja": "めまいや痛みがあれば、休みながらゆっくり行ってください。",
+      "ar": "إذا شعرت بدوخة أو ألم فتمهّل وخذ فترات راحة."
     }
   },
   "8": {
     "title": {
       "en": "Press the knee down",
-      "ja": "膝を下に押す"
+      "ja": "膝を下に押す",
+      "ar": "ضغط الركبة إلى أسفل"
     },
     "description": {
       "en": "Place a towel under the knee. Press the knee down into the towel so the front of the thigh tightens.",
-      "ja": "膝の下にタオルを置き、膝を下へ押して太ももの前に力を入れます。"
+      "ja": "膝の下にタオルを置き、膝を下へ押して太ももの前に力を入れます。",
+      "ar": "ضع منشفة تحت ركبتك واضغط الركبة إلى أسفل لتشدّ عضلات مقدمة الفخذ."
     },
     "caution": {
       "en": "If the knee hurts a lot, press more gently.",
-      "ja": "膝の痛みが強いときは、力を弱めてください。"
+      "ja": "膝の痛みが強いときは、力を弱めてください。",
+      "ar": "إذا كان ألم الركبة شديدًا فخفّف قوة الشدّ."
     }
   },
   "9": {
     "title": {
       "en": "Tighten the buttocks",
-      "ja": "お尻に力を入れる"
+      "ja": "お尻に力を入れる",
+      "ar": "شدّ الأرداف"
     },
     "description": {
       "en": "Lie down, squeeze the buttocks, hold for 3 seconds, then slowly relax.",
-      "ja": "仰向けでお尻に力を入れ、3秒保ってから、ゆっくり力を抜きます。"
+      "ja": "仰向けでお尻に力を入れ、3秒保ってから、ゆっくり力を抜きます。",
+      "ar": "استلقِ وشدّ عضلات الأرداف لمدة 3 ثوانٍ، ثم أرخِها ببطء."
     },
     "caution": {
       "en": "If the low back or the leg starts to hurt, use less effort.",
-      "ja": "腰や脚が痛くなったら、力を弱めてください。"
+      "ja": "腰や脚が痛くなったら、力を弱めてください。",
+      "ar": "إذا شعرت بألم في الظهر أو الساق فخفّف الشدة."
     }
   },
   "10": {
     "title": {
       "en": "Short-arc quad",
-      "ja": "ショートアーククワッド"
+      "ja": "ショートアーククワッド",
+      "ar": "رفع القدم مع وسادة تحت الركبة"
     },
     "description": {
       "en": "Place a pillow or a rolled towel under the knee. Lying down, slowly straighten the knee and lift the foot.",
-      "ja": "膝の下に枕か丸めたタオルを置きます。仰向けで膝をゆっくり伸ばし、足を持ち上げます。"
+      "ja": "膝の下に枕か丸めたタオルを置きます。仰向けで膝をゆっくり伸ばし、足を持ち上げます。",
+      "ar": "استلقِ وضع وسادة أو منشفة تحت ركبتك، ثم افرد الركبة ببطء وارفع قدمك."
     },
     "caution": {
       "en": "If the knee hurts a lot, use a smaller movement and check that the front of the thigh is working.",
-      "ja": "膝の痛みが強いときは、動かす範囲を小さくし、太ももの前に力が入っているか確かめてください。"
+      "ja": "膝の痛みが強いときは、動かす範囲を小さくし、太ももの前に力が入っているか確かめてください。",
+      "ar": "إذا كان ألم الركبة شديدًا فقلّل مدى الحركة، وتأكّد من شدّ عضلات مقدمة الفخذ."
     }
   },
   "11": {
     "title": {
       "en": "Straight leg raise",
-      "ja": "脚上げ（膝を伸ばして）"
+      "ja": "脚上げ（膝を伸ばして）",
+      "ar": "رفع الساق مستقيمة"
     },
     "description": {
       "en": "Lie down with the knee straight. Slowly lift one leg, then lower it.",
-      "ja": "仰向けで膝を伸ばしたまま、片方の脚をゆっくり上げ、下ろします。"
+      "ja": "仰向けで膝を伸ばしたまま、片方の脚をゆっくり上げ、下ろします。",
+      "ar": "استلقِ وارفع ساقًا واحدة ببطء مع إبقاء الركبة مفرودة، ثم أنزلها."
     },
     "caution": {
       "en": "Stop if the low back arches a lot or it hurts.",
-      "ja": "腰が大きく浮く、または痛みがあれば中止してください。"
+      "ja": "腰が大きく浮く、または痛みがあれば中止してください。",
+      "ar": "توقّف إذا ارتفع أسفل ظهرك كثيرًا أو شعرت بألم."
     }
   },
   "12": {
     "title": {
       "en": "Slide the leg out to the side",
-      "ja": "脚を横に開く"
+      "ja": "脚を横に開く",
+      "ar": "إبعاد الساق إلى الجانب"
     },
     "description": {
       "en": "Lie on your back. Slowly move one leg out to the side, then bring it back in.",
-      "ja": "仰向けで、片方の脚をゆっくり横に開き、また戻します。"
+      "ja": "仰向けで、片方の脚をゆっくり横に開き、また戻します。",
+      "ar": "استلقِ وأبعد ساقًا واحدة ببطء إلى الجانب، ثم أعدها إلى مكانها."
     },
     "caution": {
       "en": "Do not let the pelvis roll with the leg.",
-      "ja": "骨盤が一緒に回らないように注意してください。"
+      "ja": "骨盤が一緒に回らないように注意してください。",
+      "ar": "انتبه ألا يدور الحوض مع الساق."
     }
   },
   "13": {
     "title": {
       "en": "Clamshell",
-      "ja": "クラムシェル"
+      "ja": "クラムシェル",
+      "ar": "فتح الركبتين مع الاستلقاء على الجانب"
     },
     "description": {
       "en": "Lie on your side with the knees bent and the feet together. Slowly lift the top knee, then lower it.",
-      "ja": "横向きで膝を曲げ、足はそろえたままにします。上の膝をゆっくり開き、閉じます。"
+      "ja": "横向きで膝を曲げ、足はそろえたままにします。上の膝をゆっくり開き、閉じます。",
+      "ar": "استلقِ على جانبك واثنِ ركبتيك. أبقِ قدميك متلاصقتين، وارفع الركبة العليا ببطء ثم أعدها."
     },
     "caution": {
       "en": "Do not let the pelvis roll backward. Stay in a range that does not hurt.",
-      "ja": "骨盤が後ろへ倒れないようにし、痛くない範囲で行ってください。"
+      "ja": "骨盤が後ろへ倒れないようにし、痛くない範囲で行ってください。",
+      "ar": "انتبه ألا يميل الحوض إلى الخلف، وتحرّك ضمن المدى الخالي من الألم."
     }
   },
   "14": {
     "title": {
       "en": "Side-lying leg lift",
-      "ja": "横向きで脚を上げる"
+      "ja": "横向きで脚を上げる",
+      "ar": "رفع الساق مع الاستلقاء على الجانب"
     },
     "description": {
       "en": "Lie on your side with the top leg straight. Slowly lift that leg, then lower it.",
-      "ja": "横向きで、上の脚を伸ばしたままゆっくり上げ、下ろします。"
+      "ja": "横向きで、上の脚を伸ばしたままゆっくり上げ、下ろします。",
+      "ar": "استلقِ على جانبك، وارفع الساق العليا ببطء وهي مفرودة، ثم أنزلها."
     },
     "caution": {
       "en": "Do not let the low back or pelvis twist too much.",
-      "ja": "腰や骨盤が大きく動かないように注意してください。"
+      "ja": "腰や骨盤が大きく動かないように注意してください。",
+      "ar": "انتبه ألا يتحرّك أسفل الظهر أو الحوض كثيرًا."
     }
   },
   "15": {
     "title": {
       "en": "Bridge",
-      "ja": "ブリッジ"
+      "ja": "ブリッジ",
+      "ar": "رفع الحوض (الجسر)"
     },
     "description": {
       "en": "Lie down with the knees bent and the feet on the bed. Slowly lift the hips, then lower them.",
-      "ja": "膝を立てて仰向けになり、お尻をゆっくり上げ、下ろします。"
+      "ja": "膝を立てて仰向けになり、お尻をゆっくり上げ、下ろします。",
+      "ar": "استلقِ على ظهرك مع ثني الركبتين ووضع القدمين على السرير، ثم ارفع أردافك ببطء وأنزلها."
     },
     "caution": {
       "en": "Stop if the low back hurts a lot.",
-      "ja": "腰の痛みが強いときは中止してください。"
+      "ja": "腰の痛みが強いときは中止してください。",
+      "ar": "توقّف إذا كان ألم الظهر شديدًا."
     }
   },
   "16": {
     "title": {
       "en": "Open and close the hand",
-      "ja": "手を握って開く"
+      "ja": "手を握って開く",
+      "ar": "قبض اليد وبسطها"
     },
     "description": {
       "en": "Slowly make a fist, then open the fingers all the way. Repeat, staying in a range that does not hurt.",
-      "ja": "自分で指をゆっくり握り、全部開く動きを繰り返します。痛くない範囲で行います。"
+      "ja": "自分で指をゆっくり握り、全部開く動きを繰り返します。痛くない範囲で行います。",
+      "ar": "اقبض أصابعك بنفسك ببطء ثم ابسطها كلها، وكرّر ذلك ضمن المدى الخالي من الألم."
     },
     "caution": {
       "en": "Do not force the fingers fully straight. Stay within the range you can move yourself.",
-      "ja": "指を無理に最後まで伸ばさず、自分で動かせる範囲だけで行ってください。"
+      "ja": "指を無理に最後まで伸ばさず、自分で動かせる範囲だけで行ってください。",
+      "ar": "لا تفرد أصابعك بالقوة إلى النهاية، وتحرّك فقط ضمن المدى الذي تستطيع تحريكه بنفسك."
     }
   },
   "17": {
     "title": {
       "en": "Bend and straighten the wrist",
-      "ja": "手首の曲げ伸ばし"
+      "ja": "手首の曲げ伸ばし",
+      "ar": "ثني الرسغ وفرده"
     },
     "description": {
       "en": "Rest the arm comfortably and slowly move the wrist up and down.",
-      "ja": "腕を楽に置いたまま、手首をゆっくり上下に動かします。"
+      "ja": "腕を楽に置いたまま、手首をゆっくり上下に動かします。",
+      "ar": "أرح ذراعك وحرّك رسغك ببطء إلى أعلى وأسفل."
     },
     "caution": {
       "en": "Move slowly, without bouncing.",
-      "ja": "反動をつけず、ゆっくり行ってください。"
+      "ja": "反動をつけず、ゆっくり行ってください。",
+      "ar": "تحرّك ببطء ومن دون اندفاع."
     }
   },
   "18": {
     "title": {
       "en": "Bend and straighten the elbow",
-      "ja": "肘の曲げ伸ばし"
+      "ja": "肘の曲げ伸ばし",
+      "ar": "ثني المرفق وفرده"
     },
     "description": {
       "en": "Slowly bend the elbow, then straighten it. Repeat in a range that does not hurt.",
-      "ja": "肘をゆっくり曲げ、伸ばします。痛くない範囲で繰り返します。"
+      "ja": "肘をゆっくり曲げ、伸ばします。痛くない範囲で繰り返します。",
+      "ar": "اثنِ مرفقك ببطء ثم افرده، وكرّر ذلك ضمن المدى الخالي من الألم."
     },
     "caution": {
       "en": "Do not let the shoulder hitch up.",
-      "ja": "肩が過剰に上がらないように注意してください。"
+      "ja": "肩が過剰に上がらないように注意してください。",
+      "ar": "انتبه ألا يرتفع الكتف كثيرًا."
     }
   },
   "19": {
     "title": {
       "en": "Lift the arm while lying down",
-      "ja": "仰向けで腕を上げる"
+      "ja": "仰向けで腕を上げる",
+      "ar": "رفع الذراع أثناء الاستلقاء"
     },
     "description": {
       "en": "Lie down and slowly lift the arm forward on your own, then lower it. Repeat in a range that does not hurt.",
-      "ja": "仰向けで、自分で腕をゆっくり前に上げ、下ろします。痛くない範囲で繰り返します。"
+      "ja": "仰向けで、自分で腕をゆっくり前に上げ、下ろします。痛くない範囲で繰り返します。",
+      "ar": "استلقِ وارفع ذراعك بنفسك ببطء إلى الأمام ثم أنزلها. كرّر ذلك ضمن المدى الخالي من الألم."
     },
     "caution": {
       "en": "If the shoulder hurts, or it has dislocated before, tell your therapist first. Stay in a range that does not hurt.",
-      "ja": "肩の痛みや、肩が外れたことがある人は、先に療法士に伝えてください。痛くない範囲だけで行ってください。"
+      "ja": "肩の痛みや、肩が外れたことがある人は、先に療法士に伝えてください。痛くない範囲だけで行ってください。",
+      "ar": "إذا كان لديك ألم في الكتف أو سبق أن تعرّضت لخلع فأخبر المعالج أولًا. تحرّك فقط ضمن المدى الخالي من الألم."
     }
   },
   "20": {
     "title": {
       "en": "Weight bearing through the affected arm",
-      "ja": "患側の腕に体重をかける"
+      "ja": "患側の腕に体重をかける",
+      "ar": "تحميل الوزن على الذراع المصابة"
     },
     "description": {
       "en": "Rest the affected arm on a table. Slowly put weight through the palm or the forearm and hold.",
-      "ja": "テーブルの上に患側の腕を置き、手のひらまたは前腕でゆっくり体重をかけて保ちます。"
+      "ja": "テーブルの上に患側の腕を置き、手のひらまたは前腕でゆっくり体重をかけて保ちます。",
+      "ar": "ضع ذراعك المصابة على الطاولة، وحمّل وزنك ببطء على راحة اليد أو الساعد، ثم اثبت."
     },
     "caution": {
       "en": "If the shoulder or wrist hurts, use less weight and a more comfortable angle.",
-      "ja": "肩や手首が痛ければ、角度と体重を減らしてください。"
+      "ja": "肩や手首が痛ければ、角度と体重を減らしてください。",
+      "ar": "إذا شعرت بألم في الكتف أو الرسغ فقلّل الزاوية والوزن."
     }
   },
   "21": {
     "title": {
       "en": "Pelvic tilt",
-      "ja": "骨盤を傾ける"
+      "ja": "骨盤を傾ける",
+      "ar": "إمالة الحوض"
     },
     "description": {
       "en": "Lie with the knees bent. Gently press the low back toward the bed as you tilt the pelvis.",
-      "ja": "膝を立てて仰向けになり、腰を床の方へ軽く押しつけながら骨盤を動かします。"
+      "ja": "膝を立てて仰向けになり、腰を床の方へ軽く押しつけながら骨盤を動かします。",
+      "ar": "استلقِ على ظهرك مع ثني الركبتين ووضع القدمين على السرير، ثم حرّك الحوض بالضغط الخفيف بأسفل ظهرك نحو السرير."
     },
     "caution": {
       "en": "Use a small range that does not hurt.",
-      "ja": "痛くない、小さい範囲で行ってください。"
+      "ja": "痛くない、小さい範囲で行ってください。",
+      "ar": "تحرّك ضمن مدى صغير خالٍ من الألم."
     }
   },
   "22": {
     "title": {
       "en": "Reach while lying down",
-      "ja": "仰向けで手を伸ばす"
+      "ja": "仰向けで手を伸ばす",
+      "ar": "مدّ اليد أثناء الاستلقاء"
     },
     "description": {
       "en": "Lie down and slowly reach one arm forward, then bring it back. Keep the shoulder from hiking up, and stay in a comfortable range.",
-      "ja": "仰向けで、片方の腕をゆっくり前に伸ばし、戻します。肩が過剰に上がらないよう、楽な範囲で行います。"
+      "ja": "仰向けで、片方の腕をゆっくり前に伸ばし、戻します。肩が過剰に上がらないよう、楽な範囲で行います。",
+      "ar": "استلقِ ومدّ ذراعًا واحدة ببطء إلى الأمام ثم أعدها. تحرّك ضمن مدى مريح حتى لا يرتفع الكتف كثيرًا."
     },
     "caution": {
       "en": "If the shoulder hurts or tingles, use a smaller range.",
-      "ja": "肩の痛みやしびれがあれば、範囲を小さくしてください。"
+      "ja": "肩の痛みやしびれがあれば、範囲を小さくしてください。",
+      "ar": "إذا شعرت بألم أو تنميل في الكتف فقلّل مدى الحركة."
     }
   },
   "23": {
     "title": {
       "en": "Sit and hold",
-      "ja": "座った姿勢を保つ"
+      "ja": "座った姿勢を保つ",
+      "ar": "الثبات في وضع الجلوس"
     },
     "description": {
       "en": "Sit with your feet on the floor and your back upright. Hold that position.",
-      "ja": "足を床につけ、背すじを伸ばして座った姿勢を保ちます。"
+      "ja": "足を床につけ、背すじを伸ばして座った姿勢を保ちます。",
+      "ar": "ضع قدميك على الأرض، واجلس بظهر مستقيم واثبت على هذا الوضع."
     },
     "caution": {
       "en": "If you feel dizzy, lean back against the chair and rest.",
-      "ja": "めまいがあれば、背もたれにもたれて休んでください。"
+      "ja": "めまいがあれば、背もたれにもたれて休んでください。",
+      "ar": "إذا شعرت بدوخة فاستند إلى ظهر الكرسي واسترح."
     }
   },
   "24": {
     "title": {
       "en": "Shift weight side to side while sitting",
-      "ja": "座って左右に体重を移す"
+      "ja": "座って左右に体重を移す",
+      "ar": "نقل الوزن يمينًا ويسارًا أثناء الجلوس"
     },
     "description": {
       "en": "Sit in a chair and slowly move your trunk to the left, then to the right.",
-      "ja": "椅子に座り、体を左右へゆっくり移します。"
+      "ja": "椅子に座り、体を左右へゆっくり移します。",
+      "ar": "اجلس على كرسي وحرّك جذعك ببطء إلى اليمين واليسار."
     },
     "caution": {
       "en": "If your balance feels unsteady, have a caregiver stay beside you.",
-      "ja": "バランスが不安定なときは、介助者がそばで見守ってください。"
+      "ja": "バランスが不安定なときは、介助者がそばで見守ってください。",
+      "ar": "إذا كان توازنك غير ثابت فليراقبك المرافق من جانبك."
     }
   },
   "25": {
     "title": {
       "en": "Reach forward",
-      "ja": "前へ手を伸ばす"
+      "ja": "前へ手を伸ばす",
+      "ar": "مدّ اليد إلى الأمام"
     },
     "description": {
       "en": "While sitting, slowly reach toward an object in front of you, then come back.",
-      "ja": "座ったまま、前にある物へゆっくり手を伸ばし、戻します。"
+      "ja": "座ったまま、前にある物へゆっくり手を伸ばし、戻します。",
+      "ar": "اجلس ومدّ يدك ببطء نحو شيء موضوع أمامك، ثم عد إلى وضعك."
     },
     "caution": {
       "en": "Do not let the body pitch too far forward.",
-      "ja": "体が前へ倒れすぎないように注意してください。"
+      "ja": "体が前へ倒れすぎないように注意してください。",
+      "ar": "انتبه ألا يميل جسمك كثيرًا إلى الأمام."
     }
   },
   "26": {
     "title": {
       "en": "Reach for an object while sitting",
-      "ja": "座って物をつかむ"
+      "ja": "座って物をつかむ",
+      "ar": "الإمساك بالأشياء أثناء الجلوس"
     },
     "description": {
       "en": "While sitting, reach to the side or forward and pick up an object.",
-      "ja": "座ったまま、左右または前にある物へ手を伸ばしてつかみます。"
+      "ja": "座ったまま、左右または前にある物へ手を伸ばしてつかみます。",
+      "ar": "اجلس ومدّ يدك لتمسك بشيء موضوع على جانبك أو أمامك."
     },
     "caution": {
       "en": "If the body leans too far, a caregiver should help.",
-      "ja": "体が大きく傾くときは、介助者が手伝ってください。"
+      "ja": "体が大きく傾くときは、介助者が手伝ってください。",
+      "ar": "إذا مال جسمك كثيرًا فليساعدك المرافق."
     }
   },
   "27": {
     "title": {
       "en": "Reach for a cone",
-      "ja": "コーンに手を伸ばす"
+      "ja": "コーンに手を伸ばす",
+      "ar": "الإمساك بالقمع"
     },
     "description": {
       "en": "While sitting, reach for a cone in front of you or to the side, touch or hold it, then come back.",
-      "ja": "座ったまま、前や横にあるコーンへ手を伸ばしてつかみ、元の位置に戻します。"
+      "ja": "座ったまま、前や横にあるコーンへ手を伸ばしてつかみ、元の位置に戻します。",
+      "ar": "اجلس ومدّ يدك لتمسك بقمع موضوع أمامك أو بجانبك، ثم عد إلى وضعك."
     },
     "caution": {
       "en": "Do not lean the trunk too far. Have a caregiver supervise if you need to.",
-      "ja": "体を大きく傾けないようにし、必要なら介助者の見守りで行ってください。"
+      "ja": "体を大きく傾けないようにし、必要なら介助者の見守りで行ってください。",
+      "ar": "لا تمِل بجذعك كثيرًا، وتمرّن تحت إشراف المرافق عند الحاجة."
     }
   },
   "28": {
     "title": {
       "en": "Straighten the knee while sitting",
-      "ja": "座って膝を伸ばす"
+      "ja": "座って膝を伸ばす",
+      "ar": "فرد الركبة أثناء الجلوس"
     },
     "description": {
       "en": "Sit tall in a chair. Slowly straighten one knee, hold for 2 seconds, then lower the foot.",
-      "ja": "椅子に背すじを伸ばして座ります。片方の膝をゆっくり伸ばし、2秒保ってから下ろします。"
+      "ja": "椅子に背すじを伸ばして座ります。片方の膝をゆっくり伸ばし、2秒保ってから下ろします。",
+      "ar": "اجلس على كرسي بظهر مستقيم، وافرد ركبة واحدة ببطء، واثبت ثانيتين ثم أنزلها."
     },
     "caution": {
       "en": "Do not lean the back behind you.",
-      "ja": "腰が後ろへ反らないように注意してください。"
+      "ja": "腰が後ろへ反らないように注意してください。",
+      "ar": "انتبه ألا يميل ظهرك إلى الخلف."
     }
   },
   "29": {
     "title": {
       "en": "March in place while sitting",
-      "ja": "座ってその場で足を上げる"
+      "ja": "座ってその場で足を上げる",
+      "ar": "رفع الركبتين بالتناوب أثناء الجلوس"
     },
     "description": {
       "en": "Sit in a chair and lift one knee, then the other. Do not let the trunk fall backward.",
-      "ja": "椅子に座り、左右の膝を交互に上げます。体が後ろへ倒れないように保ちます。"
+      "ja": "椅子に座り、左右の膝を交互に上げます。体が後ろへ倒れないように保ちます。",
+      "ar": "اجلس على كرسي وارفع ركبتيك بالتناوب، مع الانتباه ألا يميل جذعك إلى الخلف."
     },
     "caution": {
       "en": "If the back leans behind you, use a smaller lift.",
-      "ja": "腰が後ろへ反るときは、上げる高さを小さくしてください。"
+      "ja": "腰が後ろへ反るときは、上げる高さを小さくしてください。",
+      "ar": "إذا مال ظهرك إلى الخلف فقلّل مدى الحركة."
     }
   },
   "30": {
     "title": {
       "en": "Heel raises while sitting",
-      "ja": "座ってかかとを上げる"
+      "ja": "座ってかかとを上げる",
+      "ar": "رفع الكعبين أثناء الجلوس"
     },
     "description": {
       "en": "Sit in a chair with the toes on the floor. Slowly lift the heels, then lower them.",
-      "ja": "椅子に座り、足先は床につけたまま、かかとをゆっくり上げ、下ろします。"
+      "ja": "椅子に座り、足先は床につけたまま、かかとをゆっくり上げ、下ろします。",
+      "ar": "اجلس على كرسي وأبقِ أصابع قدميك على الأرض، ثم ارفع الكعبين ببطء وأنزلهما."
     },
     "caution": {
       "en": "If the ankle hurts, move slowly.",
-      "ja": "足首が痛ければ、ゆっくり行ってください。"
+      "ja": "足首が痛ければ、ゆっくり行ってください。",
+      "ar": "إذا شعرت بألم في الكاحل فتحرّك ببطء."
     }
   },
   "31": {
     "title": {
       "en": "Toe raises while sitting",
-      "ja": "座って足先を上げる"
+      "ja": "座って足先を上げる",
+      "ar": "رفع أصابع القدمين أثناء الجلوس"
     },
     "description": {
       "en": "Sit in a chair with the heels on the floor. Slowly lift the toes toward you.",
-      "ja": "椅子に座り、かかとは床につけたまま、足先を体の方へゆっくり上げます。"
+      "ja": "椅子に座り、かかとは床につけたまま、足先を体の方へゆっくり上げます。",
+      "ar": "اجلس على كرسي وأبقِ كعبيك على الأرض، ثم ارفع أصابع قدميك ببطء نحو جسمك."
     },
     "caution": {
       "en": "Do not pull hard.",
-      "ja": "無理に引っ張らないでください。"
+      "ja": "無理に引っ張らないでください。",
+      "ar": "لا تسحب قدميك بقوة."
     }
   },
   "32": {
     "title": {
       "en": "Slide the arm forward on a table",
-      "ja": "テーブルの上で腕を滑らせる"
+      "ja": "テーブルの上で腕を滑らせる",
+      "ar": "دفع الذراع على الطاولة"
     },
     "description": {
       "en": "Put a towel on the table, rest the hand on it, and slowly slide the arm forward, then back.",
-      "ja": "テーブルの上にタオルを置き、手をのせて、腕を前へゆっくり滑らせ、戻します。"
+      "ja": "テーブルの上にタオルを置き、手をのせて、腕を前へゆっくり滑らせ、戻します。",
+      "ar": "ضع منشفة على الطاولة وضع يدك عليها، ثم ادفع ذراعك ببطء إلى الأمام وأعدها."
     },
     "caution": {
       "en": "Stop if the shoulder pain gets worse.",
-      "ja": "肩の痛みが強くなるときは中止してください。"
+      "ja": "肩の痛みが強くなるときは中止してください。",
+      "ar": "توقّف إذا زاد ألم الكتف."
     }
   },
   "33": {
     "title": {
       "en": "Lift both arms with a stick",
-      "ja": "棒を持って両腕を上げる"
+      "ja": "棒を持って両腕を上げる",
+      "ar": "رفع الذراعين مع الإمساك بعصا"
     },
     "description": {
       "en": "Hold a stick with both hands. Slowly lift the arms forward, then lower them.",
-      "ja": "両手で棒を持ち、腕をゆっくり前に上げ、下ろします。"
+      "ja": "両手で棒を持ち、腕をゆっくり前に上げ、下ろします。",
+      "ar": "أمسك عصا بكلتا يديك، وارفع ذراعيك ببطء إلى الأمام ثم أنزلهما."
     },
     "caution": {
       "en": "Use the other arm to help the painful arm. Do not force it.",
-      "ja": "痛い腕は反対の腕で助け、無理をしないでください。"
+      "ja": "痛い腕は反対の腕で助け、無理をしないでください。",
+      "ar": "ساعد الذراع المؤلمة بالذراع الأخرى ولا تُجهدها."
     }
   },
   "34": {
     "title": {
       "en": "Touch the thumb to each fingertip",
-      "ja": "親指と指先を合わせる"
+      "ja": "親指と指先を合わせる",
+      "ar": "لمس الإبهام لأطراف الأصابع"
     },
     "description": {
       "en": "Touch the thumb to the index, middle, ring, and little fingertips in order, then open the hand.",
-      "ja": "親指を人差し指、中指、薬指、小指の順に合わせ、開きます。"
+      "ja": "親指を人差し指、中指、薬指、小指の順に合わせ、開きます。",
+      "ar": "المس بإبهامك السبابة ثم الوسطى ثم البنصر ثم الخنصر على التوالي، ثم افرد أصابعك."
     },
     "caution": {
       "en": "If a finger hurts, move slowly and use a smaller range.",
-      "ja": "指が痛ければ、ゆっくり小さい範囲で行ってください。"
+      "ja": "指が痛ければ、ゆっくり小さい範囲で行ってください。",
+      "ar": "إذا شعرت بألم في الأصابع فتحرّك ببطء وضمن مدى صغير."
     }
   },
   "35": {
     "title": {
       "en": "Squeeze a towel",
-      "ja": "タオル握り"
+      "ja": "タオル握り",
+      "ar": "عصر المنشفة"
     },
     "description": {
       "en": "Hold a small towel in the hand. Slowly squeeze it, then relax.",
-      "ja": "小さいタオルを手に握り、ゆっくり力を入れて押し、ゆるめます。"
+      "ja": "小さいタオルを手に握り、ゆっくり力を入れて押し、ゆるめます。",
+      "ar": "أمسك منشفة صغيرة بيدك واضغط عليها ببطء، ثم أرخِ يدك."
     },
     "caution": {
       "en": "If the finger joints hurt, squeeze more gently.",
-      "ja": "指の関節が痛ければ、力を弱めてください。"
+      "ja": "指の関節が痛ければ、力を弱めてください。",
+      "ar": "إذا شعرت بألم في مفاصل الأصابع فخفّف الشدة."
     }
   },
   "36": {
     "title": {
       "en": "Squeeze the shoulder blades together",
-      "ja": "肩甲骨を寄せる"
+      "ja": "肩甲骨を寄せる",
+      "ar": "تقريب لوحي الكتف"
     },
     "description": {
       "en": "Let the arms hang comfortably. Slowly draw both shoulder blades together toward the spine, then relax.",
-      "ja": "腕を楽に下ろし、両方の肩甲骨を背中の方へゆっくり寄せ、ゆるめます。"
+      "ja": "腕を楽に下ろし、両方の肩甲骨を背中の方へゆっくり寄せ、ゆるめます。",
+      "ar": "أرخِ ذراعيك إلى أسفل، وقرّب لوحي الكتف ببطء خلف ظهرك ثم أرخِهما."
     },
     "caution": {
       "en": "Do not shrug. If the neck starts working, use a smaller movement.",
-      "ja": "肩をすくめないようにし、首に力が入るときは範囲を小さくしてください。"
+      "ja": "肩をすくめないようにし、首に力が入るときは範囲を小さくしてください。",
+      "ar": "لا ترفع كتفيك نحو أذنيك، وإذا شعرت بشدّ في الرقبة فقلّل مدى الحركة."
     }
   },
   "37": {
     "title": {
       "en": "Press down on the armrests",
-      "ja": "肘かけを押す"
+      "ja": "肘かけを押す",
+      "ar": "الضغط على ذراعي الكرسي"
     },
     "description": {
       "en": "Press down on the chair armrests, as if you were going to lift the hips a little.",
-      "ja": "椅子の肘かけを手で押し、お尻を少し持ち上げるように力を入れます。"
+      "ja": "椅子の肘かけを手で押し、お尻を少し持ち上げるように力を入れます。",
+      "ar": "اضغط بيديك على ذراعي الكرسي كأنك ترفع أردافك قليلًا."
     },
     "caution": {
       "en": "If the wrist or shoulder hurts, press more gently.",
-      "ja": "手首や肩が痛ければ、力を弱めてください。"
+      "ja": "手首や肩が痛ければ、力を弱めてください。",
+      "ar": "إذا شعرت بألم في الرسغ أو الكتف فخفّف الشدة."
     }
   },
   "38": {
     "title": {
       "en": "Sit to stand",
-      "ja": "立ち座り"
+      "ja": "立ち座り",
+      "ar": "القيام من الجلوس"
     },
     "description": {
       "en": "Sit in a chair with your feet on the floor. Lean the body forward, then stand up slowly.",
-      "ja": "椅子に座り、足を床につけます。体を前へ傾けてから、ゆっくり立ちます。"
+      "ja": "椅子に座り、足を床につけます。体を前へ傾けてから、ゆっくり立ちます。",
+      "ar": "اجلس على كرسي وقدماك على الأرض، ومِل بجسمك إلى الأمام ثم قف ببطء."
     },
     "caution": {
       "en": "Stop if the knee hurts or you feel dizzy.",
-      "ja": "膝の痛みやめまいがあれば中止してください。"
+      "ja": "膝の痛みやめまいがあれば中止してください。",
+      "ar": "توقّف إذا شعرت بألم في الركبة أو دوخة."
     }
   },
   "39": {
     "title": {
       "en": "Stand, hold, and sit back down",
-      "ja": "立って姿勢を保つ"
+      "ja": "立って姿勢を保つ",
+      "ar": "الوقوف والثبات ثم الجلوس"
     },
     "description": {
       "en": "Stand up from the chair, hold a tall standing position for 3~5 seconds, then sit back down slowly.",
-      "ja": "椅子から立ち上がり、正しい立ち姿勢を3~5秒保って、ゆっくり座り直します。"
+      "ja": "椅子から立ち上がり、正しい立ち姿勢を3~5秒保って、ゆっくり座り直します。",
+      "ar": "قم من الكرسي وقف معتدلًا لمدة 3 إلى 5 ثوانٍ، ثم اجلس ببطء."
     },
     "caution": {
       "en": "Stop right away if you feel dizzy or the knee hurts.",
-      "ja": "めまいや膝の痛みがあれば、すぐに中止してください。"
+      "ja": "めまいや膝の痛みがあれば、すぐに中止してください。",
+      "ar": "توقّف فورًا إذا شعرت بدوخة أو ألم في الركبة."
     }
   },
   "40": {
     "title": {
       "en": "Shift weight side to side while standing",
-      "ja": "立って左右に体重を移す"
+      "ja": "立って左右に体重を移す",
+      "ar": "نقل الوزن يمينًا ويسارًا أثناء الوقوف"
     },
     "description": {
       "en": "Stand with the feet about shoulder-width apart. Slowly shift your weight to the left, then to the right.",
-      "ja": "両足を肩幅くらいに開いて立ち、体重を左右へゆっくり移します。"
+      "ja": "両足を肩幅くらいに開いて立ち、体重を左右へゆっくり移します。",
+      "ar": "قف وقدماك متباعدتان بعرض الكتفين، وانقل وزنك ببطء إلى اليمين واليسار."
     },
     "caution": {
       "en": "Do not let the body lean too far.",
-      "ja": "体が大きく傾かないように注意してください。"
+      "ja": "体が大きく傾かないように注意してください。",
+      "ar": "انتبه ألا يميل جسمك كثيرًا."
     }
   },
   "41": {
     "title": {
       "en": "Step up and shift weight",
-      "ja": "片足を台に乗せて体重を移す"
+      "ja": "片足を台に乗せて体重を移す",
+      "ar": "رفع قدم واحدة ونقل الوزن"
     },
     "description": {
       "en": "Place one foot on a low step. Slowly shift your weight forward and back, or side to side.",
-      "ja": "片方の足を低い台の上に置き、前後または左右へゆっくり体重を移します。"
+      "ja": "片方の足を低い台の上に置き、前後または左右へゆっくり体重を移します。",
+      "ar": "ضع قدمًا واحدة على درجة منخفضة، وانقل وزنك ببطء إلى الأمام والخلف أو إلى اليمين واليسار."
     },
     "caution": {
       "en": "Do not let the knee collapse inward. Hold a rail if your balance feels unsteady.",
-      "ja": "膝が内側へ崩れないようにし、バランスが不安定なら手すりを持ってください。"
+      "ja": "膝が内側へ崩れないようにし、バランスが不安定なら手すりを持ってください。",
+      "ar": "لا تدع ركبتك تميل إلى الداخل، وإذا كان توازنك غير ثابت فأمسك بالدرابزين."
     }
   },
   "42": {
     "title": {
       "en": "Stand with the feet together",
-      "ja": "足をそろえて立つ"
+      "ja": "足をそろえて立つ",
+      "ar": "الوقوف مع ضمّ القدمين"
     },
     "description": {
       "en": "Bring the feet together and hold the standing position.",
-      "ja": "両足をそろえて立った姿勢を保ちます。"
+      "ja": "両足をそろえて立った姿勢を保ちます。",
+      "ar": "قف مع ضمّ قدميك واثبت على هذا الوضع."
     },
     "caution": {
       "en": "Do not do this with your eyes closed.",
-      "ja": "目を閉じて行わないでください。"
+      "ja": "目を閉じて行わないでください。",
+      "ar": "لا تغمض عينيك أثناء التمرين."
     }
   },
   "43": {
     "title": {
       "en": "Tandem stance",
-      "ja": "足を前後一直線にして立つ"
+      "ja": "足を前後一直線にして立つ",
+      "ar": "الوقوف وقدم أمام الأخرى"
     },
     "description": {
       "en": "Place one foot directly in front of the other, heel toward toe, and hold the standing position.",
-      "ja": "片方の足をもう片方の足の前に、一直線に置いて立ち、その姿勢を保ちます。"
+      "ja": "片方の足をもう片方の足の前に、一直線に置いて立ち、その姿勢を保ちます。",
+      "ar": "ضع قدمًا أمام الأخرى على خط مستقيم، واثبت واقفًا."
     },
     "caution": {
       "en": "If your balance feels unsteady, do this with a caregiver watching.",
-      "ja": "バランスが不安定なときは、介助者の見守りで行ってください。"
+      "ja": "バランスが不安定なときは、介助者の見守りで行ってください。",
+      "ar": "إذا كان توازنك غير ثابت فتمرّن تحت إشراف المرافق."
     }
   },
   "44": {
     "title": {
       "en": "Single-leg stance holding a chair",
-      "ja": "椅子を持って片足立ち"
+      "ja": "椅子を持って片足立ち",
+      "ar": "الوقوف على قدم واحدة مع الإمساك بكرسي"
     },
     "description": {
       "en": "Hold a sturdy chair or a rail. Lift one foot slightly and hold for as long as you safely can.",
-      "ja": "しっかりした椅子か手すりを持ち、片方の足を少し上げて、できる範囲で保ちます。"
+      "ja": "しっかりした椅子か手すりを持ち、片方の足を少し上げて、できる範囲で保ちます。",
+      "ar": "أمسك بكرسي متين أو بالدرابزين، وارفع قدمًا واحدة قليلًا واثبت بقدر ما تستطيع."
     },
     "caution": {
       "en": "Stay close to a stable support.",
-      "ja": "必ず安定した支えのそばで行ってください。"
+      "ja": "必ず安定した支えのそばで行ってください。",
+      "ar": "تمرّن دائمًا بالقرب من شيء ثابت تستند إليه."
     }
   },
   "45": {
     "title": {
       "en": "March in place while standing",
-      "ja": "立ってその場で足を上げる"
+      "ja": "立ってその場で足を上げる",
+      "ar": "رفع الركبتين بالتناوب أثناء الوقوف"
     },
     "description": {
       "en": "Stand with the feet about hip-width apart. Lift one knee, then the other, staying in place.",
-      "ja": "両足を骨盤の幅くらいに開いて立ち、その場で左右の膝を交互に上げます。"
+      "ja": "両足を骨盤の幅くらいに開いて立ち、その場で左右の膝を交互に上げます。",
+      "ar": "قف وقدماك متباعدتان بعرض الحوض، وارفع ركبتيك بالتناوب وأنت في مكانك."
     },
     "caution": {
       "en": "If you feel dizzy or unsteady, sit down and rest.",
-      "ja": "めまいやバランスの不安があれば、座って休んでください。"
+      "ja": "めまいやバランスの不安があれば、座って休んでください。",
+      "ar": "إذا شعرت بدوخة أو عدم ثبات في التوازن فاجلس واسترح."
     }
   },
   "46": {
     "title": {
       "en": "Heel raises while standing",
-      "ja": "立ってかかとを上げる"
+      "ja": "立ってかかとを上げる",
+      "ar": "رفع الكعبين أثناء الوقوف"
     },
     "description": {
       "en": "Hold a chair or a rail. Slowly lift both heels, then lower them.",
-      "ja": "椅子か手すりを持ち、両方のかかとをゆっくり上げ、下ろします。"
+      "ja": "椅子か手すりを持ち、両方のかかとをゆっくり上げ、下ろします。",
+      "ar": "أمسك بكرسي أو بالدرابزين، وارفع كعبيك معًا ببطء ثم أنزلهما."
     },
     "caution": {
       "en": "If the ankle hurts or your balance feels unsteady, use a smaller lift.",
-      "ja": "足首の痛みやバランスの不安があれば、上げる高さを小さくしてください。"
+      "ja": "足首の痛みやバランスの不安があれば、上げる高さを小さくしてください。",
+      "ar": "إذا شعرت بألم في الكاحل أو عدم ثبات في التوازن فقلّل مدى الحركة."
     }
   },
   "47": {
     "title": {
       "en": "Bend the knee while standing",
-      "ja": "立って膝を曲げる"
+      "ja": "立って膝を曲げる",
+      "ar": "ثني الركبة أثناء الوقوف"
     },
     "description": {
       "en": "Hold a chair or a rail. Slowly bend one knee backward, then lower the foot.",
-      "ja": "椅子か手すりを持って立ち、片方の膝を後ろへゆっくり曲げ、下ろします。"
+      "ja": "椅子か手すりを持って立ち、片方の膝を後ろへゆっくり曲げ、下ろします。",
+      "ar": "قف وأمسك بكرسي أو بالدرابزين، واثنِ ركبة واحدة ببطء إلى الخلف ثم أنزلها."
     },
     "caution": {
       "en": "Do not lean the chest forward. If your balance feels unsteady, do this with a caregiver watching.",
-      "ja": "上体が前へ倒れないようにし、バランスが不安定なら介助者の見守りで行ってください。"
+      "ja": "上体が前へ倒れないようにし、バランスが不安定なら介助者の見守りで行ってください。",
+      "ar": "لا تنحنِ إلى الأمام، وإذا كان توازنك غير ثابت فتمرّن تحت إشراف المرافق."
     }
   },
   "48": {
     "title": {
       "en": "Lift the leg out to the side while standing",
-      "ja": "立って脚を横に上げる"
+      "ja": "立って脚を横に上げる",
+      "ar": "رفع الساق إلى الجانب أثناء الوقوف"
     },
     "description": {
       "en": "Hold a chair. Slowly lift one leg out to the side, then lower it.",
-      "ja": "椅子を持って立ち、片方の脚を横へゆっくり上げ、下ろします。"
+      "ja": "椅子を持って立ち、片方の脚を横へゆっくり上げ、下ろします。",
+      "ar": "قف وأمسك بكرسي، وارفع ساقًا واحدة ببطء إلى الجانب ثم أنزلها."
     },
     "caution": {
       "en": "Do not lean the trunk to the opposite side.",
-      "ja": "体が反対側へ傾かないように注意してください。"
+      "ja": "体が反対側へ傾かないように注意してください。",
+      "ar": "انتبه ألا يميل جذعك إلى الجهة الأخرى."
     }
   },
   "49": {
     "title": {
       "en": "Lift the leg backward while standing",
-      "ja": "立って脚を後ろに上げる"
+      "ja": "立って脚を後ろに上げる",
+      "ar": "رفع الساق إلى الخلف أثناء الوقوف"
     },
     "description": {
       "en": "Hold a chair. Keep the knee straight and slowly lift one leg backward.",
-      "ja": "椅子を持って立ち、膝を伸ばしたまま片方の脚を後ろへゆっくり上げます。"
+      "ja": "椅子を持って立ち、膝を伸ばしたまま片方の脚を後ろへゆっくり上げます。",
+      "ar": "قف وأمسك بكرسي، وارفع ساقًا واحدة ببطء إلى الخلف مع إبقاء الركبة مفرودة."
     },
     "caution": {
       "en": "Do not arch the low back.",
-      "ja": "腰が過剰に反らないように注意してください。"
+      "ja": "腰が過剰に反らないように注意してください。",
+      "ar": "انتبه ألا يتقوّس أسفل ظهرك كثيرًا."
     }
   },
   "50": {
     "title": {
       "en": "Mini squat",
-      "ja": "ミニスクワット"
+      "ja": "ミニスクワット",
+      "ar": "ثني الركبتين قليلًا (قرفصاء صغيرة)"
     },
     "description": {
       "en": "Hold a chair or a rail. Bend the knees a little, then slowly straighten.",
-      "ja": "椅子か手すりを持ち、膝を少し曲げ、ゆっくり伸ばします。"
+      "ja": "椅子か手すりを持ち、膝を少し曲げ、ゆっくり伸ばします。",
+      "ar": "أمسك بكرسي أو بالدرابزين، واثنِ ركبتيك قليلًا ثم افردهما ببطء."
     },
     "caution": {
       "en": "Do not let the knees travel far past the toes.",
-      "ja": "膝が足先より大きく前へ出ないように注意してください。"
+      "ja": "膝が足先より大きく前へ出ないように注意してください。",
+      "ar": "انتبه ألا تتقدّم ركبتاك كثيرًا أمام أصابع قدميك."
     }
   },
   "51": {
     "title": {
       "en": "Reach forward while standing",
-      "ja": "立って前へ手を伸ばす"
+      "ja": "立って前へ手を伸ばす",
+      "ar": "مدّ اليد إلى الأمام أثناء الوقوف"
     },
     "description": {
       "en": "Stand steadily. Slowly reach forward with one hand or both hands, then come back.",
-      "ja": "安定して立ち、片手または両手を前へゆっくり伸ばし、戻します。"
+      "ja": "安定して立ち、片手または両手を前へゆっくり伸ばし、戻します。",
+      "ar": "قف بثبات، ومدّ يدًا واحدة أو كلتا يديك ببطء إلى الأمام ثم عد إلى وضعك."
     },
     "caution": {
       "en": "If you might fall, do this near a caregiver or a rail.",
-      "ja": "転びそうなときは、介助者または手すりのそばで行ってください。"
+      "ja": "転びそうなときは、介助者または手すりのそばで行ってください。",
+      "ar": "إذا كان هناك خطر سقوط فتمرّن بالقرب من المرافق أو الدرابزين."
     }
   },
   "52": {
     "title": {
       "en": "Walk the fingers up the wall",
-      "ja": "壁づたいに腕を上げる"
+      "ja": "壁づたいに腕を上げる",
+      "ar": "رفع الذراع على الحائط"
     },
     "description": {
       "en": "Face a wall. Slowly walk the fingers up the wall, then back down.",
-      "ja": "壁に向かって立ち、指を壁の上へゆっくり歩き上げ、下ろします。"
+      "ja": "壁に向かって立ち、指を壁の上へゆっくり歩き上げ、下ろします。",
+      "ar": "قف في مواجهة الحائط، وحرّك أصابعك عليه ببطء إلى أعلى كأنها تمشي، ثم أنزلها."
     },
     "caution": {
       "en": "If the shoulder hurts a lot, do not reach as high.",
-      "ja": "肩の痛みが強いときは、高さを下げ、無理をしないでください。"
+      "ja": "肩の痛みが強いときは、高さを下げ、無理をしないでください。",
+      "ar": "إذا كان ألم الكتف شديدًا فقلّل الارتفاع ولا تُجهد نفسك."
     }
   },
   "53": {
     "title": {
       "en": "Large shoulder-blade circles",
-      "ja": "肩甲骨を大きく回す"
+      "ja": "肩甲骨を大きく回す",
+      "ar": "تدوير لوحي الكتف في دائرة كبيرة"
     },
     "description": {
       "en": "Sit tall. Slowly make large backward circles with both shoulders. In order: bring them forward, lift them up, pull them back, then lower them. Repeat.",
-      "ja": "椅子に背すじを伸ばして座ります。両肩でゆっくり大きく、後ろ回しの円を描きます。前に寄せ、上に上げ、後ろに引き、下に下ろす順で繰り返します。"
+      "ja": "椅子に背すじを伸ばして座ります。両肩でゆっくり大きく、後ろ回しの円を描きます。前に寄せ、上に上げ、後ろに引き、下に下ろす順で繰り返します。",
+      "ar": "اجلس على كرسي بظهر مستقيم، وأدر كتفيك ببطء إلى الخلف في دائرة كبيرة. كرّر بهذا الترتيب: إلى الأمام، ثم إلى أعلى، ثم إلى الخلف، ثم إلى أسفل."
     },
     "caution": {
       "en": "If the shoulder hurts or feels very tight, use a smaller circle.",
-      "ja": "肩の痛みやこりが強いときは、回す範囲を小さくしてください。"
+      "ja": "肩の痛みやこりが強いときは、回す範囲を小さくしてください。",
+      "ar": "إذا كان ألم الكتف أو شدّه قويًا فقلّل مدى الحركة."
     }
   },
   "54": {
     "title": {
       "en": "Step tap",
-      "ja": "ステップタッチ"
+      "ja": "ステップタッチ",
+      "ar": "لمس الدرجة بالقدم"
     },
     "description": {
       "en": "Place a low step or a mark in front of you. Lightly tap it with one foot, then bring the foot back.",
-      "ja": "前に低い台か印を置き、片方の足で軽くタッチして、元の位置に戻します。"
+      "ja": "前に低い台か印を置き、片方の足で軽くタッチして、元の位置に戻します。",
+      "ar": "ضع أمامك درجة منخفضة أو علامة، والمسها بقدم واحدة بخفة ثم أعد قدمك إلى مكانها."
     },
     "caution": {
       "en": "Make sure the step cannot slide.",
-      "ja": "台が滑らないように固定してください。"
+      "ja": "台が滑らないように固定してください。",
+      "ar": "ثبّت الدرجة حتى لا تنزلق."
     }
   },
   "55": {
     "title": {
       "en": "Turn in place",
-      "ja": "その場で方向を変える"
+      "ja": "その場で方向を変える",
+      "ar": "تغيير الاتجاه في المكان"
     },
     "description": {
       "en": "Using small steps, slowly turn to face a new direction.",
-      "ja": "その場で小さい歩幅で、ゆっくり方向を変えます。"
+      "ja": "その場で小さい歩幅で、ゆっくり方向を変えます。",
+      "ar": "غيّر اتجاهك ببطء وأنت في مكانك بخطوات صغيرة."
     },
     "caution": {
       "en": "Do not spin quickly. Stop if you feel dizzy.",
-      "ja": "急に回らず、めまいがあれば中止してください。"
+      "ja": "急に回らず、めまいがあれば中止してください。",
+      "ar": "لا تستدر بسرعة، وتوقّف إذا شعرت بدوخة."
     }
   },
   "56": {
     "title": {
       "en": "Walk indoors",
-      "ja": "室内を歩く"
+      "ja": "室内を歩く",
+      "ar": "المشي داخل المنزل أو المبنى"
     },
     "description": {
       "en": "Walk at a comfortable pace on a flat indoor surface. Use a walking aid if you need one.",
-      "ja": "平らな室内を、楽な速さで歩きます。必要なら歩行補助具を使います。"
+      "ja": "平らな室内を、楽な速さで歩きます。必要なら歩行補助具を使います。",
+      "ar": "امشِ على أرض مستوية في الداخل بسرعة مريحة، واستخدم أداة مساعدة للمشي عند الحاجة."
     },
     "caution": {
       "en": "If you feel dizzy or it hurts, rest, then continue.",
-      "ja": "めまいや痛みがあれば、休みながら行ってください。"
+      "ja": "めまいや痛みがあれば、休みながら行ってください。",
+      "ar": "إذا شعرت بدوخة أو ألم فاسترح على فترات."
     }
   },
   "57": {
     "title": {
       "en": "Walk in a hallway",
-      "ja": "廊下を歩く"
+      "ja": "廊下を歩く",
+      "ar": "المشي في الممر"
     },
     "description": {
       "en": "Walk at a steady pace in a safe hallway. Rest along the way if you need to.",
-      "ja": "安全な廊下を一定の速さで歩きます。途中で必要なら休みます。"
+      "ja": "安全な廊下を一定の速さで歩きます。途中で必要なら休みます。",
+      "ar": "امشِ بسرعة ثابتة في ممر آمن، واسترح في الطريق عند الحاجة."
     },
     "caution": {
       "en": "Watch for people and obstacles so you do not bump into them.",
-      "ja": "人や障害物にぶつからないように注意してください。"
+      "ja": "人や障害物にぶつからないように注意してください。",
+      "ar": "انتبه ألا تصطدم بالناس أو العوائق."
     }
   },
   "58": {
     "title": {
       "en": "Walk outdoors",
-      "ja": "屋外を歩く"
+      "ja": "屋外を歩く",
+      "ar": "المشي في الخارج"
     },
     "description": {
       "en": "Walk at a comfortable pace on a flat, safe outdoor path.",
-      "ja": "平らで安全な屋外の道を、楽な速さで歩きます。"
+      "ja": "平らで安全な屋外の道を、楽な速さで歩きます。",
+      "ar": "امشِ بسرعة مريحة في طريق مشاة خارجي مستوٍ وآمن."
     },
     "caution": {
       "en": "Avoid slopes, slippery ground, and crowded places.",
-      "ja": "坂道、滑りやすい道、人の多い場所は避けてください。"
+      "ja": "坂道、滑りやすい道、人の多い場所は避けてください。",
+      "ar": "تجنّب المنحدرات والطرق الزلقة والأماكن المزدحمة."
     }
   },
   "59": {
     "title": {
       "en": "Step sideways",
-      "ja": "横歩き"
+      "ja": "横歩き",
+      "ar": "المشي إلى الجانب"
     },
     "description": {
       "en": "Stay near a rail or a wall. Slowly step sideways, one foot at a time.",
-      "ja": "手すりや壁のそばで、横へ一歩ずつゆっくり移動します。"
+      "ja": "手すりや壁のそばで、横へ一歩ずつゆっくり移動します。",
+      "ar": "تحرّك إلى الجانب خطوة خطوة ببطء بالقرب من الدرابزين أو الحائط."
     },
     "caution": {
       "en": "Move slowly so the feet do not cross and tangle.",
-      "ja": "足がもつれないよう、ゆっくり行ってください。"
+      "ja": "足がもつれないよう、ゆっくり行ってください。",
+      "ar": "تحرّك ببطء حتى لا تتشابك قدماك."
     }
   },
   "60": {
     "title": {
       "en": "Walk backward",
-      "ja": "後ろ歩き"
+      "ja": "後ろ歩き",
+      "ar": "المشي إلى الخلف"
     },
     "description": {
       "en": "In a safe space, walk backward slowly for a short distance only.",
-      "ja": "安全な場所で、短い距離だけゆっくり後ろへ歩きます。"
+      "ja": "安全な場所で、短い距離だけゆっくり後ろへ歩きます。",
+      "ar": "امشِ ببطء إلى الخلف لمسافة قصيرة فقط في مكان آمن."
     },
     "caution": {
       "en": "Do this only with a caregiver watching, or close to a rail.",
-      "ja": "必ず介助者の見守りか、手すりのそばで行ってください。"
+      "ja": "必ず介助者の見守りか、手すりのそばで行ってください。",
+      "ar": "تمرّن دائمًا تحت إشراف المرافق أو بالقرب من الدرابزين."
     }
   },
   "61": {
     "title": {
       "en": "Tandem walk",
-      "ja": "一直線に歩く"
+      "ja": "一直線に歩く",
+      "ar": "المشي على خط مستقيم"
     },
     "description": {
       "en": "Walk slowly along a line, placing one foot in front of the other.",
-      "ja": "線に沿って、片方の足をもう片方の前に置くようにゆっくり歩きます。"
+      "ja": "線に沿って、片方の足をもう片方の前に置くようにゆっくり歩きます。",
+      "ar": "امشِ ببطء على خط، واضعًا قدمًا أمام الأخرى في كل خطوة."
     },
     "caution": {
       "en": "Hold a rail if your balance feels unsteady.",
-      "ja": "バランスが不安定なときは、手すりを持って行ってください。"
+      "ja": "バランスが不安定なときは、手すりを持って行ってください。",
+      "ar": "إذا كان توازنك غير ثابت فأمسك بالدرابزين."
     }
   },
   "62": {
     "title": {
       "en": "Step over a low obstacle",
-      "ja": "低い障害物をまたぐ"
+      "ja": "低い障害物をまたぐ",
+      "ar": "تخطّي عائق منخفض"
     },
     "description": {
       "en": "Slowly step over a low obstacle. Lift the foot high enough that the toes do not catch.",
-      "ja": "低い障害物をゆっくりまたぎます。足先が引っかからないよう、十分に上げます。"
+      "ja": "低い障害物をゆっくりまたぎます。足先が引っかからないよう、十分に上げます。",
+      "ar": "اعبر فوق عائق منخفض ببطء، وارفع قدمك بما يكفي حتى لا تتعثّر أصابعها."
     },
     "caution": {
       "en": "Start with a low obstacle, with a caregiver watching.",
-      "ja": "介助者の見守りで、低い障害物から始めてください。"
+      "ja": "介助者の見守りで、低い障害物から始めてください。",
+      "ar": "ابدأ بعوائق منخفضة وتحت إشراف المرافق."
     }
   },
   "63": {
     "title": {
       "en": "Weave between cones",
-      "ja": "コーンの間を歩く"
+      "ja": "コーンの間を歩く",
+      "ar": "المشي بين الأقماع"
     },
     "description": {
       "en": "Slowly walk in a zigzag between cones or marks on the floor.",
-      "ja": "床に置いたコーンや印の間を、ゆっくりジグザグに歩きます。"
+      "ja": "床に置いたコーンや印の間を、ゆっくりジグザグに歩きます。",
+      "ar": "امشِ ببطء في خط متعرّج بين أقماع أو علامات موضوعة على الأرض."
     },
     "caution": {
       "en": "Leave enough space so you do not trip on a cone.",
-      "ja": "コーンに引っかからないよう、十分な間隔を空けて行ってください。"
+      "ja": "コーンに引っかからないよう、十分な間隔を空けて行ってください。",
+      "ar": "اترك مسافة كافية حتى لا تتعثّر بالأقماع."
     }
   },
   "64": {
     "title": {
       "en": "Step up onto a low step",
-      "ja": "低い段を上る"
+      "ja": "低い段を上る",
+      "ar": "الصعود على درجة منخفضة"
     },
     "description": {
       "en": "Place one foot on a low step, step up slowly, then step back down.",
-      "ja": "低い段に片方の足を乗せ、ゆっくり上り、下りてきます。"
+      "ja": "低い段に片方の足を乗せ、ゆっくり上り、下りてきます。",
+      "ar": "ضع قدمًا واحدة على درجة منخفضة، واصعد ببطء ثم انزل."
     },
     "caution": {
       "en": "Hold a rail, and do this with a caregiver watching.",
-      "ja": "手すりを持ち、介助者の見守りで行ってください。"
+      "ja": "手すりを持ち、介助者の見守りで行ってください。",
+      "ar": "أمسك بالدرابزين وتمرّن تحت إشراف المرافق."
     }
   },
   "65": {
     "title": {
       "en": "Walk up stairs",
-      "ja": "階段を上る"
+      "ja": "階段を上る",
+      "ar": "صعود الدرج"
     },
     "description": {
       "en": "Hold the rail and go up one step at a time, slowly.",
-      "ja": "手すりを持ち、一段ずつゆっくり上ります。"
+      "ja": "手すりを持ち、一段ずつゆっくり上ります。",
+      "ar": "أمسك بالدرابزين واصعد ببطء درجة درجة."
     },
     "caution": {
       "en": "Stop if the knee hurts a lot or you are very short of breath.",
-      "ja": "膝の痛みや息苦しさが強いときは中止してください。"
+      "ja": "膝の痛みや息苦しさが強いときは中止してください。",
+      "ar": "توقّف إذا كان ألم الركبة أو ضيق التنفس شديدًا."
     }
   },
   "66": {
     "title": {
       "en": "Walk down stairs",
-      "ja": "階段を下りる"
+      "ja": "階段を下りる",
+      "ar": "نزول الدرج"
     },
     "description": {
       "en": "Hold the rail and come down one step at a time, slowly.",
-      "ja": "手すりを持ち、一段ずつゆっくり下ります。"
+      "ja": "手すりを持ち、一段ずつゆっくり下ります。",
+      "ar": "أمسك بالدرابزين وانزل ببطء درجة درجة."
     },
     "caution": {
       "en": "Do not rush. Always hold the rail.",
-      "ja": "急いで下りず、必ず手すりを持ってください。"
+      "ja": "急いで下りず、必ず手すりを持ってください。",
+      "ar": "لا تنزل بسرعة، وأمسك بالدرابزين دائمًا."
     }
   },
   "67": {
     "title": {
       "en": "Figure-8 walk",
-      "ja": "8の字歩き"
+      "ja": "8の字歩き",
+      "ar": "المشي على شكل رقم 8"
     },
     "description": {
       "en": "Walk slowly in a figure-8 around two marks.",
-      "ja": "二つの印を中心に、8の字の道をゆっくり歩きます。"
+      "ja": "二つの印を中心に、8の字の道をゆっくり歩きます。",
+      "ar": "امشِ ببطء حول علامتين في مسار على شكل الرقم الإنجليزي 8."
     },
     "caution": {
       "en": "Stop right away if you feel dizzy or your balance wobbles.",
-      "ja": "めまいやバランスのふらつきがあれば、すぐに止まってください。"
+      "ja": "めまいやバランスのふらつきがあれば、すぐに止まってください。",
+      "ar": "توقّف فورًا إذا شعرت بدوخة أو اختلّ توازنك."
     }
   },
   "68": {
     "title": {
       "en": "Carry a light object",
-      "ja": "軽い物を運ぶ"
+      "ja": "軽い物を運ぶ",
+      "ar": "حمل غرض خفيف"
     },
     "description": {
       "en": "Carry a light object, walk a short distance slowly, then set it down.",
-      "ja": "軽い物を持ち、短い距離をゆっくり移動して、置きます。"
+      "ja": "軽い物を持ち、短い距離をゆっくり移動して、置きます。",
+      "ar": "احمل غرضًا خفيفًا وامشِ به ببطء لمسافة قصيرة، ثم ضعه."
     },
     "caution": {
       "en": "Do not carry anything heavy. If your balance feels unsteady, ask a caregiver for help.",
-      "ja": "重い物は避け、バランスが不安定なら介助者に手伝ってもらってください。"
+      "ja": "重い物は避け、バランスが不安定なら介助者に手伝ってもらってください。",
+      "ar": "تجنّب الأغراض الثقيلة، وإذا كان توازنك غير ثابت فليساعدك المرافق."
     }
   },
   "69": {
     "title": {
       "en": "Change walking speed",
-      "ja": "歩く速さを変える"
+      "ja": "歩く速さを変える",
+      "ar": "المشي مع تغيير السرعة"
     },
     "description": {
       "en": "Walk at your usual pace, then a little faster or a little slower.",
-      "ja": "いつもの速さで歩き、少し速く、またはゆっくり歩きます。"
+      "ja": "いつもの速さで歩き、少し速く、またはゆっくり歩きます。",
+      "ar": "امشِ بسرعتك المعتادة، ثم امشِ أسرع قليلًا أو أبطأ."
     },
     "caution": {
       "en": "Do not push yourself to walk fast.",
-      "ja": "無理に速く歩かないでください。"
+      "ja": "無理に速く歩かないでください。",
+      "ar": "لا تُجهد نفسك بالمشي السريع."
     }
   },
   "70": {
     "title": {
       "en": "Stationary bike",
-      "ja": "固定式自転車"
+      "ja": "固定式自転車",
+      "ar": "الدراجة الثابتة"
     },
     "description": {
       "en": "Sit on a stationary bike and pedal at an easy effort.",
-      "ja": "固定式自転車に座り、楽な強さでペダルをこぎます。"
+      "ja": "固定式自転車に座り、楽な強さでペダルをこぎます。",
+      "ar": "اجلس على الدراجة الثابتة وحرّك الدواسات بشدة مريحة."
     },
     "caution": {
       "en": "Stop right away if you are too short of breath or you feel dizzy.",
-      "ja": "息が上がりすぎる、またはめまいがあれば、すぐに中止してください。"
+      "ja": "息が上がりすぎる、またはめまいがあれば、すぐに中止してください。",
+      "ar": "توقّف فورًا إذا ضاق تنفسك كثيرًا أو شعرت بدوخة."
     }
   },
   "71": {
     "title": {
       "en": "Treadmill walking",
-      "ja": "トレッドミル歩行"
+      "ja": "トレッドミル歩行",
+      "ar": "المشي على جهاز المشي"
     },
     "description": {
       "en": "Hold the safety rails and start walking on the treadmill at a slow speed.",
-      "ja": "トレッドミルで安全手すりを持ち、遅い速さから歩きます。"
+      "ja": "トレッドミルで安全手すりを持ち、遅い速さから歩きます。",
+      "ar": "أمسك بمقبض الأمان في جهاز المشي، وابدأ المشي بسرعة بطيئة."
     },
     "caution": {
       "en": "Do this only with a therapist or caregiver watching.",
-      "ja": "必ず療法士または介助者の見守りで行ってください。"
+      "ja": "必ず療法士または介助者の見守りで行ってください。",
+      "ar": "تمرّن دائمًا تحت إشراف المعالج أو المرافق."
     }
   },
   "72": {
     "title": {
       "en": "Outdoor endurance walk",
-      "ja": "屋外で持久歩行"
+      "ja": "屋外で持久歩行",
+      "ar": "المشي الطويل في الخارج"
     },
     "description": {
       "en": "Walk at a comfortable pace for about 15~20 minutes on a flat, safe outdoor path. You may rest along the way.",
-      "ja": "平らで安全な屋外の道を、楽な速さで15~20分ほど歩きます。途中で休んでもかまいません。"
+      "ja": "平らで安全な屋外の道を、楽な速さで15~20分ほど歩きます。途中で休んでもかまいません。",
+      "ar": "امشِ لمدة 15 إلى 20 دقيقة تقريبًا بسرعة مريحة في طريق مشاة خارجي مستوٍ وآمن. يمكنك أن تستريح في الطريق عند الحاجة."
     },
     "caution": {
       "en": "Avoid slopes, slippery ground, and crowded places. Stop right away if you have chest pain, shortness of breath, or dizziness.",
-      "ja": "坂道、滑りやすい道、人の多い場所は避けてください。胸の痛み、息苦しさ、めまいがあればすぐに中止してください。"
+      "ja": "坂道、滑りやすい道、人の多い場所は避けてください。胸の痛み、息苦しさ、めまいがあればすぐに中止してください。",
+      "ar": "تجنّب المنحدرات والطرق الزلقة والأماكن المزدحمة، وتوقّف فورًا إذا شعرت بألم في الصدر أو ضيق في التنفس أو دوخة."
     }
   },
   "73": {
     "title": {
       "en": "Calf stretch",
-      "ja": "ふくらはぎのストレッチ"
+      "ja": "ふくらはぎのストレッチ",
+      "ar": "إطالة بطة الساق"
     },
     "description": {
       "en": "Hold a wall or a rail and step one leg back. Keep the back knee straight and the heel on the floor, and feel a stretch in the calf.",
-      "ja": "壁か手すりを持ち、片方の脚を後ろへ伸ばします。後ろの膝を伸ばし、かかとが床から離れないようにして、ふくらはぎが伸びる感じを保ちます。"
+      "ja": "壁か手すりを持ち、片方の脚を後ろへ伸ばします。後ろの膝を伸ばし、かかとが床から離れないようにして、ふくらはぎが伸びる感じを保ちます。",
+      "ar": "استند بيديك إلى الحائط أو الدرابزين ومدّ ساقًا واحدة إلى الخلف. أبقِ الركبة الخلفية مفرودة والكعب على الأرض حتى تشعر بشدّ في بطة الساق، واثبت."
     },
     "caution": {
       "en": "Do not bounce. Hold the stretch quietly. If it hurts, ease off.",
-      "ja": "反動をつけず、ゆっくり保ってください。痛みがあれば範囲を小さくしてください。"
+      "ja": "反動をつけず、ゆっくり保ってください。痛みがあれば範囲を小さくしてください。",
+      "ar": "لا تهتزّ، واثبت بهدوء. إذا شعرت بألم فقلّل مدى الحركة."
     }
   },
   "74": {
     "title": {
       "en": "Hamstring stretch",
-      "ja": "ハムストリングスのストレッチ"
+      "ja": "ハムストリングスのストレッチ",
+      "ar": "إطالة خلف الفخذ"
     },
     "description": {
       "en": "Sit in a chair, straighten one leg, and gently draw the toes up. Sit tall and slowly lean forward until you feel a stretch at the back of the thigh. Hold it.",
-      "ja": "椅子に座り、片方の脚を前へ伸ばして足先を軽く上げます。背すじを伸ばしたまま体をゆっくり前へ傾け、太ももの後ろが伸びる感じを保ちます。"
+      "ja": "椅子に座り、片方の脚を前へ伸ばして足先を軽く上げます。背すじを伸ばしたまま体をゆっくり前へ傾け、太ももの後ろが伸びる感じを保ちます。",
+      "ar": "اجلس على كرسي ومدّ ساقًا واحدة إلى الأمام، واسحب أصابع القدم نحوك برفق. أبقِ ظهرك مستقيمًا ومِل بجسمك ببطء إلى الأمام حتى تشعر بشدّ خلف الفخذ، واثبت."
     },
     "caution": {
       "en": "Do not round the back hard or bounce. Stop if you feel tingling or pain.",
-      "ja": "腰を深く丸めたり、反動をつけたりしないでください。しびれや痛みがあれば中止してください。"
+      "ja": "腰を深く丸めたり、反動をつけたりしないでください。しびれや痛みがあれば中止してください。",
+      "ar": "لا تحنِ ظهرك كثيرًا ولا تهتزّ. توقّف إذا شعرت بتنميل أو ألم."
     }
   },
   "75": {
     "title": {
       "en": "Diaphragmatic breathing",
-      "ja": "腹式呼吸"
+      "ja": "腹式呼吸",
+      "ar": "التنفس بالحجاب الحاجز"
     },
     "description": {
       "en": "Lie on your back, or sit tall. Put one hand on the chest and one on the belly. Breathe in slowly through the nose so the belly rises into the hand. Breathe out slowly through the mouth so the belly falls.",
-      "ja": "仰向けになるか、背すじを伸ばして座ります。片手を胸、片手をお腹に置きます。鼻からゆっくり吸い、お腹が手に触れるようにふくらませます。口からゆっくり吐き、お腹がへこむようにします。"
+      "ja": "仰向けになるか、背すじを伸ばして座ります。片手を胸、片手をお腹に置きます。鼻からゆっくり吸い、お腹が手に触れるようにふくらませます。口からゆっくり吐き、お腹がへこむようにします。",
+      "ar": "استلقِ على ظهرك أو اجلس بظهر مستقيم. ضع يدًا على صدرك ويدًا على بطنك، وخذ شهيقًا بطيئًا من الأنف حتى يرتفع بطنك نحو يدك. ثم أخرج الزفير ببطء من الفم حتى ينخفض بطنك."
     },
     "caution": {
       "en": "If you feel dizzy or short of breath, stop and return to your usual breathing. Do not force the belly up.",
-      "ja": "めまいや息切れがあればすぐにやめ、いつもの呼吸に戻してください。お腹を無理に押し上げないでください。"
+      "ja": "めまいや息切れがあればすぐにやめ、いつもの呼吸に戻してください。お腹を無理に押し上げないでください。",
+      "ar": "إذا شعرت بدوخة أو ضيق في التنفس فتوقّف فورًا وعد إلى تنفسك المعتاد. لا تدفع بطنك إلى أعلى بالقوة."
     }
   },
   "76": {
     "title": {
       "en": "Pursed-lip breathing",
-      "ja": "口すぼめ呼吸"
+      "ja": "口すぼめ呼吸",
+      "ar": "التنفس مع ضمّ الشفتين"
     },
     "description": {
       "en": "Sit tall. Breathe in slowly through the nose. Then purse the lips, as if you were gently flickering a candle, and breathe out for a long time. Make the breath out longer than the breath in.",
-      "ja": "背すじを伸ばして座ります。鼻からゆっくり吸います。次に唇を小さくすぼめ、ろうそくの炎をゆらすように長く吐きます。吸うより吐く方を長くします。"
+      "ja": "背すじを伸ばして座ります。鼻からゆっくり吸います。次に唇を小さくすぼめ、ろうそくの炎をゆらすように長く吐きます。吸うより吐く方を長くします。",
+      "ar": "اجلس بظهر مستقيم. خذ شهيقًا بطيئًا من الأنف، ثم ضمّ شفتيك وأخرج الزفير طويلًا ولطيفًا كأنك تجعل لهب شمعة يتمايل من دون أن ينطفئ. اجعل الزفير أطول من الشهيق."
     },
     "caution": {
       "en": "Do not puff the cheeks hard, and do not hold your breath. Stop if you feel dizzy.",
-      "ja": "頬を強くふくらませたり、息を止めたりしないでください。めまいがあれば中止してください。"
+      "ja": "頬を強くふくらませたり、息を止めたりしないでください。めまいがあれば中止してください。",
+      "ar": "لا تنفخ خديك كثيرًا ولا تحبس أنفاسك. توقّف إذا شعرت بدوخة."
     }
   },
   "77": {
     "title": {
       "en": "Chest-expansion breathing",
-      "ja": "胸郭を広げる呼吸"
+      "ja": "胸郭を広げる呼吸",
+      "ar": "التنفس مع توسيع الصدر"
     },
     "description": {
       "en": "Sit tall with both hands on the sides of the rib cage. Breathe in slowly and deeply through the nose so the ribs widen to the sides. Open the mouth slightly and breathe out as the ribs come back down.",
-      "ja": "背すじを伸ばして座り、両手を肋骨の横に置きます。鼻からゆっくり深く吸い、肋骨が左右に広がるようにします。口を軽く開け、肋骨が下がるように吐きます。"
+      "ja": "背すじを伸ばして座り、両手を肋骨の横に置きます。鼻からゆっくり深く吸い、肋骨が左右に広がるようにします。口を軽く開け、肋骨が下がるように吐きます。",
+      "ar": "اجلس بظهر مستقيم وضع يديك على جانبي أضلاعك. خذ شهيقًا بطيئًا وعميقًا من الأنف حتى تتسع أضلاعك إلى الجانبين. ثم افتح فمك قليلًا وأخرج الزفير حتى تنخفض الأضلاع."
     },
     "caution": {
       "en": "Do not shrug the shoulders as you breathe in. If it hurts or you are very short of breath, take a shallower breath.",
-      "ja": "肩をすくめて吸わないでください。痛みや強い息苦しさがあれば、深さをおさえてください。"
+      "ja": "肩をすくめて吸わないでください。痛みや強い息苦しさがあれば、深さをおさえてください。",
+      "ar": "لا ترفع كتفيك أثناء الشهيق. إذا شعرت بألم أو ضيق شديد في التنفس فقلّل عمق الشهيق."
     }
   },
   "78": {
     "title": {
       "en": "Incentive spirometer",
-      "ja": "インセンティブスパイロメーター"
+      "ja": "インセンティブスパイロメーター",
+      "ar": "جهاز تحفيز التنفس العميق"
     },
     "description": {
       "en": "Sit tall if you can. Seal your lips around the mouthpiece of the incentive spirometer so air does not leak through the nose. Breathe in slowly and deeply so the indicator rises. At the fullest breath, hold for 3~5 seconds. Take the mouthpiece out, then breathe out comfortably.",
-      "ja": "できれば背すじを伸ばして座ります。インセンティブスパイロメーターのマウスピースをくわえ、鼻から空気が漏れないようにします。ゆっくり深く吸い、表示が上がるようにします。いっぱいに吸ったところで3~5秒息を止めます。マウスピースを外してから、楽に吐きます。"
+      "ja": "できれば背すじを伸ばして座ります。インセンティブスパイロメーターのマウスピースをくわえ、鼻から空気が漏れないようにします。ゆっくり深く吸い、表示が上がるようにします。いっぱいに吸ったところで3~5秒息を止めます。マウスピースを外してから、楽に吐きます。",
+      "ar": "اجلس بظهر مستقيم إن أمكن. ضع قطعة الفم بين شفتيك، ولا تدع الهواء يتسرّب من أنفك. خذ شهيقًا بطيئًا وعميقًا حتى يرتفع المؤشر، وعند أقصى شهيق احبس أنفاسك لمدة 3 إلى 5 ثوانٍ. ثم أخرج قطعة الفم وأخرج الزفير براحة."
     },
     "caution": {
       "en": "Do not breathe in fast or hard. Stop and tell your therapist if you feel dizzy, have chest pain, or are very short of breath.",
-      "ja": "速く強く吸わないでください。めまい、胸の痛み、強い息苦しさがあれば中止し、療法士に伝えてください。"
+      "ja": "速く強く吸わないでください。めまい、胸の痛み、強い息苦しさがあれば中止し、療法士に伝えてください。",
+      "ar": "لا تأخذ الشهيق بسرعة أو بقوة. توقّف وأخبر المعالج إذا شعرت بدوخة أو ألم في الصدر أو ضيق شديد في التنفس."
     }
   },
   "79": {
     "title": {
       "en": "Huff",
-      "ja": "ハフィング"
+      "ja": "ハフィング",
+      "ar": "زفير قوي لإخراج البلغم (هاف)"
     },
     "description": {
       "en": "Sit tall. Breathe in through the nose at a usual size. Open the mouth wide and breathe out in one long, strong “huh,” as if you were fogging a mirror. If mucus moves up near the throat, cough once, then rest.",
-      "ja": "背すじを伸ばして座ります。鼻から普通の大きさで吸います。口を大きく開け、鏡をくもらせるような「ハッ」という長く強い息で吐きます。たんがのど元まで上がってきたら、一度咳をして休みます。"
+      "ja": "背すじを伸ばして座ります。鼻から普通の大きさで吸います。口を大きく開け、鏡をくもらせるような「ハッ」という長く強い息で吐きます。たんがのど元まで上がってきたら、一度咳をして休みます。",
+      "ar": "اجلس بظهر مستقيم. خذ شهيقًا عاديًا من الأنف، ثم افتح فمك واسعًا وأخرج زفيرًا طويلًا وقويًا بصوت «هاه» كأنك تُكوّن بخارًا على مرآة. إذا صعد البلغم إلى قرب الحلق فاسعل مرة واحدة ثم استرح."
     },
     "caution": {
       "en": "Do not cough hard over and over. Stop if you feel dizzy or it hurts.",
-      "ja": "続けて強く咳をしないでください。めまいや痛みがあれば中止してください。"
+      "ja": "続けて強く咳をしないでください。めまいや痛みがあれば中止してください。",
+      "ar": "لا تسعل بقوة عدة مرات متتالية. توقّف إذا شعرت بدوخة أو ألم."
     }
   },
   "80": {
     "title": {
       "en": "Lift the arm with the other hand",
-      "ja": "反対の手で腕を上げる"
+      "ja": "反対の手で腕を上げる",
+      "ar": "رفع الذراع بمساعدة اليد الأخرى"
     },
     "description": {
       "en": "Lie on your back. With your other hand, lightly hold the wrist or forearm of the arm you are moving. Slowly lift that arm up toward your head, only as far as it does not hurt, then lower it at the same speed. Do not let the moving arm go completely limp. Lift with it only as much as you can.",
-      "ja": "仰向けになります。反対の手で、動かす腕の手首か前腕を軽く持ちます。痛くない範囲まで腕をゆっくり頭の方へ上げ、同じ速さで下ろします。動かす腕の力を完全には抜かず、できる分だけ一緒に上げます。"
+      "ja": "仰向けになります。反対の手で、動かす腕の手首か前腕を軽く持ちます。痛くない範囲まで腕をゆっくり頭の方へ上げ、同じ速さで下ろします。動かす腕の力を完全には抜かず、できる分だけ一緒に上げます。",
+      "ar": "استلقِ وأمسك برفق بيدك الأخرى رسغ الذراع التي تمرّنها أو ساعدها. ارفع الذراع ببطء نحو رأسك ضمن المدى الخالي من الألم، ثم أنزلها بالسرعة نفسها. لا ترخِ الذراع التي تمرّنها تمامًا، بل شارك في رفعها بقدر ما تستطيع."
     },
     "caution": {
       "en": "Do not jerk the sore arm upward. If the shoulder hurts or you feel a sharp tingling, lower the height. Right after a dislocation or surgery, lift only to the height your therapist allows.",
-      "ja": "痛い腕を引っ張り上げないでください。肩の痛みやピリッとする感じがあれば、高さを下げてください。脱臼や手術の直後は、療法士が許した高さまでにしてください。"
+      "ja": "痛い腕を引っ張り上げないでください。肩の痛みやピリッとする感じがあれば、高さを下げてください。脱臼や手術の直後は、療法士が許した高さまでにしてください。",
+      "ar": "لا تشدّ الذراع المؤلمة إلى أعلى بقوة. إذا شعرت بألم في الكتف أو وخز حاد فقلّل الارتفاع. بعد الخلع أو الجراحة مباشرة ارفعها فقط إلى الارتفاع الذي يسمح به المعالج."
     }
   },
   "81": {
     "title": {
       "en": "Gently tighten the belly and hold",
-      "ja": "お腹に軽く力を入れて保つ"
+      "ja": "お腹に軽く力を入れて保つ",
+      "ar": "شدّ البطن برفق والثبات"
     },
     "description": {
       "en": "Lie down with your knees bent. Keep the space between your lower back and the floor from getting larger. Gently tighten the lower belly so it becomes a little flatter. Do not hold your breath. Keep breathing comfortably while you hold the tension, then relax.",
-      "ja": "膝を立てて寝ます。腰と床のすき間が大きくならないようにしたまま、下腹に軽く力を入れ、お腹が少し薄くなるようにします。息を止めず、楽に呼吸しながら力を保ってから、力を抜きます。"
+      "ja": "膝を立てて寝ます。腰と床のすき間が大きくならないようにしたまま、下腹に軽く力を入れ、お腹が少し薄くなるようにします。息を止めず、楽に呼吸しながら力を保ってから、力を抜きます。",
+      "ar": "استلقِ على ظهرك مع ثني الركبتين ووضع القدمين على السرير. لا تدع الفراغ بين أسفل ظهرك والسرير يكبر، وشدّ أسفل بطنك برفق حتى ينكمش قليلًا. لا تحبس أنفاسك، بل تنفّس براحة أثناء الشدّ ثم أرخِ."
     },
     "caution": {
       "en": "Do not hold your breath or tense your shoulders. Do not lift your lower back far off the floor, and do not press it down hard enough to cause pain. Stop right away if it hurts.",
-      "ja": "息を止めたり、肩に力を入れたりしないでください。腰を床から大きく持ち上げたり、逆に強く押しつけて痛みを出したりしないでください。痛みがあればすぐに中止してください。"
+      "ja": "息を止めたり、肩に力を入れたりしないでください。腰を床から大きく持ち上げたり、逆に強く押しつけて痛みを出したりしないでください。痛みがあればすぐに中止してください。",
+      "ar": "لا تحبس أنفاسك ولا تشدّ كتفيك. لا ترفع أسفل ظهرك كثيرًا، ولا تضغطه بقوة حتى تشعر بألم. توقّف فورًا إذا شعرت بألم."
     }
   },
   "82": {
     "title": {
       "en": "Squeeze a towel between the knees",
-      "ja": "膝の間のタオルを挟む"
+      "ja": "膝の間のタオルを挟む",
+      "ar": "ضمّ الركبتين على منشفة"
     },
     "description": {
       "en": "Lie with your knees bent and place a folded towel between them. Gently squeeze the towel with your knees, as if you were holding it, then relax. Keep your pelvis from rolling and your lower back from lifting.",
-      "ja": "膝を立てて寝て、折ったタオルを両膝の間に入れます。膝でタオルをやさしく挟むように力を入れてから、力を抜きます。骨盤が回ったり、腰が浮かないようにします。"
+      "ja": "膝を立てて寝て、折ったタオルを両膝の間に入れます。膝でタオルをやさしく挟むように力を入れてから、力を抜きます。骨盤が回ったり、腰が浮かないようにします。",
+      "ar": "استلقِ على ظهرك مع ثني الركبتين، وضع منشفة مطوية بين ركبتيك. اضغط المنشفة برفق بركبتيك ثم أرخِ. لا تدع الحوض يدور ولا أسفل الظهر يرتفع."
     },
     "caution": {
       "en": "After a hip replacement, do this only if your therapist says you may. This is not the same as the general hip-replacement warning about bringing the legs too far together: the towel keeps the knees apart, and you only squeeze. Stop if you feel pain in the groin or on the inner knee.",
-      "ja": "股関節を置換した人は、療法士が許した場合だけ行ってください。これは人工股関節の一般的な注意にある、脚を寄せすぎる動きとは違います。タオルが膝の間を開けた状態で、挟むだけです。脚の付け根や膝の内側が痛ければ中止してください。"
+      "ja": "股関節を置換した人は、療法士が許した場合だけ行ってください。これは人工股関節の一般的な注意にある、脚を寄せすぎる動きとは違います。タオルが膝の間を開けた状態で、挟むだけです。脚の付け根や膝の内側が痛ければ中止してください。",
+      "ar": "إذا أجريت جراحة استبدال مفصل الورك فلا تتمرّن إلا إذا سمح المعالج. لا تخلط بين هذا التمرين وبين تقريب الساق المفرط الممنوع بعد الجراحة: اضغط فقط والمنشفة تُبقي ركبتيك متباعدتين. توقّف إذا شعرت بألم في أعلى الفخذ من الداخل (الأُربية) أو في الجهة الداخلية من الركبة."
     }
   },
   "83": {
     "title": {
       "en": "Turn the whole leg in and out",
-      "ja": "脚全体を内外に回す"
+      "ja": "脚全体を内外に回す",
+      "ar": "تدوير الساق كاملة إلى الداخل والخارج"
     },
     "description": {
       "en": "Lie on your back with the knee straight, or sit with the leg stretched out in front. Keep both knees from bending. From the hip, slowly turn the whole leg inward until the toes point toward each other, then turn it outward until the toes point apart. Do not move only the ankle. Let the kneecap turn in the same direction as the toes.",
-      "ja": "膝を伸ばしたまま仰向けになるか、脚を前に伸ばして座ります。両方の膝が曲がらないようにしたまま、股関節から脚全体をゆっくり内側へ回し、つま先が互いに寄るようにします。次に外側へ回し、つま先が開くようにします。足首だけを動かさず、膝のお皿がつま先と同じ向きに回るようにします。"
+      "ja": "膝を伸ばしたまま仰向けになるか、脚を前に伸ばして座ります。両方の膝が曲がらないようにしたまま、股関節から脚全体をゆっくり内側へ回し、つま先が互いに寄るようにします。次に外側へ回し、つま先が開くようにします。足首だけを動かさず、膝のお皿がつま先と同じ向きに回るようにします。",
+      "ar": "استلقِ على ظهرك والركبتان مفرودتان، أو اجلس والساقان ممدودتان إلى الأمام. من دون ثني الركبتين، أدر الساقين كاملتين ببطء من مفصل الورك إلى الداخل حتى تتقارب أصابع القدمين، ثم إلى الخارج حتى تتباعد. لا تحرّك الكاحلين فقط، بل اجعل عظمة الركبة تدور في اتجاه أصابع القدم نفسه."
     },
     "caution": {
       "en": "If it hurts, make the movement smaller or stop. Do not bend the knee or spread the leg far out to the side.",
-      "ja": "痛みがあれば範囲を小さくするか、中止してください。膝を曲げたり、脚を横に大きく開いたりしないでください。"
+      "ja": "痛みがあれば範囲を小さくするか、中止してください。膝を曲げたり、脚を横に大きく開いたりしないでください。",
+      "ar": "إذا شعرت بألم فقلّل مدى الحركة أو توقّف. لا تثنِ ركبتيك ولا تباعد بين ساقيك كثيرًا."
     }
   },
   "84": {
     "title": {
       "en": "Lift the opposite arm and leg on hands and knees",
-      "ja": "四つばいで反対の手足を上げる"
+      "ja": "四つばいで反対の手足を上げる",
+      "ar": "رفع الذراع والساق المتقابلتين على اليدين والركبتين"
     },
     "description": {
       "en": "Place your hands and knees on the floor. Put your hands under your shoulders and your knees under your hips. Keep your lower back from sagging down or pushing up. Slowly lift one arm and the opposite leg only until they are about level with the floor, then lower them. Switch sides.",
-      "ja": "手と膝を床について四つばいになります。手は肩の下、膝は股関節の下に置きます。腰が下に沈んだり、上に突き出したりしないようにしたまま、片方の腕と反対の脚を、床とほぼ水平になる高さまでゆっくり上げて下ろします。左右を交互に行います。"
+      "ja": "手と膝を床について四つばいになります。手は肩の下、膝は股関節の下に置きます。腰が下に沈んだり、上に突き出したりしないようにしたまま、片方の腕と反対の脚を、床とほぼ水平になる高さまでゆっくり上げて下ろします。左右を交互に行います。",
+      "ar": "اتخذ وضع الارتكاز على اليدين والركبتين: اليدان تحت الكتفين والركبتان تحت الوركين. لا تدع أسفل ظهرك يهبط أو يتقوّس إلى أعلى، وارفع ببطء ذراعًا واحدة والساق المقابلة حتى تصيرا موازيتين للأرض فقط، ثم أنزلهما. بدّل بين الجهتين."
     },
     "caution": {
       "en": "Stop if your lower back, wrist, or knee hurts. If your body twists to one side, do not lift as high. If you cannot balance on your own, start with the arm only, or the leg only. If your wrist is uncomfortable, ask your therapist before using a fist or a supported hand.",
-      "ja": "腰、手首、膝が痛ければ中止してください。体が片方へ回るときは、上げる高さを下げてください。一人でバランスが不安なら、先に腕だけ、または脚だけ行ってください。手首がつらいときは、こぶしや手を支える姿勢にする前に療法士と相談してください。"
+      "ja": "腰、手首、膝が痛ければ中止してください。体が片方へ回るときは、上げる高さを下げてください。一人でバランスが不安なら、先に腕だけ、または脚だけ行ってください。手首がつらいときは、こぶしや手を支える姿勢にする前に療法士と相談してください。",
+      "ar": "توقّف إذا شعرت بألم في الظهر أو الرسغ أو الركبة. إذا دار جسمك إلى جهة فقلّل ارتفاع الرفع. إذا كان توازنك غير ثابت وحدك فابدأ بالذراع فقط أو بالساق فقط. إذا كان رسغك غير مرتاح فاسأل المعالج عن الاستناد بقبضة اليد أو بيد مسنودة."
     }
   },
   "85": {
     "title": {
       "en": "Chin tuck",
-      "ja": "あごを引く"
+      "ja": "あごを引く",
+      "ar": "سحب الذقن إلى الداخل"
     },
     "description": {
       "en": "Sit tall and look straight ahead. Do not drop your head. Gently draw the chin in so the head slides straight back, as if it were moving backward on a level line. Hold briefly when the back of the neck feels lightly longer, then relax.",
-      "ja": "背すじを伸ばして座り、正面を見ます。頭を下げず、あごを少し引いて、頭が後ろへ水平に移動するように引きます。首の後ろが軽く長くなる感じで少し保ってから、力を抜きます。"
+      "ja": "背すじを伸ばして座り、正面を見ます。頭を下げず、あごを少し引いて、頭が後ろへ水平に移動するように引きます。首の後ろが軽く長くなる感じで少し保ってから、力を抜きます。",
+      "ar": "اجلس بظهر مستقيم وانظر إلى الأمام. من دون أن تخفض رأسك، أدخل ذقنك قليلًا واسحب رأسك إلى الخلف في خط أفقي. اثبت قليلًا عندما تشعر بإطالة خفيفة خلف الرقبة، ثم أرخِ."
     },
     "caution": {
       "en": "Do not bend the head forward or drop it down. Stop right away and tell your therapist if you feel dizzy, your hand tingles, or your neck hurts a lot. After neck surgery or an injury, do this only if your therapist allows it.",
-      "ja": "頭を前に傾けたり、下に下げたりしないでください。めまい、手のしびれ、強い首の痛みがあればすぐに中止し、療法士に伝えてください。首の手術やけがの後は、療法士が許した場合だけ行ってください。"
+      "ja": "頭を前に傾けたり、下に下げたりしないでください。めまい、手のしびれ、強い首の痛みがあればすぐに中止し、療法士に伝えてください。首の手術やけがの後は、療法士が許した場合だけ行ってください。",
+      "ar": "لا تحنِ رأسك إلى الأمام أو إلى أسفل. توقّف فورًا وأخبر المعالج إذا شعرت بدوخة أو تنميل في اليد أو ألم شديد في الرقبة. بعد جراحة أو إصابة في الرقبة لا تتمرّن إلا إذا سمح المعالج."
     }
   },
   "86": {
     "title": {
       "en": "Turn the trunk while sitting",
-      "ja": "座って体を回す"
+      "ja": "座って体を回す",
+      "ar": "تدوير الجذع أثناء الجلوس"
     },
     "description": {
       "en": "Sit tall with both feet on the floor. Lightly cross your arms in front of your chest, or rest your hands on your shoulders. Keep your pelvis facing forward and slowly turn only your trunk to one side, then come back. Repeat to the other side.",
-      "ja": "背すじを伸ばして座り、両足を床に置きます。腕を胸の前で軽く組むか、肩に手を置きます。骨盤は正面を向けたまま、体だけを片方へゆっくり回して戻します。反対側も繰り返します。"
+      "ja": "背すじを伸ばして座り、両足を床に置きます。腕を胸の前で軽く組むか、肩に手を置きます。骨盤は正面を向けたまま、体だけを片方へゆっくり回して戻します。反対側も繰り返します。",
+      "ar": "اجلس بظهر مستقيم وقدماك على الأرض. اطوِ ذراعيك برفق أمام صدرك أو ضع يديك على كتفيك. أبقِ الحوض متجهًا إلى الأمام، وأدر جذعك فقط ببطء إلى جهة واحدة ثم عد. كرّر إلى الجهة الأخرى."
     },
     "caution": {
       "en": "Do not twist the lower back hard. Stop if you just had spine surgery, have sudden low-back pain, or feel dizzy. After a hip replacement, stay within the turning and bending range your therapist gave you.",
-      "ja": "腰を大きくねじらないでください。背骨の手術の直後、急な腰痛、めまいがあれば中止してください。股関節を置換した人は、療法士が伝えた回す範囲・曲げる範囲を守ってください。"
+      "ja": "腰を大きくねじらないでください。背骨の手術の直後、急な腰痛、めまいがあれば中止してください。股関節を置換した人は、療法士が伝えた回す範囲・曲げる範囲を守ってください。",
+      "ar": "لا تلوِ ظهرك بدوران كبير. توقّف إذا كنت قد أجريت جراحة في العمود الفقري حديثًا، أو كان لديك ألم حاد في أسفل الظهر، أو شعرت بدوخة. إذا أجريت جراحة استبدال مفصل الورك فالتزم بمدى الدوران والثني الذي حدّده المعالج."
     }
   },
   "87": {
     "title": {
       "en": "Scrunch a towel with the toes",
-      "ja": "つま先でタオルをたぐる"
+      "ja": "つま先でタオルをたぐる",
+      "ar": "تجميع المنشفة بأصابع القدم"
     },
     "description": {
       "en": "Sit in a chair and spread a thin towel on the floor in front of your foot. Keep the heel on the floor and scrunch the towel toward you with your toes. Move only the toes, and do not let the knee wobble.",
-      "ja": "椅子に座り、足の前の床に薄いタオルを広げます。かかとを床につけたまま、つま先でタオルを手繰り寄せるようにくしゃくしゃにします。つま先だけを動かし、膝が揺れないようにします。"
+      "ja": "椅子に座り、足の前の床に薄いタオルを広げます。かかとを床につけたまま、つま先でタオルを手繰り寄せるようにくしゃくしゃにします。つま先だけを動かし、膝が揺れないようにします。",
+      "ar": "اجلس على كرسي وافرش منشفة رقيقة على الأرض أمام قدمك. أبقِ كعبك على الأرض، واجمع المنشفة بأصابع قدمك كأنك تسحبها نحوك. حرّك الأصابع فقط ولا تدع الركبة تهتزّ."
     },
     "caution": {
       "en": "Stop if a toe joint or the sole of the foot hurts. If you recently had foot surgery, have a serious wound, or have poor blood flow, ask your therapist first. If the foot cramps, straighten it and rest.",
-      "ja": "足の指の関節や足の裏が痛ければ中止してください。最近足の手術をした、傷がひどい、血流の障害があるときは、療法士と相談してください。つったら、足を伸ばして休んでください。"
+      "ja": "足の指の関節や足の裏が痛ければ中止してください。最近足の手術をした、傷がひどい、血流の障害があるときは、療法士と相談してください。つったら、足を伸ばして休んでください。",
+      "ar": "توقّف إذا شعرت بألم في مفاصل أصابع القدم أو باطن القدم. إذا كانت لديك جراحة حديثة في القدم أو جرح شديد أو ضعف في الدورة الدموية فاستشر المعالج. إذا أصابك تشنّج فافرد قدمك واسترح."
     }
   },
   "88": {
     "title": {
       "en": "Standing stretch for the front of the thigh",
-      "ja": "立って太ももの前を伸ばす"
+      "ja": "立って太ももの前を伸ばす",
+      "ar": "إطالة مقدمة الفخذ أثناء الوقوف"
     },
     "description": {
       "en": "Stand and hold a chair or a rail with one hand. Bend one knee back and lightly hold the ankle, or the cuff of the pants, with the hand on the same side. Point the knee toward the floor and do not let the lower back bend forward. Hold where you feel a stretch in the front of the thigh.",
-      "ja": "椅子か手すりを片手で持って立ちます。片方の膝を後ろへ曲げ、同じ側の手で足首かズボンの裾を軽く持ちます。膝は床の方を向け、腰が前に折れないようにして、太ももの前が伸びる感じで保ちます。"
+      "ja": "椅子か手すりを片手で持って立ちます。片方の膝を後ろへ曲げ、同じ側の手で足首かズボンの裾を軽く持ちます。膝は床の方を向け、腰が前に折れないようにして、太ももの前が伸びる感じで保ちます。",
+      "ar": "قف وأمسك بكرسي أو بالدرابزين بيد واحدة. اثنِ ركبة واحدة إلى الخلف، وأمسك برفق كاحلك أو طرف البنطال باليد من الجهة نفسها. اجعل الركبة متجهة إلى الأرض ولا تدع أسفل ظهرك يتقوّس إلى الأمام، واثبت عندما تشعر بشدّ في مقدمة الفخذ."
     },
     "caution": {
       "en": "Do not bounce. Stop if your lower back or knee hurts, or if your balance feels unsteady. If you had a hip replacement from the front, or you are limited in straightening the hip or turning it outward, do not do this until your therapist allows it. If you cannot hold the ankle, rest the top of the foot on a chair behind you and use only a small stretch.",
-      "ja": "反動をつけないでください。腰の痛み、膝の痛み、バランスの不安があれば中止してください。股関節の前方からの置換や、股関節を伸ばす・外へ回す動きに制限がある人は、療法士が許すまでは行わないでください。足首をつかめないときは、後ろの椅子に足の甲を乗せて、小さくだけ行ってください。"
+      "ja": "反動をつけないでください。腰の痛み、膝の痛み、バランスの不安があれば中止してください。股関節の前方からの置換や、股関節を伸ばす・外へ回す動きに制限がある人は、療法士が許すまでは行わないでください。足首をつかめないときは、後ろの椅子に足の甲を乗せて、小さくだけ行ってください。",
+      "ar": "لا تهتزّ. توقّف إذا شعرت بألم في الظهر أو الركبة أو عدم ثبات في التوازن. إذا أجريت استبدال مفصل الورك من الأمام، أو كان ممنوعًا عليك مدّ الورك إلى الخلف أو تدويره إلى الخارج، فلا تتمرّن قبل أن يسمح المعالج. إذا لم تستطع الإمساك بكاحلك فضع ظهر قدمك على كرسي خلفك وتحرّك ضمن مدى صغير فقط."
     }
   },
   "89": {
     "title": {
       "en": "Walk in place",
-      "ja": "その場歩き"
+      "ja": "その場歩き",
+      "ar": "المشي في المكان"
     },
     "description": {
       "en": "Stand with a chair or a rail beside you. Lift your feet one after the other and walk in place. Swing your arms naturally, and keep going for the set time at an effort where you can still talk. Hold the support with one hand if you need to.",
-      "ja": "椅子か手すりを横に置いて立ちます。その場で足を交互に軽く上げ、歩くように動きます。腕は自然に振り、話せる強さで決めた時間を続けます。必要なら片手で支えを持ちます。"
+      "ja": "椅子か手すりを横に置いて立ちます。その場で足を交互に軽く上げ、歩くように動きます。腕は自然に振り、話せる強さで決めた時間を続けます。必要なら片手で支えを持ちます。",
+      "ar": "قف وبجانبك كرسي أو درابزين. ارفع قدميك بخفة بالتناوب وأنت في مكانك كأنك تمشي. حرّك ذراعيك بشكل طبيعي، واستمر للمدة المحددة بشدة تسمح لك بالكلام. أمسك بشيء ثابت بيد واحدة عند الحاجة."
     },
     "caution": {
       "en": "Sit down right away if you feel dizzy, very short of breath, or chest pain. If your balance is unsteady, hold a support. If a joint starts to hurt more, do not lift the feet as high.",
-      "ja": "めまい、強い息苦しさ、胸の痛みがあればすぐに座ってください。バランスが不安なら支えを持って行ってください。関節の痛みが増えたら、足を上げる高さを下げてください。"
+      "ja": "めまい、強い息苦しさ、胸の痛みがあればすぐに座ってください。バランスが不安なら支えを持って行ってください。関節の痛みが増えたら、足を上げる高さを下げてください。",
+      "ar": "اجلس فورًا إذا شعرت بدوخة أو ضيق شديد في التنفس أو ألم في الصدر. إذا كان توازنك غير ثابت فأمسك بشيء ثابت. إذا زاد ألم المفاصل فقلّل ارتفاع القدمين."
     }
   },
   "90": {
     "title": {
       "en": "Prop up on your elbows while lying face down",
-      "ja": "うつ伏せで肘につき上体を起こす"
+      "ja": "うつ伏せで肘につき上体を起こす",
+      "ar": "الاستناد على المرفقين مع الاستلقاء على البطن"
     },
     "description": {
       "en": "Do this only if your therapist prescribed it. Lie face down and place your elbows under your shoulders, then gently raise your upper body and rest on your elbows. Keep your pelvis and legs on the floor, and breathe comfortably. Hold the position while you check that pain is not spreading down the leg.",
-      "ja": "療法士がこの動きを処方した場合だけ行います。床にうつ伏せになり、肘を肩の下に置いて上体を軽く起こし、肘に寄りかかります。骨盤と脚は床に置いたまま、楽に呼吸します。痛みが脚へ広がっていないかを確かめながら保ちます。"
+      "ja": "療法士がこの動きを処方した場合だけ行います。床にうつ伏せになり、肘を肩の下に置いて上体を軽く起こし、肘に寄りかかります。骨盤と脚は床に置いたまま、楽に呼吸します。痛みが脚へ広がっていないかを確かめながら保ちます。",
+      "ar": "لا تتمرّن إلا إذا وصف لك المعالج هذه الحركة. استلقِ على بطنك على الأرض، وضع مرفقيك تحت كتفيك، وارفع الجزء العلوي من جسمك برفق واستند. أبقِ الحوض والساقين على الأرض وتنفّس براحة. اثبت مع التأكد من أن الألم لا ينتشر إلى الساق."
     },
     "caution": {
       "en": "Do not use this as a general home exercise without a diagnosis. If tingling or pain spreads down the leg, stop right away and lie comfortably face down or on your side again. Do not do this right after spine surgery, if a fracture is suspected, if spinal narrowing is severe, or if you are pregnant. Do not move on by yourself to the later step of pushing the back up all the way with your palms.",
-      "ja": "診断なしに、一般の宿題として使わないでください。脚のしびれや痛みが下の方へ広がったら、すぐに中止し、楽にうつ伏せか横向きに戻ってください。背骨の手術の直後、骨折の疑い、狭窄が強いとき、妊娠中は行わないでください。手のひらで腰を最後まで押し上げる次の段階へ、一人で進めないでください。"
+      "ja": "診断なしに、一般の宿題として使わないでください。脚のしびれや痛みが下の方へ広がったら、すぐに中止し、楽にうつ伏せか横向きに戻ってください。背骨の手術の直後、骨折の疑い、狭窄が強いとき、妊娠中は行わないでください。手のひらで腰を最後まで押し上げる次の段階へ、一人で進めないでください。",
+      "ar": "لا تستخدم هذا التمرين واجبًا منزليًا عامًا من دون تشخيص. إذا انتشر التنميل أو الألم إلى أسفل الساق فتوقّف فورًا، واستلقِ مرتاحًا على بطنك أو على جانبك. لا تتمرّن بعد جراحة العمود الفقري مباشرة، أو عند الاشتباه بكسر، أو في حالة تضيّق شديد في القناة الشوكية، أو أثناء الحمل. لا تنتقل وحدك إلى المرحلة التالية التي تدفع فيها جسمك بالكامل إلى أعلى براحتي اليدين."
     }
   },
   "91": {
     "title": {
       "en": "Hold the tabletop position",
-      "ja": "テーブルトップの姿勢を保つ"
+      "ja": "テーブルトップの姿勢を保つ",
+      "ar": "الثبات مع رفع الساقين بزاوية 90 درجة"
     },
     "description": {
       "en": "Lie on your back with both arms by your sides. Bend both hips and both knees to a right angle (90 degrees) and lift the legs off the bed. Point the thighs toward the ceiling, and keep the shins level with the bed. Do not let your lower back lift off the floor. Do not hold your breath. Breathe comfortably while you hold the position, then lower the legs slowly.",
-      "ja": "仰向けになり、両腕を体の横に置きます。両方の股関節と膝をそれぞれ直角（90度）に曲げ、脚をベッドから持ち上げます。太ももは天井の方へ立て、すねはベッドと平行に水平にします。腰が床から浮かないようにしたまま、息を止めず楽に呼吸しながら姿勢を保ち、ゆっくり脚を下ろします。"
+      "ja": "仰向けになり、両腕を体の横に置きます。両方の股関節と膝をそれぞれ直角（90度）に曲げ、脚をベッドから持ち上げます。太ももは天井の方へ立て、すねはベッドと平行に水平にします。腰が床から浮かないようにしたまま、息を止めず楽に呼吸しながら姿勢を保ち、ゆっくり脚を下ろします。",
+      "ar": "استلقِ على ظهرك وذراعاك بجانب جسمك. اثنِ الوركين والركبتين بزاوية قائمة (90 درجة) وارفع ساقيك عن السرير. اجعل الفخذين متجهين نحو السقف، والجزء السفلي من الساقين أفقيًا موازيًا للسرير. لا تدع أسفل ظهرك يرتفع، ولا تحبس أنفاسك، بل تنفّس براحة واثبت، ثم أنزل ساقيك ببطء."
     },
     "caution": {
       "en": "If your lower back lifts off the floor or your lower back starts to hurt, lower the legs right away and stop. Do not hold your breath or lift your head.",
-      "ja": "腰が床から浮くか、腰が痛くなったら、すぐに脚を下ろして中止してください。息を止めたり、頭を持ち上げたりしないでください。"
+      "ja": "腰が床から浮くか、腰が痛くなったら、すぐに脚を下ろして中止してください。息を止めたり、頭を持ち上げたりしないでください。",
+      "ar": "إذا ارتفع أسفل ظهرك أو شعرت بألم في الظهر فأنزل ساقيك فورًا وتوقّف. لا تحبس أنفاسك ولا ترفع رقبتك."
     }
   }
 };
@@ -1924,5 +2336,25 @@ var TRANSLATION_NOTES = [
   {
     "id": "91",
     "text": "승인된 매핑 그대로 10초 유지 × 5세트입니다. 초는 치료사가 바꿀 수 있습니다. THA 프리셋에는 넣지 않았습니다."
+  },
+  {
+    "id": "ar",
+    "text": "아랍어(v2.68)는 AI가 작성한 초안이며 Matt 검토 전이고 아랍어 원어민 확인도 받지 않았습니다. 환자에게 쓰기 전에 의료통역사 등 아랍어를 읽는 사람의 확인이 필요합니다. 지역 방언이 아닌 현대 표준 아랍어이고, 명령형은 아랍어 안내문에서 흔한 남성 단수형입니다(여성 환자에게도 같은 문장이 인쇄됩니다)."
+  },
+  {
+    "id": "ar-num",
+    "text": "아랍어 숫자는 치료사가 확인할 수 있게 0–9를 씁니다. 용량은 '반복: 10 × 세트: 2'처럼 이름표를 붙여 숫자가 항상 보이게 했습니다. 다만 초·분은 1과 2일 때 아랍어 문법대로 낱말로 적습니다. 날짜의 달 이름은 걸프·이집트식(يناير, فبراير …)입니다."
+  },
+  {
+    "id": "ar-rtl",
+    "text": "아랍어 유인물은 오른쪽에서 왼쪽으로 배치합니다. 그림은 좌우를 뒤집지 않습니다. 환자 이름처럼 번역하지 않는 글자는 원래 방향 그대로 인쇄합니다. 통증 숫자 0–10은 오른쪽부터 읽습니다."
+  },
+  {
+    "id": "ar-67",
+    "text": "67번의 8자는 아랍어 숫자 8(٨)과 모양이 달라 '영어식 숫자 8 모양'으로 옮겼습니다."
+  },
+  {
+    "id": "ar-58",
+    "text": "58·72번의 야외 걷기, 56번의 실내 걷기는 병원과 집을 모두 포함하는 말로 옮겼습니다."
   }
 ];

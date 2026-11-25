@@ -39,6 +39,26 @@
     .leaflet-out[lang="ja"] * {
       font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", "Noto Sans JP", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
     }
+    /* 아랍어는 오른쪽에서 왼쪽으로 쓴다. 배치는 dir="rtl" 이 뒤집고, 그림은 뒤집지 않는다. */
+    .leaflet-out[lang="ar"],
+    .leaflet-out[lang="ar"] * {
+      font-family: "Segoe UI", Tahoma, Arial, "Geeza Pro", "Noto Sans Arabic", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+      letter-spacing: normal;
+    }
+    .leaflet-out[lang="ar"] .keep-ko,
+    .leaflet-out[lang="ar"] .leaflet-compact,
+    .leaflet-out[lang="ar"] .leaflet-compact h2,
+    .leaflet-out[lang="ar"] .leaflet-compact p,
+    .leaflet-out[lang="ar"] .leaflet-dose { word-break: normal; }
+    .leaflet-out[lang="ar"] .text-right { text-align: end; }
+    .leaflet-out[lang="ar"] .font-black,
+    .leaflet-out[lang="ar"] .leaflet-compact h2,
+    .leaflet-out[lang="ar"] .leaflet-dose { font-weight: 700 !important; }
+    /* 아랍 글자는 같은 크기에서 작게 보인다 */
+    .leaflet-out[lang="ar"] .text-xs { font-size: 13px; line-height: 1.6; }
+    .leaflet-out[lang="ar"] .leaflet-compact h2,
+    .leaflet-out[lang="ar"] .leaflet-dose { font-size: 12px !important; line-height: 1.5 !important; }
+    .leaflet-out[lang="ar"] .leaflet-compact p { font-size: 11.5px !important; line-height: 1.5 !important; }
     .leaflet-qr { width: 18mm !important; height: 18mm !important; min-width: 18mm; min-height: 18mm; }
     .leaflet-grid { display:grid; grid-template-columns:1fr 1fr; gap:2mm; align-items:start; }
     .leaflet-compact { break-inside:avoid; page-break-inside:avoid; word-break:keep-all; overflow-wrap:break-word; }
@@ -47,6 +67,7 @@
     @media screen and (max-width:700px) {
       .leaflet-wide-card { flex-direction:column !important; align-items:stretch !important; }
       .leaflet-wide-card .shrink-0.text-right { text-align:left; }
+      .leaflet-out[lang="ar"] .leaflet-wide-card .shrink-0.text-right { text-align:start; }
     }
     @media (min-width:640px) {
       .cart-row { flex-direction:row; align-items:center; gap:.75rem; }
@@ -267,12 +288,16 @@ const EXERCISE_IMAGES = {};
 ─────────────────────────────────────────── */
 
 
-const VERSION      = "v2.67";
+const VERSION      = "v2.68";
 const VERSION_DATE = "2026-11-25";
 const STORAGE_KEY  = "exercise-homework-patients-v2";
 const RECENT_KEY   = "exercise-homework-recent-v1";
 const FAVORITE_KEY = "exercise-homework-favorites-v1";
 const DEFAULT_MEMO = MEMO_PRESETS.default.ko;
+const OUTPUT_LANGS = ["ko","en","ja","ar"];
+function normalizeOutputLang(value){
+  return OUTPUT_LANGS.includes(value) ? value : "ko";
+}
 const SIDE_OPTIONS = ["","좌측","우측","양측","환측","건측"];
 const SIDE_UNSELECTED = new Set(["","좌/우 선택","해당 없음"]);
 function normalizeSide(side){
@@ -547,7 +572,7 @@ function migratePatientRecord(rec){
     record.settings=settings;
     changed=true;
   }
-  if(settings.outputLang!=="ko" && settings.outputLang!=="en" && settings.outputLang!=="ja"){
+  if(!OUTPUT_LANGS.includes(settings.outputLang)){
     settings.outputLang="ko";
     record.settings=settings;
     changed=true;
@@ -1013,11 +1038,26 @@ function totalMinutes(list){
   const arr=Array.isArray(list)?list:state.selected;
   return arr.reduce((s,x)=>s+exerciseMinutes(x),0);
 }
+/* 아랍어는 수에 따라 낱말 꼴이 바뀐다: 1, 2(쌍수), 3–10(복수), 그 밖(단수) */
+function arCount(n, forms){
+  if(n===1) return forms.one;
+  if(n===2) return forms.two;
+  const r=n%100;
+  return `${n}\u00a0${r>=3&&r<=10?forms.few:forms.many}`;
+}
+function arMinutes(n, afterPreposition){
+  return arCount(n,{one:"دقيقة واحدة",two:afterPreposition?"دقيقتين":"دقيقتان",few:"دقائق",many:"دقيقة"});
+}
+function arSeconds(n){
+  return arCount(n,{one:"ثانية واحدة",two:"ثانيتان",few:"ثوانٍ",many:"ثانية"});
+}
 function sessionTimeText(list, lang){
   const arr=Array.isArray(list)?list:state.selected;
-  if(lang==="en"||lang==="ja"){
+  if(lang==="en"||lang==="ja"||lang==="ar"){
     const mins=totalMinutes(arr);
-    let text=lang==="en"?`About ${mins} min (per session)`:`約${mins}分（1回あたり）`;
+    let text=lang==="en"?`About ${mins} min (per session)`
+      :lang==="ar"?`نحو ${arMinutes(mins,true)} (لكل جلسة)`
+      :`約${mins}分（1回あたり）`;
     if(state.showDailyFreq===false) return text;
     const patientFreq=normalizeDailyFreq(state.patient&&state.patient.dailyFreq);
     let daily=0;
@@ -1028,7 +1068,9 @@ function sessionTimeText(list, lang){
       any=true;
       daily+=exerciseMinutes(item)*freq;
     });
-    if(any) text+=lang==="en"?` · about ${daily} min a day`:` · 1日約${daily}分`;
+    if(any) text+=lang==="en"?` · about ${daily} min a day`
+      :lang==="ar"?` · نحو ${arMinutes(daily,true)} في اليوم`
+      :` · 1日約${daily}分`;
     return text;
   }
   let text=`약 ${totalMinutes(arr)}분 (1회 기준)`;
@@ -1048,7 +1090,7 @@ function sessionTimeText(list, lang){
 function refreshTimeDisplays(){
   document.querySelectorAll("[data-session-time]").forEach(el=>{
     const lang=el.getAttribute("data-session-time");
-    el.textContent=sessionTimeText(undefined, lang==="en"||lang==="ja"?lang:undefined);
+    el.textContent=sessionTimeText(undefined, normalizeOutputLang(lang)==="ko"?undefined:lang);
   });
 }
 function categories(){
@@ -1362,7 +1404,7 @@ function loadPatient(id){
     state.showFallWarning=r.settings.showFallWarning??false;state.showCaution=r.settings.showCaution??true;state.showImage=r.settings.showImage??true;
     state.showDailyFreq=r.settings.showDailyFreq??true;
     state.checklistWeeks=r.settings.checklistWeeks??2;
-    state.outputLang=(r.settings.outputLang==="en"||r.settings.outputLang==="ja")?r.settings.outputLang:"ko";}
+    state.outputLang=normalizeOutputLang(r.settings.outputLang);}
   else state.outputLang="ko";
   state.isNewPatient=false;
   // 탭 이동 없이 환자정보 탭 폼에만 반영 (tab=0 유지)
@@ -1382,7 +1424,7 @@ function duplicatePatient(id){
   state.freqCustomTarget=null;
   state.selected=hydrateSelected(r.selected);
   if(Object.prototype.hasOwnProperty.call(r,"therapistName")) state.therapistName=r.therapistName||"";
-  state.outputLang=(r.settings&&(r.settings.outputLang==="en"||r.settings.outputLang==="ja"))?r.settings.outputLang:"ko";
+  state.outputLang=normalizeOutputLang(r.settings&&r.settings.outputLang);
   state.isNewPatient=true; // 복사본은 신규로 취급
   state.tab=0;
   showMessage("복사본을 만들었습니다. 이름 수정 후 [＋ 환자 추가]를 누르세요.");
@@ -1480,6 +1522,7 @@ function cssQuote(s){
   return String(s??"").replace(/\\/g,"\\\\").replace(/"/g,"\\\"").replace(/[\n\r]/g," ");
 }
 function outputFontStack(){
+  if(outputLang()==="ar") return '"Segoe UI",Tahoma,Arial,"Geeza Pro","Noto Sans Arabic","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
   if(outputLang()==="ja") return '"Hiragino Sans","Yu Gothic","Meiryo","Noto Sans JP","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
   if(outputLang()==="en") return 'Arial,"Helvetica Neue","Segoe UI","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
   return '"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",sans-serif';
@@ -1490,6 +1533,14 @@ function printPageStyle(){
   const date=outputLang()==="ko"?rawDate:printedDate(rawDate);
   const left=cssQuote([name, date].filter(Boolean).join("  ·  "));
   const font=outputFontStack();
+  if(outputLang()==="ar"){
+    /* 이름과 날짜를 각각 방향 격리 문자(U+2068, U+2069)로 감싸야 영문·한글 이름 옆에서 날짜가 섞이지 않는다 */
+    const right=cssQuote([name, date].filter(Boolean).map(x=>`\u2068${x}\u2069`).join("  ·  "));
+    return `@page{size:A4;margin:16mm 12mm 14mm;
+    @top-right{content:"${right}";direction:rtl;font-size:9pt;font-family:${font};color:#334155;}
+    @top-left{content:counter(page) " / " counter(pages);direction:ltr;font-size:9pt;font-family:${font};color:#334155;}
+  }`;
+  }
   return `@page{size:A4;margin:16mm 12mm 14mm;
     @top-left{content:"${left}";font-size:9pt;font-family:${font};color:#334155;}
     @top-right{content:counter(page) " / " counter(pages);font-size:9pt;font-family:${font};color:#334155;}
@@ -2146,7 +2197,7 @@ function patientListHTML(){
               ${r.patientNo?`<span class="text-xs text-slate-400">${esc(r.patientNo)}</span>`:""}
               ${isCurrent?`<span class="text-[10px] font-bold text-blue-600 bg-blue-100 rounded-full px-1.5 py-0.5">작업 중</span>`:""}
             </div>
-            <div class="text-xs text-slate-400 truncate">${r.note?esc(r.note)+" · ":""}${esc(r.date||"")} · 운동 ${Array.isArray(r.selected)?r.selected.length:0}개${r.settings&&r.settings.outputLang==="en"?" · 출력 EN":""}${r.settings&&r.settings.outputLang==="ja"?" · 출력 JA":""}</div>
+            <div class="text-xs text-slate-400 truncate">${r.note?esc(r.note)+" · ":""}${esc(r.date||"")} · 운동 ${Array.isArray(r.selected)?r.selected.length:0}개${r.settings&&r.settings.outputLang==="en"?" · 출력 EN":""}${r.settings&&r.settings.outputLang==="ja"?" · 출력 JA":""}${r.settings&&r.settings.outputLang==="ar"?" · 출력 AR":""}</div>
           </div>
         </button>
         <div class="flex items-center gap-0.5 shrink-0">
@@ -2881,7 +2932,7 @@ function tabAiAdmin(){
 
 
 function outputLang(){
-  return state.outputLang==="en"||state.outputLang==="ja"?state.outputLang:"ko";
+  return normalizeOutputLang(state.outputLang);
 }
 function tPrint(key){
   const lang=outputLang();
@@ -2889,7 +2940,7 @@ function tPrint(key){
   return pack[key]!=null?pack[key]:(PRINT_STRINGS.ko[key]||"");
 }
 function setOutputLang(value){
-  state.outputLang=value==="en"||value==="ja"?value:"ko";
+  state.outputLang=normalizeOutputLang(value);
   autoSave();
   render();
 }
@@ -2901,6 +2952,7 @@ function outputLangControl(){
       <option value="ko" ${lang==="ko"?"selected":""}>한국어</option>
       <option value="en" ${lang==="en"?"selected":""}>English</option>
       <option value="ja" ${lang==="ja"?"selected":""}>日本語</option>
+      <option value="ar" ${lang==="ar"?"selected":""}>العربية</option>
     </select>
   </label>`;
 }
@@ -2930,6 +2982,10 @@ function printedDate(iso){
   if(!m) return String(iso);
   const y=Number(m[1]), mo=Number(m[2]), d=Number(m[3]);
   if(lang==="ja") return `${y}年${mo}月${d}日`;
+  if(lang==="ar"){
+    const arMonths=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+    return `${d} ${arMonths[mo-1]||m[2]} ${y}`;
+  }
   const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
   return `${months[mo-1]||m[2]} ${d}, ${y}`;
 }
@@ -2937,6 +2993,7 @@ function leafletDailyFreq(n){
   const lang=outputLang();
   if(lang==="ko") return dailyFreqText(n);
   if(lang==="en") return n===1?"1 time a day":`${n} times a day`;
+  if(lang==="ar") return `${arCount(n,{one:"مرة واحدة",two:"مرتان",few:"مرات",many:"مرة"})} في اليوم`;
   return `1日${n}回`;
 }
 function leafletDoseText(item){
@@ -2946,7 +3003,7 @@ function leafletDoseText(item){
   let base;
   if(item.isTimeBased){
     const n=positiveInt(item.durationMin,1);
-    base=lang==="en"?`${n} min`:`${n}分`;
+    base=lang==="en"?`${n} min`:lang==="ar"?`المدة: ${arMinutes(n)}`:`${n}分`;
   }else{
     const sets=positiveInt(item.sets,1);
     const n=positiveInt(item.reps,1);
@@ -2954,6 +3011,8 @@ function leafletDoseText(item){
     if(lang==="en"){
       const setWord=sets===1?"set":"sets";
       base=hold?`Hold ${n} sec × ${sets} ${setWord}`:`${n} ${n===1?"rep":"reps"} × ${sets} ${setWord}`;
+    }else if(lang==="ar"){
+      base=hold?`الثبات:\u00a0${arSeconds(n)} × المجموعات:\u00a0${sets}`:`التكرار:\u00a0${n} × المجموعات:\u00a0${sets}`;
     }else base=hold?`${n}秒保持 × ${sets}セット`:`${n}回 × ${sets}セット`;
   }
   if(!state.showDailyFreq) return base;
@@ -2970,6 +3029,7 @@ function exerciseIndexLabel(i){
   const lang=outputLang();
   if(lang==="en") return `Exercise ${n}`;
   if(lang==="ja") return `運動 ${n}`;
+  if(lang==="ar") return `التمرين ${n}`;
   return `운동 ${n}`;
 }
 function printedExerciseFields(item){
@@ -3007,6 +3067,10 @@ function printedExerciseFields(item){
     level:(levelPack&&levelPack[lang])||koLevel
   };
 }
+/* 아랍어 줄 안에 한글·영문 이름이나 직접 고친 문장이 섞여도 글자 순서와 괄호가 뒤집히지 않게 한다 */
+function outText(text){
+  return outputLang()==="ar"?`<bdi>${esc(text)}</bdi>`:esc(text);
+}
 function printedMemo(){
   const lang=outputLang();
   const memo=state.patient.memo||"";
@@ -3025,6 +3089,7 @@ function weekLabel(w){
   const lang=outputLang();
   if(lang==="en") return `Week ${w}`;
   if(lang==="ja") return `${w}週目`;
+  if(lang==="ar") return `الأسبوع ${w}`;
   return `${w}주차`;
 }
 
@@ -3078,12 +3143,12 @@ function leafletHTML(){
         <div class="flex-1 min-w-0 keep-ko">
           <div class="flex items-baseline gap-2 flex-wrap">
             <span class="text-xs text-slate-400 font-bold shrink-0">${exerciseIndexLabel(i)}</span>
-            <h2 class="text-base font-black leading-tight">${esc(fields.title)}</h2>
+            <h2 class="text-base font-black leading-tight">${outText(fields.title)}</h2>
             <span class="text-xs text-slate-500 shrink-0">· ${esc(fields.level)}</span>
           </div>
-          <p class="text-xs text-slate-500 mt-0.5" style="white-space:normal;overflow:visible;">${tPrint("method")}: ${esc(fields.description)}</p>
+          <p class="text-xs text-slate-500 mt-0.5" style="white-space:normal;overflow:visible;">${tPrint("method")}: ${outText(fields.description)}</p>
           ${state.showCaution && item.caution
-            ? `<p class="text-xs text-amber-700 mt-0.5" style="white-space:normal;overflow:visible;">⚠ ${esc(fields.caution)}</p>`
+            ? `<p class="text-xs text-amber-700 mt-0.5" style="white-space:normal;overflow:visible;">⚠ ${outText(fields.caution)}</p>`
             : ""}
         </div>
         <div class="shrink-0 text-right space-y-1">
@@ -3102,10 +3167,10 @@ function leafletHTML(){
             ? `<div class="leaflet-compact-img" style="display:flex;flex:none;align-items:center;justify-content:center;overflow:hidden;border-radius:4px;background:#f8fafc;">${picture}</div>`
             : ""}
           <div style="min-width:0;flex:1;">
-            <h2 style="font-size:11px;font-weight:800;line-height:1.35;"><span style="color:#94a3b8;font-weight:700;">${i+1}. </span>${esc(fields.title)}</h2>
-            <p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#475569;">${esc(fields.description)}</p>
+            <h2 style="font-size:11px;font-weight:800;line-height:1.35;"><span style="color:#94a3b8;font-weight:700;">${i+1}. </span>${outText(fields.title)}</h2>
+            <p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#475569;">${outText(fields.description)}</p>
             ${state.showCaution && item.caution
-              ? `<p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#92400e;">⚠ ${esc(fields.caution)}</p>`
+              ? `<p style="margin-top:0.5mm;font-size:10px;line-height:1.35;color:#92400e;">⚠ ${outText(fields.caution)}</p>`
               : ""}
             <div class="leaflet-dose" style="margin-top:1mm;display:inline-block;border:1.5px solid #0f172a;border-radius:4px;padding:0.4mm 1.4mm;font-size:11px;font-weight:800;line-height:1.35;white-space:normal;">${sidePrintPrefix(item.side)}${esc(leafletDoseText(item))}</div>
             ${qrOnLeaflet() && isValidVideoUrl(item.videoUrl)
@@ -3125,14 +3190,14 @@ function leafletHTML(){
           : ""}
         <div>
           <div class="text-xs font-bold text-slate-400 mb-1">${exerciseIndexLabel(i)} · ${esc(fields.level)}</div>
-          <h2 class="${isLarge ? "text-2xl" : "text-xl"} font-black">${esc(fields.title)}</h2>
+          <h2 class="${isLarge ? "text-2xl" : "text-xl"} font-black">${outText(fields.title)}</h2>
           <p class="mt-1 text-xs font-semibold text-slate-500">${tPrint("goal")}: ${esc(fields.target)}</p>
           <div class="mt-2 inline-block rounded-xl border-2 border-slate-900 px-3 py-1.5 ${isLarge ? "text-2xl" : "text-base"} font-black keep-ko" style="white-space:normal;line-height:1.35;">${sidePrintPrefix(item.side)}${esc(leafletDoseText(item))}</div>
         </div>
       </div>
-      <div class="mt-3 rounded-xl bg-slate-50 p-3 ${textClass}"><b>${tPrint("method")}: </b>${esc(fields.description)}</div>
+      <div class="mt-3 rounded-xl bg-slate-50 p-3 ${textClass}"><b>${tPrint("method")}: </b>${outText(fields.description)}</div>
       ${state.showCaution && item.caution
-        ? `<div class="mt-2 rounded-xl bg-amber-50 p-3 ${isLarge ? "text-xl leading-9" : "text-sm leading-6"}"><b>${tPrint("caution")}: </b>${esc(fields.caution)}</div>`
+        ? `<div class="mt-2 rounded-xl bg-amber-50 p-3 ${isLarge ? "text-xl leading-9" : "text-sm leading-6"}"><b>${tPrint("caution")}: </b>${outText(fields.caution)}</div>`
         : ""}
       ${qrOnLeaflet() && isValidVideoUrl(item.videoUrl)
         ? `<div class="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 p-2"><img src="${qrDataUrl(item.videoUrl)}" alt="${esc(tPrint("qrAlt"))}" class="leaflet-qr shrink-0" style="width:18mm;height:18mm"><div class="text-xs leading-5">${tPrint("qrHelp")}</div></div>`
@@ -3142,15 +3207,15 @@ function leafletHTML(){
 
   const lang=outputLang();
   const showDate=lang==="ko"?state.patient.date:printedDate(state.patient.date);
-  return `<div class="mx-auto max-w-4xl bg-white leaflet-out" lang="${lang}">
+  return `<div class="mx-auto max-w-4xl bg-white leaflet-out" lang="${lang}"${lang==="ar"?' dir="rtl"':""}>
     <div class="mb-5 border-b-2 border-slate-900 pb-4 flex items-end justify-between gap-4">
       <div><h1 class="text-3xl font-black">${esc(tPrint("docTitle"))}</h1><p class="mt-1 text-slate-600 text-sm">${esc(tPrint("docSubtitle"))}</p></div>
       <div class="text-right text-sm leading-7 min-w-0" style="max-width:18rem;">
-        <p><b>${esc(tPrint("patientName"))}</b> ${esc(state.patient.name||"____________")}${state.patient.patientNo?` (${esc(state.patient.patientNo)})`:""}</p>
+        <p><b>${esc(tPrint("patientName"))}</b> ${outText(state.patient.name||"____________")}${state.patient.patientNo?` (${outText(state.patient.patientNo)})`:""}</p>
         <p><b>${esc(tPrint("dateLabel"))}</b> ${esc(showDate)}</p>
         ${state.showDailyFreq&&normalizeDailyFreq(state.patient.dailyFreq)?`<p><b>${esc(tPrint("dailyFreqLabel"))}</b> ${esc(leafletDailyFreq(normalizeDailyFreq(state.patient.dailyFreq)))}</p>`:""}
         <p><b>${esc(tPrint("timeLabel"))}</b> <span data-session-time="${lang}">${esc(leafletSessionText())}</span></p>
-        ${state.therapistName?`<p><b>${esc(tPrint("therapistLabel"))}</b> ${esc(state.therapistName)}</p>`:""}
+        ${state.therapistName?`<p><b>${esc(tPrint("therapistLabel"))}</b> ${outText(state.therapistName)}</p>`:""}
       </div>
     </div>
     ${state.showFallWarning&&state.selected.length>0?`<div class="mb-5 rounded-2xl border-2 border-amber-400 bg-amber-50 p-4 font-bold text-amber-900 text-sm leading-6">⚠ ${esc(printedSafety(state.selected))}</div>`:""}
@@ -3159,7 +3224,7 @@ function leafletHTML(){
       :`<div class="${isGrid?"leaflet-grid":isWide?"space-y-2":"space-y-4"}">${state.selected.map((item,i)=>articleHTML(item,i)).join("")}</div>`}
     ${state.showChecklist&&state.selected.length>0?checklistHTML():""}
     ${state.showPainLog&&state.selected.length>0?painHTML():""}
-    <div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-2 font-black ${isLarge?"text-2xl":""}">${esc(tPrint("generalCaution"))}</h3><p class="${isLarge?"text-xl leading-9":"leading-7 text-sm"}">${esc(printedMemo())}</p></div>
+    <div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-2 font-black ${isLarge?"text-2xl":""}">${esc(tPrint("generalCaution"))}</h3><p class="${isLarge?"text-xl leading-9":"leading-7 text-sm"}">${outText(printedMemo())}</p></div>
   </div>`;
 }
 
@@ -3181,7 +3246,8 @@ function checklistHTML(){
 
 function painHTML(){
   const scale=tPrint("fatigueScale");
-  return `<div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-3 font-black">${esc(tPrint("painTitle"))}</h3><div class="grid grid-cols-2 gap-3 text-sm"><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("painBefore"))}: 0 1 2 3 4 5 6 7 8 9 10</div><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("painAfter"))}: 0 1 2 3 4 5 6 7 8 9 10</div><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("fatigueBefore"))}: ${esc(scale)}</div><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("fatigueAfter"))}: ${esc(scale)}</div></div></div>`;
+  const nrs=outputLang()==="ar"?'<span style="white-space:nowrap">0 1 2 3 4 5 6 7 8 9 10</span>':"0 1 2 3 4 5 6 7 8 9 10";
+  return `<div class="mt-5 rounded-2xl border-2 border-slate-900 p-4"><h3 class="mb-3 font-black">${esc(tPrint("painTitle"))}</h3><div class="grid grid-cols-2 gap-3 text-sm"><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("painBefore"))}: ${nrs}</div><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("painAfter"))}: ${nrs}</div><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("fatigueBefore"))}: ${esc(scale)}</div><div class="rounded-xl border border-slate-300 p-3">${esc(tPrint("fatigueAfter"))}: ${esc(scale)}</div></div></div>`;
 }
 
 render();
